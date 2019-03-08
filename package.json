@@ -2,13 +2,20 @@
   "$schema": "https://raw.githubusercontent.com/sourcegraph/sourcegraph/master/shared/src/schema/extension.schema.json",
   "name": "sourcegraph-sentry",
   "description": "Sourcegraph Sentry extension renders \"View logs on Sentry\" links next to error handling code.",
-  "publisher": "vanesa",
+  "publisher": "Sourcegraph",
   "activationEvents": [
     "*"
   ],
   "wip": true,
-  "categories": [],
-  "tags": [],
+  "categories": [
+    "External services"
+  ],
+  "tags": [
+    "sentry",
+    "error tracking",
+    "errors",
+    "logs"
+  ],
   "contributes": {
     "actions": [],
     "menus": {
@@ -22,7 +29,7 @@
     "type": "git",
     "url": "https://github.com/sourcegraph/sourcegraph-sentry.git"
   },
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "main": "dist/sourcegraph-sentry.js",
   "scripts": {
     "tslint": "tslint -p tsconfig.json './src/**/*.ts'",
@@ -41,11 +48,13 @@
     "last 1 Safari versions"
   ],
   "devDependencies": {
+    "@sourcegraph/prettierrc": "^2.2.0",
     "@sourcegraph/tsconfig": "^4.0.0",
     "@sourcegraph/tslint-config": "^12.3.1",
     "lnfs-cli": "^2.1.0",
     "mkdirp": "^0.5.1",
     "parcel-bundler": "^1.12.0",
+    "rxjs": "^6.4.0",
     "sourcegraph": "^23.0.0",
     "tslint": "^5.13.1",
     "typescript": "^3.3.3333"
