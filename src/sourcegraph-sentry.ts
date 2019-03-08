@@ -1,6 +1,7 @@
 import { from } from 'rxjs'
 import { filter, switchMap } from 'rxjs/operators'
 import * as sourcegraph from 'sourcegraph'
+import { resolveSettings, Settings } from './settings'
 
 const CODE_PATTERNS = [
     /throw new Error+\([\'\"]([^\'\"]+)[\'\"]\)/gi,
@@ -9,6 +10,7 @@ const CODE_PATTERNS = [
 ]
 
 const DECORATION_TYPE = sourcegraph.app.createDecorationType()
+const SETTINGS = resolveSettings(sourcegraph.configuration.get<Settings>().value)
 
 function decorateEditor(editor: sourcegraph.CodeEditor): void {
     const decorations: sourcegraph.TextDocumentDecoration[] = []
@@ -50,7 +52,9 @@ export function activate(context: sourcegraph.ExtensionContext): void {
 
 function buildUrl(errorQuery: string): URL {
     const url = new URL(
-        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+' +
+        'https://sentry.io/organizations/' +
+            SETTINGS['sentry.organization'] +
+            '/issues/?project=1334031&query=is%3Aunresolved+' +
             errorQuery.split(' ').join('+') +
             '&statsPeriod=14d'
     )

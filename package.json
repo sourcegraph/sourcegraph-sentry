@@ -22,7 +22,21 @@
       "editor/title": [],
       "commandPalette": []
     },
-    "configuration": {}
+    "configuration": {
+      "title": "Sentry extension settings",
+      "properties": {
+        "sentry.organization": {
+          "description": "Name of the Sentry organization",
+          "type": "string",
+          "default": ""
+        },
+        "sentry.projects": {
+          "description": "List of projects collecting logs",
+          "type": "array",
+          "default": []
+        }
+      }
+    }
   },
   "version": "0.0.0-DEVELOPMENT",
   "repository": {
