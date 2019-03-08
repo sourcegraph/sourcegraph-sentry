@@ -4,7 +4,7 @@ import * as sourcegraph from 'sourcegraph'
 
 const CODE_PATTERNS = [
     /throw new Error+\([\'\"]([^\'\"]+)[\'\"]\)/gi,
-    /console\.[^\'\"]+\([\'\"]([^\'\"]+)[\'\"]\)/gi,
+    /console\.[^\'\"\`]+\([\'\"\`]([^\'\"\`]+)[\'\"\`]\)/gi,
     /log\.[^\'\"]+\([\'\"]([^\'\"]+)[\'\"]\)/gi,
 ]
 
@@ -13,20 +13,23 @@ const DECORATION_TYPE = sourcegraph.app.createDecorationType()
 function decorateEditor(editor: sourcegraph.CodeEditor): void {
     const decorations: sourcegraph.TextDocumentDecoration[] = []
     for (const [i, line] of editor.document.text!.split('\n').entries()) {
+        let m: RegExpExecArray | null
         for (const pattern of CODE_PATTERNS) {
-            const match = line.match(pattern)
-            if (match) {
-                decorations.push({
-                    range: new sourcegraph.Range(i, 0, i, 0),
-                    isWholeLine: true,
-                    after: {
-                        backgroundColor: '#e03e2f',
-                        color: 'rgba(255, 255, 255, 0.8)',
-                        contentText: ' View logs in Sentry » ',
-                        linkURL: 'testUrl',
-                    },
-                })
-            }
+            do {
+                m = pattern.exec(line)
+                if (m) {
+                    decorations.push({
+                        range: new sourcegraph.Range(i, 0, i, 0),
+                        isWholeLine: true,
+                        after: {
+                            backgroundColor: '#e03e2f',
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            contentText: ' View logs in Sentry » ',
+                            linkURL: buildUrl(m[1]).toString(),
+                        },
+                    })
+                }
+            } while (m)
             pattern.lastIndex = 0 // reset
         }
     }
@@ -45,4 +48,12 @@ export function activate(context: sourcegraph.ExtensionContext): void {
     }
 }
 
+function buildUrl(errorQuery: string): URL {
+    const url = new URL(
+        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+' +
+            errorQuery.split(' ').join('+') +
+            '&statsPeriod=14d'
+    )
+    return url
+}
 // Sourcegraph extension documentation: https://docs.sourcegraph.com/extensions/authoring
