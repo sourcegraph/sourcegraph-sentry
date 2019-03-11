@@ -25,15 +25,50 @@
     "configuration": {
       "title": "Sentry extension settings",
       "properties": {
-        "sentry.organization": {
+        "sentryOrganization": {
           "description": "Name of the Sentry organization",
           "type": "string",
           "default": ""
         },
-        "sentry.projects": {
-          "description": "List of projects collecting logs",
+        "sentryProjects": {
           "type": "array",
-          "default": []
+          "items": {
+            "name": { "type" : "string" },
+            "type" : "object",
+            "description": "Sentry project receiving logs",
+            "projectId": {
+              "description": "Sentry project id, e.g. 12351512",
+              "type": "string"
+            },
+            "patternProperties" : {
+              "repoMatch": {
+                "type" : "string",
+                "description": "Regex to match repos associated to this Sentre project, e.g. github\\.com/sourcegraph/sourcegraph"
+              },
+              "fileMatch": {
+                "type" : "string",
+                "description": "Regex to match files associated with this project, e.g. (web|shared)/.*\\.tsx?$"
+              },
+              "lineMatch": {
+                "type" : "string",
+                "description" : "Regex to match lines associated with this project, e.g. throw new Error\\([\"']([^'\"]+)[\"']\\)"
+              }
+            },
+            "additionalProperties" : {
+              "contentText": {
+                "description" : "Text shown in Sentry link, e.g. View sourcegraph/sourcegraph_dot_com errors",
+                "type" : "string"
+              },
+              "hoverMessage": {
+                "description" : "Hovertext shown on Sentry link, e.g. View errors matching '$1' in Sentry",
+                "type" : "string"
+              },
+              "query": {
+                "description" : "Query derived from error handling code $1",
+                "type" : "string"
+              }
+            }
+          }
         }
       }
     }
