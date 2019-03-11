@@ -39,6 +39,10 @@ function decorateEditor(editor: sourcegraph.CodeEditor): void {
 }
 
 export function activate(context: sourcegraph.ExtensionContext): void {
+    sourcegraph.workspace.onDidOpenTextDocument.subscribe(textDocument => {
+        const params = getParamsFromUriPath(textDocument.uri)
+    })
+
     if (sourcegraph.app.activeWindowChanges) {
         const activeEditor = from(sourcegraph.app.activeWindowChanges).pipe(
             filter((window): window is sourcegraph.Window => window !== undefined),
@@ -48,6 +52,25 @@ export function activate(context: sourcegraph.ExtensionContext): void {
         // When the active editor changes, publish new decorations.
         context.subscriptions.add(activeEditor.subscribe(decorateEditor))
     }
+}
+
+/**
+ * Extract Sentry params from Document URI necessary to
+ * build URL to the Sentry issues stream page, if the current
+ * Document sends log events to Sentry.
+ *
+ * TODO: Implement regex match of params with Sentry extension config settings.
+ */
+function getParamsFromUriPath(textDocument: string): object {
+    const repoPattern = /github\.com\/([^\?\#]+)/gi
+    const filePattern = /#([^\?\#\/]+)\/.*\.tsx?$/gi
+    const repoM = repoPattern.exec(textDocument)
+    const fileM = filePattern.exec(textDocument)
+    const params = {
+        repo: repoM && repoM[1],
+        fileValidation: fileM,
+    }
+    return params
 }
 
 function buildUrl(errorQuery: string): URL {

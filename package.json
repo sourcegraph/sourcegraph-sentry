@@ -43,7 +43,7 @@
             "patternProperties" : {
               "repoMatch": {
                 "type" : "string",
-                "description": "Regex to match repos associated to this Sentre project, e.g. github\\.com/sourcegraph/sourcegraph"
+                "description": "Regex to match repos associated to this Sentry project, e.g. github\\.com/sourcegraph/sourcegraph"
               },
               "fileMatch": {
                 "type" : "string",
