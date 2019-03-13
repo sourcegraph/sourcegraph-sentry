@@ -25,12 +25,12 @@
     "configuration": {
       "title": "Sentry extension settings",
       "properties": {
-        "sentryOrganization": {
+        "sentry.organization": {
           "description": "Name of the Sentry organization",
           "type": "string",
           "default": ""
         },
-        "sentryProjects": {
+        "sentry.projects": {
           "type": "array",
           "items": {
             "name": { "type" : "string" },
@@ -79,13 +79,15 @@
     "url": "https://github.com/sourcegraph/sourcegraph-sentry.git"
   },
   "license": "Apache-2.0",
-  "main": "dist/sourcegraph-sentry.js",
+  "main": "dist/extension.js",
   "scripts": {
     "tslint": "tslint -p tsconfig.json './src/**/*.ts'",
     "typecheck": "tsc -p tsconfig.json",
-    "build": "parcel build --out-file dist/sourcegraph-sentry.js src/sourcegraph-sentry.ts",
+    "test": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' mocha --require ts-node/register --require source-map-support/register --opts mocha.opts",
+    "cover": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' nyc --require ts-node/register --require source-map-support/register --all mocha --opts mocha.opts --timeout 10000",
+    "build": "parcel build --out-file dist/extension.js src/extension.ts",
     "symlink-package": "mkdirp dist && lnfs ./package.json ./dist/package.json",
-    "serve": "npm run symlink-package && parcel serve --no-hmr --out-file dist/sourcegraph-sentry.js src/sourcegraph-sentry.ts",
+    "serve": "npm run symlink-package && parcel serve --no-hmr --out-file dist/extension.js src/extension.ts",
     "watch:typecheck": "tsc -p tsconfig.json -w",
     "watch:build": "tsc -p tsconfig.dist.json -w",
     "sourcegraph:prepublish": "npm run build"
@@ -100,11 +102,18 @@
     "@sourcegraph/prettierrc": "^2.2.0",
     "@sourcegraph/tsconfig": "^4.0.0",
     "@sourcegraph/tslint-config": "^12.3.1",
+    "@types/expect": "^1.20.4",
+    "@types/mocha": "^5.2.6",
+    "expect": "^24.4.0",
     "lnfs-cli": "^2.1.0",
     "mkdirp": "^0.5.1",
+    "mocha": "^6.0.2",
+    "nyc": "^13.3.0",
     "parcel-bundler": "^1.12.0",
     "rxjs": "^6.4.0",
+    "source-map-support": "^0.5.11",
     "sourcegraph": "^23.0.0",
+    "ts-node": "^8.0.3",
     "tslint": "^5.13.1",
     "typescript": "^3.3.3333"
   }

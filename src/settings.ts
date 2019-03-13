@@ -6,7 +6,22 @@
  */
 export interface Settings {
     ['sentry.organization']?: string
-    ['sentry.projects']?: []
+    ['sentry.projects']?: [
+        {
+            name: string
+            projectId: string
+            patternProperties: {
+                repoMatch: RegExp
+                fileMatch: RegExp
+                lineMatch: RegExp
+            }
+            additionalProperties: {
+                contentText: string
+                hoverMessage: string
+                query: string
+            }
+        }
+    ]
 }
 
 /** Returns a copy of the extension settings with values normalized and defaults applied. */
