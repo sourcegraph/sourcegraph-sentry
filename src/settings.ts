@@ -12,13 +12,14 @@ export interface Settings {
             projectId: string
             patternProperties: {
                 repoMatch: RegExp
-                fileMatch: RegExp
-                lineMatch: RegExp
+                fileMatches: RegExp[]
+                lineMatches: RegExp[]
             }
+            // TODO: Add these to v1.
             additionalProperties: {
-                contentText: string
-                hoverMessage: string
-                query: string
+                contentText: string // e.g. "View sourcegraph/sourcegraph_dot_com errors"
+                hoverMessage: string //  e.g. "View errors matching '$1' in Sentry"
+                query: string // e.g. "$1"
             }
         }
     ]
