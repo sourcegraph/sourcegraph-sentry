@@ -71,7 +71,7 @@ export function getParamsFromUriPath(textDocument: string): Params {
  * @param projects Sentry extension projects configurations.
  * @return Sentry projectID this document reports to.
  */
-function matchSentryProject(params: Params, projects: Settings['sentry.projects']): SentryProject | undefined {
+export function matchSentryProject(params: Params, projects: Settings['sentry.projects']): SentryProject | undefined {
     // Check if a Sentry project is associated with this document's repo and retrieve the project.
     const project = projects!.find(p => !!new RegExp(p.patternProperties.repoMatch).exec(params.repo!))
     if (!project) {
