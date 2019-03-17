@@ -45,7 +45,7 @@ export function matchSentryProject(params: Params, projects: Settings['sentry.pr
     }
 
     // Check if document matches the file matching pattern specified under the Sentry extension configuration.
-    const fileMatched: boolean = !!project.patternProperties.fileMatches.find(
+    const fileMatched: boolean = project.patternProperties.fileMatches.some(
         pattern => !!new RegExp(pattern).exec(params.file!)
     )
     if (!fileMatched) {

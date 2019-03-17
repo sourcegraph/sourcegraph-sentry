@@ -41,6 +41,9 @@ export function activate(context: sourcegraph.ExtensionContext): void {
 }
 
 function decorateEditor(editor: sourcegraph.CodeEditor, sentryProjectId: string, lineMatches: RegExp[]): void {
+    if (!editor) {
+        return
+    }
     const decorations: sourcegraph.TextDocumentDecoration[] = []
     for (const [i, line] of editor.document.text!.split('\n').entries()) {
         let m: RegExpExecArray | null
