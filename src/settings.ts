@@ -16,10 +16,10 @@ export interface Settings {
                 lineMatches: RegExp[]
             }
             // TODO: Add these to v1.
-            additionalProperties: {
-                contentText: string // e.g. "View sourcegraph/sourcegraph_dot_com errors"
-                hoverMessage: string //  e.g. "View errors matching '$1' in Sentry"
-                query: string // e.g. "$1"
+            additionalProperties?: {
+                contentText?: string // e.g. "View sourcegraph/sourcegraph_dot_com errors"
+                hoverMessage?: string //  e.g. "View errors matching '$1' in Sentry"
+                query?: string // e.g. "$1"
             }
         }
     ]

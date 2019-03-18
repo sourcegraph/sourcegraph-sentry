@@ -24,8 +24,8 @@ export function getParamsFromUriPath(textDocument: string): Params {
     const repoM = repoPattern.exec(textDocument)
     const fileM = filePattern.exec(textDocument)
     return {
-        repo: repoM ? repoM[1] : '',
-        file: fileM ? fileM[0] : '',
+        repo: repoM && repoM[1],
+        file: fileM && fileM[0],
     }
 }
 
@@ -37,19 +37,30 @@ export function getParamsFromUriPath(textDocument: string): Params {
  * @param projects Sentry extension projects configurations.
  * @return Sentry projectID this document reports to.
  */
-export function matchSentryProject(params: Params, projects: Settings['sentry.projects']): SentryProject | undefined {
+export function matchSentryProject(
+    params: Params,
+    projects: Settings['sentry.projects'] | null
+): SentryProject | undefined {
+    if (!projects || !params.repo) {
+        return
+    }
     // Check if a Sentry project is associated with this document's repo and retrieve the project.
-    const project = projects!.find(p => !!new RegExp(p.patternProperties.repoMatch).exec(params.repo!))
+    const project = projects.find(p => !!new RegExp(p.patternProperties.repoMatch).exec(params.repo!))
     if (!project) {
         return
     }
 
     // Check if document matches the file matching pattern specified under the Sentry extension configuration.
-    const fileMatched: boolean = project.patternProperties.fileMatches.some(
-        pattern => !!new RegExp(pattern).exec(params.file!)
-    )
-    if (!fileMatched) {
-        return
+    if (project.patternProperties.fileMatches) {
+        if (!params.file) {
+            return
+        }
+        const fileMatched: boolean = project.patternProperties.fileMatches.some(
+            pattern => !!new RegExp(pattern).exec(params.file!)
+        )
+        if (!fileMatched) {
+            return
+        }
     }
 
     return {

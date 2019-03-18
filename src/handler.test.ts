@@ -10,14 +10,14 @@ describe('getParamsFromUriPath', () => {
 
     it('return empty repo if host is not GitHub', () =>
         expect(getParamsFromUriPath('git://unknownhost.com/sourcegraph/testrepo#http/req/main.go')).toEqual({
-            repo: '',
+            repo: null,
             file: '#http/req/main.go',
         }))
 
     it('return empty file if document has no file format', () =>
         expect(getParamsFromUriPath('git://github.com/sourcegraph/sourcegraph/testrepo#formatless')).toEqual({
             repo: 'sourcegraph/sourcegraph',
-            file: '',
+            file: null,
         }))
 })
 
