@@ -5,9 +5,10 @@ interface Params {
     file: string | null
 }
 
-interface SentryProject {
+export interface SentryProject {
     projectId: string
     lineMatches: RegExp[]
+    fileMatch: boolean | null
 }
 
 /**
@@ -21,11 +22,11 @@ export function getParamsFromUriPath(textDocument: string): Params {
     // TODO: Support more than just GitHub.
     const repoPattern = /github\.com\/([^\?\#\/]+\/[^\?\#\/]*)/gi
     const filePattern = /#([^\?\#\/]+)\/.*\.?$/gi
-    const repoM = repoPattern.exec(textDocument)
-    const fileM = filePattern.exec(textDocument)
+    const repoMatch = repoPattern.exec(textDocument)
+    const fileMatch = filePattern.exec(textDocument)
     return {
-        repo: repoM && repoM[1],
-        file: fileM && fileM[0],
+        repo: repoMatch && repoMatch[1],
+        file: fileMatch && fileMatch[0],
     }
 }
 
@@ -41,7 +42,7 @@ export function matchSentryProject(
     params: Params,
     projects: Settings['sentry.projects'] | null
 ): SentryProject | undefined {
-    if (!projects || !params.repo) {
+    if (!projects || !params.repo || !params.file) {
         return
     }
     // Check if a Sentry project is associated with this document's repo and retrieve the project.
@@ -50,21 +51,15 @@ export function matchSentryProject(
         return
     }
 
-    // Check if document matches the file matching pattern specified under the Sentry extension configuration.
-    if (project.patternProperties.fileMatches) {
-        if (!params.file) {
-            return
-        }
-        const fileMatched: boolean = project.patternProperties.fileMatches.some(
-            pattern => !!new RegExp(pattern).exec(params.file!)
-        )
-        if (!fileMatched) {
-            return
-        }
-    }
+    // Check if document file format matches the file pattern set of the project.
+    const fileMatched =
+        project.patternProperties.fileMatches && project.patternProperties.fileMatches.length > 0
+            ? project.patternProperties.fileMatches.some(pattern => !!new RegExp(pattern).exec(params.file!))
+            : null
 
     return {
         projectId: project.projectId,
         lineMatches: project.patternProperties.lineMatches,
+        fileMatch: fileMatched,
     }
 }

@@ -12,14 +12,23 @@ interface Params {
     file: string | null
 }
 
+interface LineDecorationText {
+    content: string
+    hover: string
+}
+
 const DECORATION_TYPE = sourcegraph.app.createDecorationType()
 const SETTINGSCONFIG = resolveSettings(sourcegraph.configuration.get<Settings>().value)
 const SENTRYORGANIZATION = SETTINGSCONFIG['sentry.organization']
 
+/**
+ * Common error log patterns to use in case no line matching regexes
+ * are set in the sentry extension settings.
+ */
 const COMMON_ERRORLOG_PATTERNS = [
     /throw new Error+\(['"]([^'"]+)['"]\)/gi,
-    /console\.[^'"`]+\(['"`]([^'"`]+)['"`]\)/gi,
-    /log\.[^'"]+\(['"]([^'"]+)['"]\)/gi,
+    /console\.(log|error|info|warn)\(['"`]([^'"`]+)['"`]\)/gi,
+    /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/gi,
 ]
 
 export function activate(context: sourcegraph.ExtensionContext): void {
@@ -40,7 +49,12 @@ export function activate(context: sourcegraph.ExtensionContext): void {
             context.subscriptions.add(
                 activeEditor.subscribe(editor => {
                     sentryProject
-                        ? decorateEditor(editor, sentryProject.projectId, sentryProject.lineMatches)
+                        ? decorateEditor(
+                              editor,
+                              sentryProject.projectId,
+                              sentryProject.lineMatches,
+                              sentryProject.fileMatch
+                          )
                         : decorateEditor(editor)
                 })
             )
@@ -48,8 +62,15 @@ export function activate(context: sourcegraph.ExtensionContext): void {
     })
 }
 
-function decorateEditor(editor: sourcegraph.CodeEditor, sentryProjectId?: string, lineMatches?: RegExp[]): void {
-    if (!editor) {
+function decorateEditor(
+    editor: sourcegraph.CodeEditor,
+    sentryProjectId?: string,
+    lineMatches?: RegExp[],
+    fileMatch?: boolean | null
+): void {
+    // Do not decorate lines if the document file format does not match the
+    // file matching patterns listed in the Sentry extension configurations.
+    if (fileMatch === false) {
         return
     }
     const decorations: sourcegraph.TextDocumentDecoration[] = []
@@ -60,7 +81,7 @@ function decorateEditor(editor: sourcegraph.CodeEditor, sentryProjectId?: string
             do {
                 m = pattern.exec(line)
                 if (m) {
-                    decorations.push(decorateLine(i, m, sentryProjectId))
+                    decorations.push(decorateLine(i, m, sentryProjectId, fileMatch))
                 }
             } while (m)
             pattern.lastIndex = 0 // reset
@@ -72,39 +93,55 @@ function decorateEditor(editor: sourcegraph.CodeEditor, sentryProjectId?: string
 /**
  * Decorate a line that matches either the line match pattern from the Sentry extension configurations
  * or that matches common error loggin patterns.
- * @param i index for decoration range
- * @param m line match containing error query
+ * @param index for decoration range
+ * @param match for a line containing an error query
  * @param sentryProjectId Sentry project id retrieved from Sentry extension settings
  */
 export function decorateLine(
-    i: number,
-    m: RegExpExecArray,
-    sentryProjectId?: string
+    index: number,
+    match: RegExpExecArray,
+    sentryProjectId?: string,
+    fileMatch?: boolean | null
 ): sourcegraph.TextDocumentDecoration {
-    let decoration: sourcegraph.TextDocumentDecoration
-    decoration = {
-        range: new sourcegraph.Range(i, 0, i, 0),
+    const lineDecorationText = setLineDecorationText(sentryProjectId, fileMatch)
+    const decoration: sourcegraph.TextDocumentDecoration = {
+        range: new sourcegraph.Range(index, 0, index, 0),
         isWholeLine: true,
         after: {
             backgroundColor: '#e03e2f',
             color: 'rgba(255, 255, 255, 0.8)',
-            contentText: !SENTRYORGANIZATION
-                ? ' Add Sentry extension configurations to your settings to view logs in Sentry » '
-                : ' View logs in Sentry » ',
-            hoverMessage: !SENTRYORGANIZATION
-                ? ' Add Sentry extension configurations to your settings to view logs in Sentry. '
-                : sentryProjectId
-                ? ' View logs in Sentry » '
-                : ' View logs in Sentry, add Sentry projects to your settings for project matching.',
+            contentText: lineDecorationText.content,
+            hoverMessage: lineDecorationText.hover,
             // Depending on the line matching pattern the query m is indexed in position 1 or 2.
             linkURL: !SENTRYORGANIZATION
                 ? ''
                 : sentryProjectId
-                ? buildUrl(m.length > 2 ? m[2] : m[1], sentryProjectId).toString()
-                : buildUrl(m.length > 2 ? m[2] : m[1]).toString(),
+                ? buildUrl(match.length > 2 ? match[2] : match[1], sentryProjectId).toString()
+                : buildUrl(match.length > 2 ? match[2] : match[1]).toString(),
         },
     }
     return decoration
+}
+
+export function setLineDecorationText(sentryProjectId?: string, fileMatch?: boolean | null): LineDecorationText {
+    let contentText = ' View logs in Sentry » '
+    let hoverText = ' View logs in Sentry » '
+
+    if (!SENTRYORGANIZATION) {
+        contentText = ' Configure the Sentry extension to view logs. '
+        hoverText = ' Configure the Sentry extension to view logs in Sentry. '
+    } else if (!sentryProjectId) {
+        contentText = ' View logs in Sentry (❕)» '
+        hoverText = ' Add Sentry projects to your Sentry extension settings for project matching.'
+    } else if (!fileMatch) {
+        // If fileMatch is null (= not specified in the Sentry extension settings), suggest adding file matching
+        contentText = ' View logs in Sentry (❕)» '
+        hoverText = ' Add Sentry file matching regexes to your Sentry extension settings for file matching.'
+    }
+    return {
+        content: contentText,
+        hover: hoverText,
+    }
 }
 
 /**
