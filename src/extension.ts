@@ -1,7 +1,13 @@
 import { from } from 'rxjs'
 import { filter, switchMap } from 'rxjs/operators'
 import * as sourcegraph from 'sourcegraph'
-import { getParamsFromUriPath, matchSentryProject } from './handler'
+import {
+    checkMissingConfig,
+    createDecoration,
+    getParamsFromUriPath,
+    isFileMatched,
+    matchSentryProject,
+} from './handler'
 import { resolveSettings, Settings } from './settings'
 
 /**
@@ -10,11 +16,6 @@ import { resolveSettings, Settings } from './settings'
 interface Params {
     repo: string | null
     file: string | null
-}
-
-interface LineDecorationText {
-    content: string
-    hover: string
 }
 
 const DECORATION_TYPE = sourcegraph.app.createDecorationType()
@@ -31,14 +32,27 @@ const COMMON_ERRORLOG_PATTERNS = [
     /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/gi,
 ]
 
+// TODO: Refactor to use activeEditor
 export function activate(context: sourcegraph.ExtensionContext): void {
     sourcegraph.workspace.onDidOpenTextDocument.subscribe(textDocument => {
         const params: Params = getParamsFromUriPath(textDocument.uri)
         const sentryProjects = SETTINGSCONFIG['sentry.projects']
 
         // Retrieve the Sentry project that this document reports to.
-        const sentryProject = sentryProjects ? matchSentryProject(params, sentryProjects) : null
+        // TODO: Move this outside of activate() and into a separate, testable function.
+        const sentryProject = sentryProjects && matchSentryProject(params, sentryProjects)
+        let missingConfigData: string[] = []
+        let fileMatched: boolean | null
 
+        if (sentryProject) {
+            missingConfigData = checkMissingConfig(sentryProject)
+            fileMatched = isFileMatched(params, sentryProject)
+            // Do not decorate lines if the document file format does not match the
+            // file matching patterns listed in the Sentry extension configurations.
+            if (fileMatched === false) {
+                return
+            }
+        }
         if (sourcegraph.app.activeWindowChanges) {
             const activeEditor = from(sourcegraph.app.activeWindowChanges).pipe(
                 filter((window): window is sourcegraph.Window => window !== undefined),
@@ -51,39 +65,36 @@ export function activate(context: sourcegraph.ExtensionContext): void {
                     sentryProject
                         ? decorateEditor(
                               editor,
+                              missingConfigData,
                               sentryProject.projectId,
-                              sentryProject.lineMatches,
-                              sentryProject.fileMatch
+                              sentryProject.patternProperties.lineMatches
                           )
-                        : decorateEditor(editor)
+                        : decorateEditor(editor, missingConfigData)
                 })
             )
         }
     })
 }
 
+// TODO: Refactor so that it calls a new function that returns TextDocumentDecoration[],
+// and add tests for that new function (kind of like getBlameDecorations())
 function decorateEditor(
     editor: sourcegraph.CodeEditor,
+    missingConfigData: string[],
     sentryProjectId?: string,
-    lineMatches?: RegExp[],
-    fileMatch?: boolean | null
+    lineMatches?: RegExp[]
 ): void {
-    // Do not decorate lines if the document file format does not match the
-    // file matching patterns listed in the Sentry extension configurations.
-    if (fileMatch === false) {
-        return
-    }
     const decorations: sourcegraph.TextDocumentDecoration[] = []
-    for (const [i, line] of editor.document.text!.split('\n').entries()) {
-        let m: RegExpExecArray | null
+    for (const [index, line] of editor.document.text!.split('\n').entries()) {
+        let match: RegExpExecArray | null
         for (let pattern of lineMatches ? lineMatches : COMMON_ERRORLOG_PATTERNS) {
             pattern = new RegExp(pattern, 'gi')
             do {
-                m = pattern.exec(line)
-                if (m) {
-                    decorations.push(decorateLine(i, m, sentryProjectId, fileMatch))
+                match = pattern.exec(line)
+                if (match) {
+                    decorations.push(decorateLine(index, match, missingConfigData, sentryProjectId))
                 }
-            } while (m)
+            } while (match)
             pattern.lastIndex = 0 // reset
         }
     }
@@ -100,19 +111,22 @@ function decorateEditor(
 export function decorateLine(
     index: number,
     match: RegExpExecArray,
-    sentryProjectId?: string,
-    fileMatch?: boolean | null
+    missingConfigData: string[],
+    sentryProjectId?: string
 ): sourcegraph.TextDocumentDecoration {
-    const lineDecorationText = setLineDecorationText(sentryProjectId, fileMatch)
+    const lineDecorationText = createDecoration(missingConfigData, sentryProjectId)
     const decoration: sourcegraph.TextDocumentDecoration = {
         range: new sourcegraph.Range(index, 0, index, 0),
         isWholeLine: true,
         after: {
-            backgroundColor: '#e03e2f',
+            backgroundColor: missingConfigData.length === 0 ? '#e03e2f' : '#f2736d',
             color: 'rgba(255, 255, 255, 0.8)',
             contentText: lineDecorationText.content,
             hoverMessage: lineDecorationText.hover,
             // Depending on the line matching pattern the query m is indexed in position 1 or 2.
+            // TODO: Specify which capture group should be used through configuration.
+            // TODO: If !SENTRYORGANIZATION is missing in config, link to $USER/settings and hint
+            // user to fill it out.
             linkURL: !SENTRYORGANIZATION
                 ? ''
                 : sentryProjectId
@@ -123,33 +137,13 @@ export function decorateLine(
     return decoration
 }
 
-export function setLineDecorationText(sentryProjectId?: string, fileMatch?: boolean | null): LineDecorationText {
-    let contentText = ' View logs in Sentry » '
-    let hoverText = ' View logs in Sentry » '
-
-    if (!SENTRYORGANIZATION) {
-        contentText = ' Configure the Sentry extension to view logs. '
-        hoverText = ' Configure the Sentry extension to view logs in Sentry. '
-    } else if (!sentryProjectId) {
-        contentText = ' View logs in Sentry (❕)» '
-        hoverText = ' Add Sentry projects to your Sentry extension settings for project matching.'
-    } else if (!fileMatch) {
-        // If fileMatch is null (= not specified in the Sentry extension settings), suggest adding file matching
-        contentText = ' View logs in Sentry (❕)» '
-        hoverText = ' Add Sentry file matching regexes to your Sentry extension settings for file matching.'
-    }
-    return {
-        content: contentText,
-        hover: hoverText,
-    }
-}
-
 /**
  * Build URL to the Sentry issues stream page with the Sentry Org, query and, if available, Sentry project ID.
  * @param errorQuery extracted from the error handling code matching the config matching pattern.
  * @param sentryProjectId from the associated Sentry project receiving logs from the document's repo.
  * @return URL to the Sentry unresolved issues stream page for this kind of query.
  */
+// TODO: Use URLSearchParams instead of encodeURIComponent
 function buildUrl(errorQuery: string, sentryProjectId?: string): URL {
     const url = new URL(
         'https://sentry.io/organizations/' +

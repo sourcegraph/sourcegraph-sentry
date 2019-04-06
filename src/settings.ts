@@ -6,23 +6,23 @@
  */
 export interface Settings {
     ['sentry.organization']?: string
-    ['sentry.projects']?: [
-        {
-            name: string
-            projectId: string
-            patternProperties: {
-                repoMatch: RegExp
-                fileMatches: RegExp[]
-                lineMatches: RegExp[]
-            }
-            // TODO: Add these to v1.
-            additionalProperties?: {
-                contentText?: string // e.g. "View sourcegraph/sourcegraph_dot_com errors"
-                hoverMessage?: string //  e.g. "View errors matching '$1' in Sentry"
-                query?: string // e.g. "$1"
-            }
-        }
-    ]
+    ['sentry.projects']?: [SentryProject]
+}
+
+export interface SentryProject {
+    name: string
+    projectId: string
+    patternProperties: {
+        repoMatch: RegExp
+        fileMatches: RegExp[]
+        lineMatches: RegExp[]
+    }
+    // TODO: Add these to v1.
+    additionalProperties?: {
+        contentText?: string // e.g. "View sourcegraph/sourcegraph_dot_com errors"
+        hoverMessage?: string //  e.g. "View errors matching '$1' in Sentry"
+        query?: string // e.g. "$1"
+    }
 }
 
 /** Returns a copy of the extension settings with values normalized and defaults applied. */
