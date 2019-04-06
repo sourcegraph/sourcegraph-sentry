@@ -79,7 +79,6 @@ export function checkMissingConfig(settings: SentryProject): string[] {
             for (const [k, v] of Object.entries(value)) {
                 if (!v || Object.keys(v).length === 0) {
                     missingConfig.push(k)
-                    console.log('object: ', k, v)
                 }
             }
         } else if (!value) {
