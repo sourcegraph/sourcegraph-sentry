@@ -1,5 +1,9 @@
 {
-  "extends": [
-    "config:base"
-  ]
+  "extends": ["github>sourcegraph/renovate-config"],
+  "travis": {
+    "enabled": true
+  },
+  "node": {
+    "supportPolicy": ["lts"]
+  }
 }

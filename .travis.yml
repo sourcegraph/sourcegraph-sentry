@@ -1,0 +1,20 @@
+language: node_js
+node_js: '10'
+cache: yarn
+jobs:
+  include:
+    - stage: test
+      script:
+        - npm run prettier-check
+        - npm run tslint
+        - npm run typecheck
+        - npm run build
+        - npm run cover
+        - nyc report --reporter json
+        - 'bash <(curl -s https://codecov.io/bash)'
+stages:
+  - test
+branches:
+  only:
+    - master
+    - /^renovate\//
