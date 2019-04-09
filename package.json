@@ -103,21 +103,21 @@
   "devDependencies": {
     "@sourcegraph/prettierrc": "^2.2.0",
     "@sourcegraph/tsconfig": "^4.0.0",
-    "@sourcegraph/tslint-config": "^12.3.1",
+    "@sourcegraph/tslint-config": "^13.0.0",
     "@types/expect": "^1.20.4",
     "@types/mocha": "^5.2.6",
-    "expect": "^24.4.0",
+    "expect": "^24.7.1",
     "lnfs-cli": "^2.1.0",
     "mkdirp": "^0.5.1",
-    "mocha": "^6.0.2",
+    "mocha": "^6.1.2",
     "nyc": "^13.3.0",
-    "parcel-bundler": "^1.12.0",
+    "parcel-bundler": "^1.12.3",
     "prettier": "1.16.4",
     "rxjs": "^6.4.0",
-    "source-map-support": "^0.5.11",
+    "source-map-support": "^0.5.12",
     "sourcegraph": "^23.0.0",
     "ts-node": "^8.0.3",
-    "tslint": "^5.13.1",
-    "typescript": "^3.3.3333"
+    "tslint": "^5.15.0",
+    "typescript": "^3.4.2"
   }
 }
