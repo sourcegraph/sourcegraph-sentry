@@ -82,6 +82,7 @@
   "main": "dist/extension.js",
   "scripts": {
     "tslint": "tslint -p tsconfig.json './src/**/*.ts'",
+    "prettier-check": "npm run prettier -- --write=false",
     "prettier": "prettier --list-different --write \"src/**/*.ts\"",
     "typecheck": "tsc -p tsconfig.json",
     "test": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' mocha --require ts-node/register --require source-map-support/register --opts mocha.opts",
