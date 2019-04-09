@@ -94,6 +94,35 @@
     "watch:build": "tsc -p tsconfig.dist.json -w",
     "sourcegraph:prepublish": "npm run typecheck && npm run test && npm run build"
   },
+  "release": {
+    "branch": "latest"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "mocha": {
+    "spec": "src/test/**/*.test.ts"
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.ts?(x)"
+    ],
+    "exclude": [
+      "**/*.test.ts?(x)",
+      "**/*.d.ts"
+    ],
+    "extension": [
+      ".tsx",
+      ".ts"
+    ],
+    "reporter": [
+      "text",
+      "json"
+    ]
+  },
+
   "browserslist": [
     "last 1 Chrome versions",
     "last 1 Firefox versions",

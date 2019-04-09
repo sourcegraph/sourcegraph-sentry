@@ -34,7 +34,7 @@ const COMMON_ERRORLOG_PATTERNS = [
 
 // TODO: Refactor to use activeEditor
 export function activate(context: sourcegraph.ExtensionContext): void {
-    sourcegraph.workspace.onDidOpenTextDocument.subscribe(textDocument => {
+    sourcegraph.workspace.openedTextDocuments.subscribe(textDocument => {
         const params: Params = getParamsFromUriPath(textDocument.uri)
         const sentryProjects = SETTINGSCONFIG['sentry.projects']
 

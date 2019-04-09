@@ -45,13 +45,13 @@ export function getParamsFromUriPath(textDocument: string): Params {
  */
 export function matchSentryProject(params: Params, projects: SentryProject[]): SentryProject | undefined {
     if (!projects || !params.repo || !params.file) {
-        return
+        return undefined
     }
     // Check if a Sentry project is associated with this document's repo and retrieve the project.
     // TODO: Handle the null case instead of using a non-null assertion !
     const project = projects.find(p => !!new RegExp(p.patternProperties.repoMatch).exec(params.repo!))
     if (!project) {
-        return
+        return undefined
     }
     return project
 }
