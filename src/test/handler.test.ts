@@ -1,10 +1,9 @@
 import expect from 'expect'
 import mock from 'mock-require'
-import { SentryProject, Settings } from '../settings'
-// import { createMockSourcegraphAPI } from './stubs'
+import { SentryProject } from '../settings'
+import { createMockSourcegraphAPI } from './stubs'
 
-const SETTINGSCONFIG: Settings | null = null
-const sourcegraph = { configuration: { get: () => ({ value: SETTINGSCONFIG }) } }
+const sourcegraph = createMockSourcegraphAPI()
 // For modules importing Range/Location/Position/URI/etc
 mock('sourcegraph', sourcegraph)
 
