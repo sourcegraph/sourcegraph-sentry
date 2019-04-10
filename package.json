@@ -33,39 +33,41 @@
         "sentry.projects": {
           "type": "array",
           "items": {
-            "name": { "type" : "string" },
-            "type" : "object",
+            "name": {
+              "type": "string"
+            },
+            "type": "object",
             "description": "Sentry project receiving logs",
             "projectId": {
               "description": "Sentry project id, e.g. 12351512",
               "type": "string"
             },
-            "patternProperties" : {
+            "patternProperties": {
               "repoMatch": {
-                "type" : "string",
+                "type": "string",
                 "description": "Regex to match repos associated to this Sentry project, e.g. github\\.com/sourcegraph/sourcegraph"
               },
               "fileMatch": {
-                "type" : "string",
+                "type": "string",
                 "description": "Regex to match files associated with this project, e.g. (web|shared)/.*\\.tsx?$"
               },
               "lineMatch": {
-                "type" : "string",
-                "description" : "Regex to match lines associated with this project, e.g. throw new Error\\([\"']([^'\"]+)[\"']\\)"
+                "type": "string",
+                "description": "Regex to match lines associated with this project, e.g. throw new Error\\([\"']([^'\"]+)[\"']\\)"
               }
             },
-            "additionalProperties" : {
+            "additionalProperties": {
               "contentText": {
-                "description" : "Text shown in Sentry link, e.g. View sourcegraph/sourcegraph_dot_com errors",
-                "type" : "string"
+                "description": "Text shown in Sentry link, e.g. View sourcegraph/sourcegraph_dot_com errors",
+                "type": "string"
               },
               "hoverMessage": {
-                "description" : "Hovertext shown on Sentry link, e.g. View errors matching '$1' in Sentry",
-                "type" : "string"
+                "description": "Hovertext shown on Sentry link, e.g. View errors matching '$1' in Sentry",
+                "type": "string"
               },
               "query": {
-                "description" : "Query derived from error handling code $1",
-                "type" : "string"
+                "description": "Query derived from error handling code $1",
+                "type": "string"
               }
             }
           }
@@ -101,7 +103,7 @@
     ]
   },
   "mocha": {
-    "spec": "src/**/*.test.ts"
+    "spec": "src/test/**/*.test.ts"
   },
   "nyc": {
     "include": [
@@ -120,7 +122,6 @@
       "json"
     ]
   },
-
   "browserslist": [
     "last 1 Chrome versions",
     "last 1 Firefox versions",
@@ -133,12 +134,13 @@
     "@sourcegraph/prettierrc": "^2.2.0",
     "@sourcegraph/tsconfig": "^4.0.0",
     "@sourcegraph/tslint-config": "^13.0.0",
-    "@types/expect": "^1.20.4",
+    "@types/expect": "1.20.4",
     "@types/lodash": "4.14.123",
     "@types/mocha": "^5.2.6",
     "@types/mock-require": "2.0.0",
+    "@types/node": "^11.13.3",
     "@types/sinon": "7.0.11",
-    "expect": "^24.7.1",
+    "expect": "24.1.0",
     "lnfs-cli": "^2.1.0",
     "lodash": "^4.17.11",
     "mkdirp": "^0.5.1",
@@ -147,6 +149,7 @@
     "nyc": "^13.3.0",
     "parcel-bundler": "^1.12.3",
     "prettier": "1.16.4",
+    "prettier-check": "^2.0.0",
     "rxjs": "^6.4.0",
     "sinon": "^7.3.1",
     "source-map-support": "^0.5.12",
