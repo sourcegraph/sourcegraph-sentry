@@ -96,9 +96,6 @@
     "watch:build": "tsc -p tsconfig.dist.json -w",
     "sourcegraph:prepublish": "npm run typecheck && npm run test && npm run build"
   },
-  "release": {
-    "branch": "latest"
-  },
   "mocha": {
     "spec": "src/test/**/*.test.ts"
   },
