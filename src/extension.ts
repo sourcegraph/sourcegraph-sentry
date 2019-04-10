@@ -28,7 +28,7 @@ const SENTRYORGANIZATION = SETTINGSCONFIG['sentry.organization']
  */
 const COMMON_ERRORLOG_PATTERNS = [
     /throw new Error+\(['"]([^'"]+)['"]\)/gi,
-    /console\.(log|error|info|warn)\(['"`]([^'"`]+)['"`]\)/gi,
+    /console\.(error|info|warn)\(['"`]([^'"`]+)['"`]\)/gi,
     /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/gi,
 ]
 
@@ -114,7 +114,7 @@ export function decorateLine(
     missingConfigData: string[],
     sentryProjectId?: string
 ): sourcegraph.TextDocumentDecoration {
-    const lineDecorationText = createDecoration(missingConfigData, sentryProjectId)
+    const lineDecorationText = createDecoration(missingConfigData, SENTRYORGANIZATION, sentryProjectId)
     const decoration: sourcegraph.TextDocumentDecoration = {
         range: new sourcegraph.Range(index, 0, index, 0),
         isWholeLine: true,

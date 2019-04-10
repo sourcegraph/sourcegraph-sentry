@@ -1,6 +1,14 @@
 import expect from 'expect'
-import { getParamsFromUriPath, matchSentryProject } from './handler'
-import { Settings } from './settings'
+import mock from 'mock-require'
+import { Settings } from '../settings'
+// import { createMockSourcegraphAPI } from './stubs'
+
+const SETTINGSCONFIG: Settings | null = null
+const sourcegraph = { configuration: { get: () => ({ value: SETTINGSCONFIG }) } }
+// For modules importing Range/Location/Position/URI/etc
+mock('sourcegraph', sourcegraph)
+
+import { getParamsFromUriPath, matchSentryProject } from '../handler'
 
 describe('getParamsFromUriPath', () => {
     it('extracts repo and file params', () =>
@@ -10,14 +18,14 @@ describe('getParamsFromUriPath', () => {
 
     it('return empty repo if host is not GitHub', () =>
         expect(getParamsFromUriPath('git://unknownhost.com/sourcegraph/testrepo#http/req/main.go')).toEqual({
-            repo: null,
+            repo: '',
             file: '#http/req/main.go',
         }))
 
     it('return empty file if document has no file format', () =>
         expect(getParamsFromUriPath('git://github.com/sourcegraph/sourcegraph/testrepo#formatless')).toEqual({
             repo: 'sourcegraph/sourcegraph',
-            file: null,
+            file: '',
         }))
 })
 
