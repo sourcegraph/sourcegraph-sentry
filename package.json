@@ -83,6 +83,8 @@
   "license": "Apache-2.0",
   "main": "dist/extension.js",
   "scripts": {
+    "prettier-check": "npm run prettier -- --write=false",
+    "prettier": "prettier \"**/*.{ts,js,json,md}\" --list-different --write",
     "tslint": "tslint -p tsconfig.json './src/**/*.ts'",
     "typecheck": "tsc -p tsconfig.json",
     "test": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' mocha --require ts-node/register --require source-map-support/register --opts mocha.opts",
@@ -148,6 +150,8 @@
     "mock-require": "^3.0.3",
     "nyc": "^13.3.0",
     "parcel-bundler": "^1.12.3",
+    "prettier": "1.16.4",
+    "prettier-check": "^2.0.0",
     "rxjs": "^6.4.0",
     "sinon": "^7.3.1",
     "source-map-support": "^0.5.12",
