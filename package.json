@@ -33,39 +33,41 @@
         "sentry.projects": {
           "type": "array",
           "items": {
-            "name": { "type" : "string" },
-            "type" : "object",
+            "name": {
+              "type": "string"
+            },
+            "type": "object",
             "description": "Sentry project receiving logs",
             "projectId": {
               "description": "Sentry project id, e.g. 12351512",
               "type": "string"
             },
-            "patternProperties" : {
+            "patternProperties": {
               "repoMatch": {
-                "type" : "string",
+                "type": "string",
                 "description": "Regex to match repos associated to this Sentry project, e.g. github\\.com/sourcegraph/sourcegraph"
               },
               "fileMatch": {
-                "type" : "string",
+                "type": "string",
                 "description": "Regex to match files associated with this project, e.g. (web|shared)/.*\\.tsx?$"
               },
               "lineMatch": {
-                "type" : "string",
-                "description" : "Regex to match lines associated with this project, e.g. throw new Error\\([\"']([^'\"]+)[\"']\\)"
+                "type": "string",
+                "description": "Regex to match lines associated with this project, e.g. throw new Error\\([\"']([^'\"]+)[\"']\\)"
               }
             },
-            "additionalProperties" : {
+            "additionalProperties": {
               "contentText": {
-                "description" : "Text shown in Sentry link, e.g. View sourcegraph/sourcegraph_dot_com errors",
-                "type" : "string"
+                "description": "Text shown in Sentry link, e.g. View sourcegraph/sourcegraph_dot_com errors",
+                "type": "string"
               },
               "hoverMessage": {
-                "description" : "Hovertext shown on Sentry link, e.g. View errors matching '$1' in Sentry",
-                "type" : "string"
+                "description": "Hovertext shown on Sentry link, e.g. View errors matching '$1' in Sentry",
+                "type": "string"
               },
               "query": {
-                "description" : "Query derived from error handling code $1",
-                "type" : "string"
+                "description": "Query derived from error handling code $1",
+                "type": "string"
               }
             }
           }
@@ -81,6 +83,8 @@
   "license": "Apache-2.0",
   "main": "dist/extension.js",
   "scripts": {
+    "prettier-check": "npm run prettier -- --write=false",
+    "prettier": "prettier \"**/*.{ts,js,json,md}\" --list-different --write",
     "tslint": "tslint -p tsconfig.json './src/**/*.ts'",
     "typecheck": "tsc -p tsconfig.json",
     "test": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' mocha --require ts-node/register --require source-map-support/register --opts mocha.opts",
@@ -92,6 +96,26 @@
     "watch:build": "tsc -p tsconfig.dist.json -w",
     "sourcegraph:prepublish": "npm run typecheck && npm run test && npm run build"
   },
+  "mocha": {
+    "spec": "src/test/**/*.test.ts"
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.ts?(x)"
+    ],
+    "exclude": [
+      "**/*.test.ts?(x)",
+      "**/*.d.ts"
+    ],
+    "extension": [
+      ".tsx",
+      ".ts"
+    ],
+    "reporter": [
+      "text",
+      "json"
+    ]
+  },
   "browserslist": [
     "last 1 Chrome versions",
     "last 1 Firefox versions",
@@ -101,20 +125,28 @@
   "devDependencies": {
     "@sourcegraph/prettierrc": "^2.2.0",
     "@sourcegraph/tsconfig": "^4.0.0",
-    "@sourcegraph/tslint-config": "^12.3.1",
-    "@types/expect": "^1.20.4",
+    "@sourcegraph/tslint-config": "^13.0.0",
+    "@types/expect": "1.20.4",
+    "@types/lodash": "4.14.123",
     "@types/mocha": "^5.2.6",
-    "expect": "^24.4.0",
+    "@types/mock-require": "2.0.0",
+    "@types/node": "^11.13.3",
+    "@types/sinon": "7.0.11",
+    "expect": "24.1.0",
     "lnfs-cli": "^2.1.0",
+    "lodash": "^4.17.11",
     "mkdirp": "^0.5.1",
-    "mocha": "^6.0.2",
+    "mocha": "^6.1.2",
+    "mock-require": "^3.0.3",
     "nyc": "^13.3.0",
-    "parcel-bundler": "^1.12.0",
+    "parcel-bundler": "^1.12.3",
+    "prettier": "1.16.4",
     "rxjs": "^6.4.0",
-    "source-map-support": "^0.5.11",
+    "sinon": "^7.3.1",
+    "source-map-support": "^0.5.12",
     "sourcegraph": "^23.0.0",
     "ts-node": "^8.0.3",
-    "tslint": "^5.13.1",
-    "typescript": "^3.3.3333"
+    "tslint": "^5.15.0",
+    "typescript": "^3.4.2"
   }
 }

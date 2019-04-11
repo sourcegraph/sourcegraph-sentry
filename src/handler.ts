@@ -1,5 +1,4 @@
-import * as sourcegraph from 'sourcegraph'
-import { resolveSettings, SentryProject, Settings } from './settings'
+import { SentryProject } from './settings'
 
 interface Params {
     repo: string | null
@@ -11,9 +10,6 @@ interface LineDecorationText {
     hover: string
     backgroundColor: string
 }
-
-const SETTINGSCONFIG = resolveSettings(sourcegraph.configuration.get<Settings>().value)
-const SENTRYORGANIZATION = SETTINGSCONFIG['sentry.organization']
 
 /**
  * Extract Sentry params from document URI necessary to
@@ -45,13 +41,13 @@ export function getParamsFromUriPath(textDocument: string): Params {
  */
 export function matchSentryProject(params: Params, projects: SentryProject[]): SentryProject | undefined {
     if (!projects || !params.repo || !params.file) {
-        return
+        return undefined
     }
     // Check if a Sentry project is associated with this document's repo and retrieve the project.
     // TODO: Handle the null case instead of using a non-null assertion !
     const project = projects.find(p => !!new RegExp(p.patternProperties.repoMatch).exec(params.repo!))
     if (!project) {
-        return
+        return undefined
     }
     return project
 }
@@ -88,12 +84,16 @@ export function checkMissingConfig(settings: SentryProject): string[] {
     return missingConfig
 }
 
-export function createDecoration(missingConfigData: string[], sentryProjectId?: string): LineDecorationText {
+export function createDecoration(
+    missingConfigData: string[],
+    sentryOrg?: string,
+    sentryProjectId?: string
+): LineDecorationText {
     let contentText = ' View logs in Sentry » '
     let hoverText = ' View logs in Sentry » '
     const color = '#e03e2f'
 
-    if (!SENTRYORGANIZATION) {
+    if (!sentryOrg) {
         contentText = ' Configure the Sentry extension to view logs. '
         hoverText = ' Configure the Sentry extension to view logs in Sentry. '
     } else if (!sentryProjectId) {

@@ -15,6 +15,7 @@ export interface SentryProject {
     patternProperties: {
         repoMatch: RegExp
         fileMatches: RegExp[]
+        // RexExp patterns to match log handeling code, e.g. /log\.(Printf|Print)\(['"]([^'"]+)['"]\)/
         lineMatches: RegExp[]
     }
     // TODO: Add these to v1.
