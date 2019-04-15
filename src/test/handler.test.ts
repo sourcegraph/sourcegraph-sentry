@@ -10,7 +10,13 @@ mock('sourcegraph', sourcegraph)
 import { getParamsFromUriPath, matchSentryProject } from '../handler'
 
 describe('getParamsFromUriPath', () => {
-    it('extracts repo and file params', () =>
+    it('extracts repo and file params from root folder', () =>
+        expect(getParamsFromUriPath('git://github.com/sourcegraph/sourcegraph?264...#index.tsx')).toEqual({
+            repo: 'sourcegraph/sourcegraph',
+            file: '#index.tsx',
+        }))
+
+    it('extracts repo and file params from subfolder', () =>
         expect(
             getParamsFromUriPath('git://github.com/sourcegraph/sourcegraph?264...#web/src/e2e/index.e2e.test.tsx')
         ).toEqual({ repo: 'sourcegraph/sourcegraph', file: '#web/src/e2e/index.e2e.test.tsx' }))

@@ -1,4 +1,4 @@
-import { from, concat, of } from 'rxjs'
+import { concat, from, of } from 'rxjs'
 import { filter, switchMap } from 'rxjs/operators'
 import * as sourcegraph from 'sourcegraph'
 import {
