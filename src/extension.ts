@@ -1,4 +1,4 @@
-import { from } from 'rxjs'
+import { from, concat, of } from 'rxjs'
 import { filter, switchMap } from 'rxjs/operators'
 import * as sourcegraph from 'sourcegraph'
 import {
@@ -34,7 +34,10 @@ const COMMON_ERRORLOG_PATTERNS = [
 
 // TODO: Refactor to use activeEditor
 export function activate(context: sourcegraph.ExtensionContext): void {
-    sourcegraph.workspace.openedTextDocuments.subscribe(textDocument => {
+    concat(
+        ...sourcegraph.workspace.textDocuments.map(doc => of(doc)),
+        from(sourcegraph.workspace.onDidOpenTextDocument)
+    ).subscribe(textDocument => {
         const params: Params = getParamsFromUriPath(textDocument.uri)
         const sentryProjects = SETTINGSCONFIG['sentry.projects']
 
