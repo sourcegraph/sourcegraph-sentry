@@ -1,4 +1,4 @@
-import { concat, from, of } from 'rxjs'
+import { from } from 'rxjs'
 import { filter, switchMap } from 'rxjs/operators'
 import * as sourcegraph from 'sourcegraph'
 import {
@@ -32,51 +32,45 @@ const COMMON_ERRORLOG_PATTERNS = [
     /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/gi,
 ]
 
-// TODO: Refactor to use activeEditor
 export function activate(context: sourcegraph.ExtensionContext): void {
-    concat(
-        ...sourcegraph.workspace.textDocuments.map(doc => of(doc)),
-        from(sourcegraph.workspace.onDidOpenTextDocument)
-    ).subscribe(textDocument => {
-        const params: Params = getParamsFromUriPath(textDocument.uri)
-        const sentryProjects = SETTINGSCONFIG['sentry.projects']
+    if (sourcegraph.app.activeWindowChanges) {
+        const activeEditor = from(sourcegraph.app.activeWindowChanges).pipe(
+            filter((window): window is sourcegraph.Window => window !== undefined),
+            switchMap(window => window.activeViewComponentChanges),
+            filter((editor): editor is sourcegraph.CodeEditor => editor !== undefined)
+        )
+        // When the active editor changes, publish new decorations.
+        context.subscriptions.add(
+            activeEditor.subscribe(editor => {
+                const params: Params = getParamsFromUriPath(editor.document.uri)
+                const sentryProjects = SETTINGSCONFIG['sentry.projects']
 
-        // Retrieve the Sentry project that this document reports to.
-        // TODO: Move this outside of activate() and into a separate, testable function.
-        const sentryProject = sentryProjects && matchSentryProject(params, sentryProjects)
-        let missingConfigData: string[] = []
-        let fileMatched: boolean | null
+                // Retrieve the Sentry project that this document reports to.
+                // TODO: Move this outside of activate() and into a separate, testable function.
+                const sentryProject = sentryProjects && matchSentryProject(params, sentryProjects)
+                let missingConfigData: string[] = []
+                let fileMatched: boolean | null
 
-        if (sentryProject) {
-            missingConfigData = checkMissingConfig(sentryProject)
-            fileMatched = isFileMatched(params, sentryProject)
-            // Do not decorate lines if the document file format does not match the
-            // file matching patterns listed in the Sentry extension configurations.
-            if (fileMatched === false) {
-                return
-            }
-        }
-        if (sourcegraph.app.activeWindowChanges) {
-            const activeEditor = from(sourcegraph.app.activeWindowChanges).pipe(
-                filter((window): window is sourcegraph.Window => window !== undefined),
-                switchMap(window => window.activeViewComponentChanges),
-                filter((editor): editor is sourcegraph.CodeEditor => editor !== undefined)
-            )
-            // When the active editor changes, publish new decorations.
-            context.subscriptions.add(
-                activeEditor.subscribe(editor => {
-                    sentryProject
-                        ? decorateEditor(
-                              editor,
-                              missingConfigData,
-                              sentryProject.projectId,
-                              sentryProject.patternProperties.lineMatches
-                          )
-                        : decorateEditor(editor, missingConfigData)
-                })
-            )
-        }
-    })
+                if (sentryProject) {
+                    missingConfigData = checkMissingConfig(sentryProject)
+                    fileMatched = isFileMatched(params, sentryProject)
+                    // Do not decorate lines if the document file format does not match the
+                    // file matching patterns listed in the Sentry extension configurations.
+                    if (fileMatched === false) {
+                        return
+                    }
+                    decorateEditor(
+                        editor,
+                        missingConfigData,
+                        sentryProject.projectId,
+                        sentryProject.patternProperties.lineMatches
+                    )
+                } else {
+                    decorateEditor(editor, missingConfigData)
+                }
+            })
+        )
+    }
 }
 
 // TODO: Refactor so that it calls a new function that returns TextDocumentDecoration[],
