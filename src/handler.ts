@@ -15,16 +15,17 @@ interface LineDecorationText {
  * Extract Sentry params from document URI necessary to
  * check if the current document sends log events to Sentry and
  * use these params build URL to the Sentry issues stream page.
- * @param textDocument A document URI.
+ * @param textDocumentURI A document URI.
  * @returns repo and file part of URI.
  */
-export function getParamsFromUriPath(textDocument: string): Params {
+export function getParamsFromUriPath(textDocumentURI: string): Params {
     // TODO: Support more than just GitHub.
     // TODO: Safeguard for cases where repo/fileMatch are null.
     const repoPattern = /github\.com\/([^\?\#\/]+\/[^\?\#\/]*)/gi
-    const filePattern = /#([^\?\#\/]+)\/.*\.?$/gi
-    const repoMatch = repoPattern.exec(textDocument)
-    const fileMatch = filePattern.exec(textDocument)
+    const filePattern = /#.*\.(.*)$/gi
+
+    const repoMatch = repoPattern.exec(textDocumentURI)
+    const fileMatch = filePattern.exec(textDocumentURI)
     return {
         repo: repoMatch && repoMatch[1],
         file: fileMatch && fileMatch[0],
