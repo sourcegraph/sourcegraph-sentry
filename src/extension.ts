@@ -51,7 +51,7 @@ export function activate(context: sourcegraph.ExtensionContext): void {
 }
 
 /**
- * Get and varify the necessary uri and config data and build the decorations
+ * Get and varify the necessary uri and config data and build the decorations.
  * @param editor
  * @param sentryProjects
  */
@@ -85,7 +85,7 @@ export function getDecorations(
 }
 
 /**
- * Build decorations by matching error handling code with either user config or common error patterns
+ * Build decorations by matching error handling code with either user config or common error patterns.
  * @param editor
  * @param missingConfigData
  * @param sentryProjectId
