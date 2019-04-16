@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/sourcegraph/sourcegraph/master/shared/src/schema/extension.schema.json",
-  "name": "sourcegraph-sentry",
+  "name": "sentry",
   "description": "Sourcegraph Sentry extension renders \"View logs on Sentry\" links next to error handling code.",
   "publisher": "Sourcegraph",
   "activationEvents": [
