@@ -42,46 +42,64 @@ export function activate(context: sourcegraph.ExtensionContext): void {
         // When the active editor changes, publish new decorations.
         context.subscriptions.add(
             activeEditor.subscribe(editor => {
-                const params: Params = getParamsFromUriPath(editor.document.uri)
                 const sentryProjects = SETTINGSCONFIG['sentry.projects']
-
-                // Retrieve the Sentry project that this document reports to.
-                // TODO: Move this outside of activate() and into a separate, testable function.
-                const sentryProject = sentryProjects && matchSentryProject(params, sentryProjects)
-                let missingConfigData: string[] = []
-                let fileMatched: boolean | null
-
-                if (sentryProject) {
-                    missingConfigData = checkMissingConfig(sentryProject)
-                    fileMatched = isFileMatched(params, sentryProject)
-                    // Do not decorate lines if the document file format does not match the
-                    // file matching patterns listed in the Sentry extension configurations.
-                    if (fileMatched === false) {
-                        return
-                    }
-                    decorateEditor(
-                        editor,
-                        missingConfigData,
-                        sentryProject.projectId,
-                        sentryProject.patternProperties.lineMatches
-                    )
-                } else {
-                    decorateEditor(editor, missingConfigData)
-                }
+                const decorations = getDecorations(editor, sentryProjects)
+                editor.setDecorations(DECORATION_TYPE, decorations)
             })
         )
     }
 }
 
-// TODO: Refactor so that it calls a new function that returns TextDocumentDecoration[],
-// and add tests for that new function (kind of like getBlameDecorations())
+/**
+ * Get and varify the necessary uri and config data and build the decorations
+ * @param editor
+ * @param sentryProjects
+ */
+export function getDecorations(
+    editor: sourcegraph.CodeEditor,
+    sentryProjects: Settings['sentry.projects']
+): sourcegraph.TextDocumentDecoration[] {
+    const params: Params = getParamsFromUriPath(editor.document.uri)
+    const sentryProject = sentryProjects && matchSentryProject(params, sentryProjects)
+    let missingConfigData: string[] = []
+    let fileMatched: boolean | null
+
+    if (sentryProject) {
+        missingConfigData = checkMissingConfig(sentryProject)
+        fileMatched = isFileMatched(params, sentryProject)
+
+        // Do not decorate lines if the document file format does not match the
+        // file matching patterns listed in the Sentry extension configurations.
+        if (fileMatched === false) {
+            return []
+        }
+
+        return decorateEditor(
+            editor,
+            missingConfigData,
+            sentryProject.projectId,
+            sentryProject.patternProperties.lineMatches
+        )
+    }
+    return decorateEditor(editor, missingConfigData)
+}
+
+/**
+ * Build decorations by matching error handling code with either user config or common error patterns
+ * @param editor
+ * @param missingConfigData
+ * @param sentryProjectId
+ * @param lineMatches
+ */
+// TODO: add tests for that new function (kind of like getBlameDecorations())
 function decorateEditor(
     editor: sourcegraph.CodeEditor,
     missingConfigData: string[],
     sentryProjectId?: string,
     lineMatches?: RegExp[]
-): void {
+): sourcegraph.TextDocumentDecoration[] {
     const decorations: sourcegraph.TextDocumentDecoration[] = []
+
     for (const [index, line] of editor.document.text!.split('\n').entries()) {
         let match: RegExpExecArray | null
         for (let pattern of lineMatches ? lineMatches : COMMON_ERRORLOG_PATTERNS) {
@@ -95,7 +113,7 @@ function decorateEditor(
             pattern.lastIndex = 0 // reset
         }
     }
-    editor.setDecorations(DECORATION_TYPE, decorations)
+    return decorations
 }
 
 /**
