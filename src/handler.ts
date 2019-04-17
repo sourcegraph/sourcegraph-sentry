@@ -44,12 +44,16 @@ export function matchSentryProject(params: Params, projects: SentryProject[]): S
     if (!projects || !params.repo || !params.file) {
         return undefined
     }
+
     // Check if a Sentry project is associated with this document's repo and retrieve the project.
     // TODO: Handle the null case instead of using a non-null assertion !
+    // TODO: Handle cases where the wrong project is matched due to similar repo name,
+    // e.g. `sourcegraph-jetbrains` repo will match the `sourcegraph` project
     const project = projects.find(p => !!new RegExp(p.patternProperties.repoMatch).exec(params.repo!))
     if (!project) {
         return undefined
     }
+
     return project
 }
 
