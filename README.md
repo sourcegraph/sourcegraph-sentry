@@ -10,7 +10,7 @@ In this first version, the Sentry extension will render a `View logs in Sentry` 
 
 ## Language support
 
-To work, the Sentry Sourcegraph extension must know how to instances of error handling and/or exception throwing for each language. The first version will support:
+To work, the Sentry Sourcegraph extension must know how to recognize instances of error handling and/or exception throwing for each language. The first version will support:
 
 - TypeScript
 - Go
@@ -41,7 +41,7 @@ Set the following configurations in your settings:
 
 ```
 
-Filematches can also be narrowed down to certain folders by specifying this in the RegExp:
+File matches can also be narrowed down to certain folders by specifying this in the RegExp:
 
 ```
 ...
