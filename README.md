@@ -27,14 +27,14 @@ Set the following configurations in your settings:
 "sentry.projects": [
   {
     "name": "[Project Name]",
-    "projectId": "[Project ID]",
+    "projectId": "[Project ID, e.g. "1334031"]",
     "patternProperties": {
       "repoMatch": "[repo name asociated with this project]",
       "fileMatches": [
-          [RegExp that matches file format, e.g. "\\.tsx?"]
+          [RegExp[] that matches file format, e.g. "\\.tsx?"]
         ],
       "lineMatches": [
-        [RegExp that matches file format, e.g. "logger\\.debug\\(['\"`]([^'\"`]+)['\"`]\\);"],
+        [RegExp[] that matches error handling code, e.g. "throw new Error+\\(['\"]([^'\"]+)['\"]\\)"],
       ]
     }
   }
