@@ -6,7 +6,6 @@
     "moduleResolution": "node",
     "lib": ["es2018", "webworker"],
     "inlineSources": true,
-    "inlineSourceMap": true,
     "declaration": false,
     "outDir": "dist",
     "noEmit": true,
