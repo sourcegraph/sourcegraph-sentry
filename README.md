@@ -13,6 +13,57 @@ In this first version, the Sentry extension will render a `View logs in Sentry` 
 To work, the Sentry Sourcegraph extension must know how to instances of error handling and/or exception throwing for each language. The first version will support:
 
 - TypeScript
+- Go
+- JavaScript
+- Python
+- Java
+
+## Setup
+
+Set the following configurations in your settings:
+
+```
+"sentry.organization": "[Organization Name]",
+"sentry.projects": [
+  {
+    "name": "[Project Name]",
+    "projectId": "[Project ID]",
+    "patternProperties": {
+      "repoMatch": "[repo name asociated with this project]",
+      "fileMatches": [
+          [RegExp that matches file format, e.g. "\\.tsx?"]
+        ],
+      "lineMatches": [
+        [RegExp that matches file format, e.g. "logger\\.debug\\(['\"`]([^'\"`]+)['\"`]\\);"],
+      ]
+    }
+  }
+
+```
+
+Filematches can also be narrowed down to certain folders by specifying this in the RegExp:
+
+```
+...
+"fileMatches": ["(web|shared|src)\/.*\\.tsx?"]
+...
+```
+
+## Examples
+
+- TypeScript
+
+  Configuration:
+
+  ```
+  ...
+  "patternProperties": {
+      "repoMatch": "sourcegraph",
+      "fileMatches": ["([^'\"]+)\/.*\\.ts?"],
+      "lineMatches": ["throw new Error+\\(['\"]([^'\"]+)['\"]\\)"]
+    }
+
+  ```
 
   - [On Sourcegraph](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/client/browser/src/libs/github/file_info.ts#L16)
   - [On GitHub](https://github.com/sourcegraph/sourcegraph/blob/master/client/browser/src/libs/github/file_info.ts#L16)
