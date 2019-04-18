@@ -8,7 +8,7 @@ import {
     isFileMatched,
     matchSentryProject,
 } from './handler'
-import { resolveSettings, Settings } from './settings'
+import { resolveSettings, SentryProject, Settings } from './settings'
 
 /**
  * Params derived from the document's URI.
@@ -43,7 +43,7 @@ export function activate(context: sourcegraph.ExtensionContext): void {
         context.subscriptions.add(
             activeEditor.subscribe(editor => {
                 const sentryProjects = SETTINGSCONFIG['sentry.projects']
-                const decorations = getDecorations(editor, sentryProjects)
+                const decorations = getDecorations(editor.document.uri, sentryProjects, editor.document.text)
                 editor.setDecorations(DECORATION_TYPE, decorations)
             })
         )
@@ -52,14 +52,15 @@ export function activate(context: sourcegraph.ExtensionContext): void {
 
 /**
  * Get and varify the necessary uri and config data and build the decorations.
- * @param editor
+ * @param documentUri
  * @param sentryProjects
  */
 export function getDecorations(
-    editor: sourcegraph.CodeEditor,
-    sentryProjects: Settings['sentry.projects']
+    documentUri: string,
+    sentryProjects?: SentryProject[],
+    documentText?: string
 ): sourcegraph.TextDocumentDecoration[] {
-    const params: Params = getParamsFromUriPath(editor.document.uri)
+    const params: Params = getParamsFromUriPath(documentUri)
     const sentryProject = sentryProjects && matchSentryProject(params, sentryProjects)
     let missingConfigData: string[] = []
     let fileMatched: boolean | null
@@ -75,32 +76,32 @@ export function getDecorations(
         }
 
         return decorateEditor(
-            editor,
             missingConfigData,
+            documentText,
             sentryProject.projectId,
             sentryProject.patternProperties.lineMatches
         )
     }
-    return decorateEditor(editor, missingConfigData)
+    return decorateEditor(missingConfigData, documentText)
 }
 
 /**
  * Build decorations by matching error handling code with either user config or common error patterns.
- * @param editor
  * @param missingConfigData
+ * @param documentText
  * @param sentryProjectId
  * @param lineMatches
  */
 // TODO: add tests for that new function (kind of like getBlameDecorations())
 function decorateEditor(
-    editor: sourcegraph.CodeEditor,
     missingConfigData: string[],
+    documentText?: string,
     sentryProjectId?: string,
     lineMatches?: RegExp[]
 ): sourcegraph.TextDocumentDecoration[] {
     const decorations: sourcegraph.TextDocumentDecoration[] = []
 
-    for (const [index, line] of editor.document.text!.split('\n').entries()) {
+    for (const [index, line] of documentText!.split('\n').entries()) {
         let match: RegExpExecArray | null
         for (let pattern of lineMatches ? lineMatches : COMMON_ERRORLOG_PATTERNS) {
             pattern = new RegExp(pattern, 'gi')

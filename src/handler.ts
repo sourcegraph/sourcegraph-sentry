@@ -49,7 +49,9 @@ export function matchSentryProject(params: Params, projects: SentryProject[]): S
     // TODO: Handle the null case instead of using a non-null assertion !
     // TODO: Handle cases where the wrong project is matched due to similar repo name,
     // e.g. `sourcegraph-jetbrains` repo will match the `sourcegraph` project
-    const project = projects.find(p => !!new RegExp(p.patternProperties.repoMatch).exec(params.repo!))
+    const project = projects.find(p =>
+        p.patternProperties.repoMatch ? !!new RegExp(p.patternProperties.repoMatch).exec(params.repo!) : false
+    )
     if (!project) {
         return undefined
     }
