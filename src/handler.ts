@@ -109,7 +109,8 @@ export function createDecoration(
     } else if (missingConfigData.length > 0) {
         contentText = ' View logs in Sentry (❕)» '
         hoverText =
-            ' Please fill out the following configurations in your Sentry extension settings: ' + missingConfigData
+            ' Please fill out the following configurations in your Sentry extension settings: ' +
+            missingConfigData.join(', ')
     }
     return {
         content: contentText,

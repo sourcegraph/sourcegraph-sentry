@@ -43,8 +43,13 @@ export function activate(context: sourcegraph.ExtensionContext): void {
         context.subscriptions.add(
             activeEditor.subscribe(editor => {
                 const sentryProjects = SETTINGSCONFIG['sentry.projects']
-                const decorations = getDecorations(editor.document.uri, sentryProjects, editor.document.text)
-                editor.setDecorations(DECORATION_TYPE, decorations)
+                if (editor.document.text) {
+                    const decorations = getDecorations(editor.document.uri, editor.document.text, sentryProjects)
+                    if (decorations.length === 0) {
+                        return
+                    }
+                    editor.setDecorations(DECORATION_TYPE, decorations)
+                }
             })
         )
     }
@@ -52,13 +57,14 @@ export function activate(context: sourcegraph.ExtensionContext): void {
 
 /**
  * Get and varify the necessary uri and config data and build the decorations.
- * @param documentUri
- * @param sentryProjects
+ * @param documentUri the current document's URI
+ * @param documentText content of the document being scanned for error handling code
+ * @param sentryProjects list of Sentry projects sourced from the user's Sentry extension configurations
  */
 export function getDecorations(
     documentUri: string,
-    sentryProjects?: SentryProject[],
-    documentText?: string
+    documentText: string,
+    sentryProjects?: SentryProject[]
 ): sourcegraph.TextDocumentDecoration[] {
     const params: Params = getParamsFromUriPath(documentUri)
     const sentryProject = sentryProjects && matchSentryProject(params, sentryProjects)
@@ -87,28 +93,33 @@ export function getDecorations(
 
 /**
  * Build decorations by matching error handling code with either user config or common error patterns.
- * @param missingConfigData
- * @param documentText
- * @param sentryProjectId
- * @param lineMatches
+ * @param missingConfigData list of missing configs that will appear as a hover warning on the Sentry link
+ * @param documentText content of the document being scanned for error handling code
+ * @param sentryProjectId Sentry project id retrieved from Sentry extension settings
+ * @param lineMatches line patching patterns set in the user's Sentry extension configurations
+ * @return a list of decorations to render as links on each matching line
  */
 // TODO: add tests for that new function (kind of like getBlameDecorations())
 function decorateEditor(
     missingConfigData: string[],
-    documentText?: string,
+    documentText: string,
     sentryProjectId?: string,
     lineMatches?: RegExp[]
 ): sourcegraph.TextDocumentDecoration[] {
     const decorations: sourcegraph.TextDocumentDecoration[] = []
 
-    for (const [index, line] of documentText!.split('\n').entries()) {
+    for (const [index, line] of documentText.split('\n').entries()) {
         let match: RegExpExecArray | null
         for (let pattern of lineMatches ? lineMatches : COMMON_ERRORLOG_PATTERNS) {
             pattern = new RegExp(pattern, 'gi')
             do {
                 match = pattern.exec(line)
-                if (match) {
-                    decorations.push(decorateLine(index, match, missingConfigData, sentryProjectId))
+                // Depending on the line matching pattern the query m is indexed in position 1 or 2.
+                // TODO: Specify which capture group should be used through configuration.
+                if (match && match.length < 2) {
+                    decorations.push(decorateLine(index, match[1], missingConfigData, sentryProjectId))
+                } else if (match && match.length >= 2) {
+                    decorations.push(decorateLine(index, match[2], missingConfigData, sentryProjectId))
                 }
             } while (match)
             pattern.lastIndex = 0 // reset
@@ -122,11 +133,13 @@ function decorateEditor(
  * or that matches common error loggin patterns.
  * @param index for decoration range
  * @param match for a line containing an error query
+ * @param missingConfigData list of missing configs that will appear as a hover warning on the Sentry link
  * @param sentryProjectId Sentry project id retrieved from Sentry extension settings
+ * @return either a successful or a warning decoration to render the Sentry link
  */
 export function decorateLine(
     index: number,
-    match: RegExpExecArray,
+    match: string,
     missingConfigData: string[],
     sentryProjectId?: string
 ): sourcegraph.TextDocumentDecoration {
@@ -139,15 +152,13 @@ export function decorateLine(
             color: 'rgba(255, 255, 255, 0.8)',
             contentText: lineDecorationText.content,
             hoverMessage: lineDecorationText.hover,
-            // Depending on the line matching pattern the query m is indexed in position 1 or 2.
-            // TODO: Specify which capture group should be used through configuration.
             // TODO: If !SENTRYORGANIZATION is missing in config, link to $USER/settings and hint
             // user to fill it out.
             linkURL: !SENTRYORGANIZATION
                 ? ''
                 : sentryProjectId
-                ? buildUrl(match.length > 2 ? match[2] : match[1], sentryProjectId).toString()
-                : buildUrl(match.length > 2 ? match[2] : match[1]).toString(),
+                ? buildUrl(match, sentryProjectId).toString()
+                : buildUrl(match).toString(),
         },
     }
     return decoration
