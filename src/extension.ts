@@ -107,7 +107,6 @@ function decorateEditor(
     lineMatches?: RegExp[]
 ): sourcegraph.TextDocumentDecoration[] {
     const decorations: sourcegraph.TextDocumentDecoration[] = []
-
     for (const [index, line] of documentText.split('\n').entries()) {
         let match: RegExpExecArray | null
         for (let pattern of lineMatches ? lineMatches : COMMON_ERRORLOG_PATTERNS) {
@@ -116,9 +115,9 @@ function decorateEditor(
                 match = pattern.exec(line)
                 // Depending on the line matching pattern the query m is indexed in position 1 or 2.
                 // TODO: Specify which capture group should be used through configuration.
-                if (match && match.length < 2) {
+                if (match && match.length <= 2) {
                     decorations.push(decorateLine(index, match[1], missingConfigData, sentryProjectId))
-                } else if (match && match.length >= 2) {
+                } else if (match && match.length > 2) {
                     decorations.push(decorateLine(index, match[2], missingConfigData, sentryProjectId))
                 }
             } while (match)
