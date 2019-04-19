@@ -45,7 +45,7 @@ export const createMockSourcegraphAPI = () => ({
     commands: {},
 })
 
-export const projects: SentryProject[] = [
+export let projects: SentryProject[] = [
     {
         name: 'Webapp typescript errors',
         projectId: '1334031',

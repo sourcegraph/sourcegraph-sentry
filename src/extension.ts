@@ -27,9 +27,18 @@ const SENTRYORGANIZATION = SETTINGSCONFIG['sentry.organization']
  * are set in the sentry extension settings.
  */
 const COMMON_ERRORLOG_PATTERNS = [
+    // typescript
     /throw new Error+\(['"]([^'"]+)['"]\)/gi,
     /console\.(error|info|warn)\(['"`]([^'"`]+)['"`]\)/gi,
+    // go
     /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/gi,
+    /fmt\.Errorf\(['"]([^'"]+)['"]\)/gi,
+    /errors\.New\(['"]([^'"]+)['"]\)/gi,
+    /err\.message\(['"`]([^'"`]+)['"`]\)/gi,
+    // python
+    /raise TypeError\(['"`]([^'"`]+)['"`]\)/gi,
+    // java
+    /logger\.debug\(['"`]([^'"`]+)['"`]\);/gi,
 ]
 
 export function activate(context: sourcegraph.ExtensionContext): void {
@@ -100,7 +109,7 @@ export function getDecorations(
  * @return a list of decorations to render as links on each matching line
  */
 // TODO: add tests for that new function (kind of like getBlameDecorations())
-function decorateEditor(
+export function decorateEditor(
     missingConfigData: string[],
     documentText: string,
     sentryProjectId?: string,
@@ -109,7 +118,7 @@ function decorateEditor(
     const decorations: sourcegraph.TextDocumentDecoration[] = []
     for (const [index, line] of documentText.split('\n').entries()) {
         let match: RegExpExecArray | null
-        for (let pattern of lineMatches ? lineMatches : COMMON_ERRORLOG_PATTERNS) {
+        for (let pattern of lineMatches && lineMatches.length > 0 ? lineMatches : COMMON_ERRORLOG_PATTERNS) {
             pattern = new RegExp(pattern, 'gi')
             do {
                 match = pattern.exec(line)
@@ -147,7 +156,7 @@ export function decorateLine(
         range: new sourcegraph.Range(index, 0, index, 0),
         isWholeLine: true,
         after: {
-            backgroundColor: missingConfigData.length === 0 ? '#e03e2f' : '#f2736d',
+            backgroundColor: missingConfigData.length === 0 && sentryProjectId ? '#e03e2f' : '#f2736d',
             color: 'rgba(255, 255, 255, 0.8)',
             contentText: lineDecorationText.content,
             hoverMessage: lineDecorationText.hover,
