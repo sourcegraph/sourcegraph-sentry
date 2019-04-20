@@ -27,7 +27,7 @@ const SENTRYORGANIZATION = SETTINGSCONFIG['sentry.organization']
  * are set in the sentry extension settings.
  */
 const COMMON_ERRORLOG_PATTERNS = [
-    // typescript
+    // typescript/javascript
     /throw new Error+\(['"]([^'"]+)['"]\)/gi,
     /console\.(error|info|warn)\(['"`]([^'"`]+)['"`]\)/gi,
     // go
@@ -35,10 +35,11 @@ const COMMON_ERRORLOG_PATTERNS = [
     /fmt\.Errorf\(['"]([^'"]+)['"]\)/gi,
     /errors\.New\(['"]([^'"]+)['"]\)/gi,
     /err\.message\(['"`]([^'"`]+)['"`]\)/gi,
+    /panic\(['"]([^'"]+)['"]\)/gi,
     // python
-    /raise TypeError\(['"`]([^'"`]+)['"`]\)/gi,
+    /raise (TypeError|ValueError)\(['"`]([^'"`]+)['"`]\)/gi,
     // java
-    /logger\.debug\(['"`]([^'"`]+)['"`]\);/gi,
+    /logger\.(debug|error)\(['"`]([^'"`]+)['"`]\);/gi,
 ]
 
 export function activate(context: sourcegraph.ExtensionContext): void {
