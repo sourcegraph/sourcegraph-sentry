@@ -49,7 +49,13 @@ export function matchSentryProject(params: Params, projects: SentryProject[]): S
     // TODO: Handle the null case instead of using a non-null assertion !
     // TODO: Handle cases where the wrong project is matched due to similar repo name,
     // e.g. `sourcegraph-jetbrains` repo will match the `sourcegraph` project
-    const project = projects.find(p => !!new RegExp(p.patternProperties.repoMatch).exec(params.repo!))
+
+    const project = projects.find(p =>
+        p.patternProperties.repoMatch
+            ? !!p.patternProperties.repoMatch.find(repo => !!new RegExp(repo).exec(params.repo!))
+            : false
+    )
+
     if (!project) {
         return undefined
     }
@@ -74,11 +80,10 @@ export function checkMissingConfig(settings: SentryProject): string[] {
         return []
     }
     const missingConfig: string[] = []
-
     for (const [key, value] of Object.entries(settings)) {
         if (value instanceof Object) {
             for (const [k, v] of Object.entries(value)) {
-                if (!v || Object.keys(v).length === 0) {
+                if (!v || (v instanceof Object && Object.keys(v).length === 0)) {
                     missingConfig.push(k)
                 }
             }
@@ -107,7 +112,8 @@ export function createDecoration(
     } else if (missingConfigData.length > 0) {
         contentText = ' View logs in Sentry (❕)» '
         hoverText =
-            ' Please fill out the following configurations in your Sentry extension settings: ' + missingConfigData
+            ' Please fill out the following configurations in your Sentry extension settings: ' +
+            missingConfigData.join(', ')
     }
     return {
         content: contentText,

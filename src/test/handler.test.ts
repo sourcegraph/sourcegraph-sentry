@@ -1,13 +1,13 @@
 import expect from 'expect'
 import mock from 'mock-require'
-import { SentryProject } from '../settings'
-import { createMockSourcegraphAPI } from './stubs'
+import { createMockSourcegraphAPI, projects } from './stubs'
 
 const sourcegraph = createMockSourcegraphAPI()
-// For modules importing Range/Location/Position/URI/etc
+// For modules importing Range/Location/URI/etc
 mock('sourcegraph', sourcegraph)
 
-import { getParamsFromUriPath, matchSentryProject } from '../handler'
+import { checkMissingConfig, getParamsFromUriPath, matchSentryProject } from '../handler'
+import { SentryProject } from '../settings'
 
 describe('getParamsFromUriPath', () => {
     it('extracts repo and file params from root folder', () =>
@@ -34,92 +34,42 @@ describe('getParamsFromUriPath', () => {
         }))
 })
 
-const project: SentryProject[] = [
-    {
-        name: 'Webapp typescript errors',
-        projectId: '1334031',
-        patternProperties: {
-            repoMatch: /sourcegraph\/sourcegraph/,
-            fileMatches: [/(web|shared)\/.*\.tsx?/, /(dev)\/.*\\.ts?/],
-            lineMatches: [
-                /throw new Error+\(['"]([^'"]+)['"]\)/,
-                /console\.(warn|debug|info|error|log)\(['"`]([^'"`]+)['"`]\)/,
-                /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/,
-            ],
-        },
-        additionalProperties: {
-            contentText: 'View sourcegraph/sourcegraph_dot_com errors',
-            hoverMessage: 'View errors matching "$1" in Sentry',
-            query: '$1',
-        },
-    },
-
-    {
-        name: 'Dev env errors',
-        projectId: '213332',
-        patternProperties: {
-            repoMatch: /sourcegraph\/dev-repo/,
-            fileMatches: [/(dev)\/.*\\.go?/],
-            lineMatches: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/],
-        },
-        additionalProperties: {
-            contentText: 'View sourcegraph/dev-repo errors',
-            hoverMessage: 'View errors matching "$1" in Sentry',
-            query: '$1',
-        },
-    },
-]
-
 const paramsWeb = {
     repo: 'sourcegraph/sourcegraph',
     file: '#web/src/storm/index.tsx',
 }
 
-const paramsDev = {
+export const paramsDev = {
     repo: 'sourcegraph/dev-repo',
     file: '#dev/backend/main.go',
 }
 
-const paramsNone = {
+export const paramsNone = {
     repo: 'sourcegraph/test-repo',
     file: '#dev/test/start.rb',
 }
 
 describe('matchSentryProject', () => {
     it('returns a web project that matches the repo and file patterns', () =>
-        expect(matchSentryProject(paramsWeb, project)).toEqual({
-            name: 'Webapp typescript errors',
-            projectId: '1334031',
-            patternProperties: {
-                repoMatch: /sourcegraph\/sourcegraph/,
-                fileMatches: [/(web|shared)\/.*\.tsx?/, /(dev)\/.*\\.ts?/],
-                lineMatches: [
-                    /throw new Error+\(['"]([^'"]+)['"]\)/,
-                    /console\.(warn|debug|info|error|log)\(['"`]([^'"`]+)['"`]\)/,
-                    /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/,
-                ],
-            },
-            additionalProperties: {
-                contentText: 'View sourcegraph/sourcegraph_dot_com errors',
-                hoverMessage: 'View errors matching "$1" in Sentry',
-                query: '$1',
-            },
-        })),
-        it('returns a dev project that matches the repo and file patterns', () =>
-            expect(matchSentryProject(paramsDev, project)).toEqual({
-                name: 'Dev env errors',
-                projectId: '213332',
-                patternProperties: {
-                    repoMatch: /sourcegraph\/dev-repo/,
-                    fileMatches: [/(dev)\/.*\\.go?/],
-                    lineMatches: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/],
-                },
-                additionalProperties: {
-                    contentText: 'View sourcegraph/dev-repo errors',
-                    hoverMessage: 'View errors matching "$1" in Sentry',
-                    query: '$1',
-                },
-            })),
-        it('returns undefined for not matching repo and file patterns', () =>
-            expect(matchSentryProject(paramsNone, project)).toEqual(undefined))
+        expect(matchSentryProject(paramsWeb, projects)).toEqual(projects[0]))
+
+    it('returns a dev project that matches the repo and file patterns', () =>
+        expect(matchSentryProject(paramsDev, projects)).toEqual(projects[1]))
+
+    it('returns undefined for not matching repo and file patterns', () =>
+        expect(matchSentryProject(paramsNone, projects)).toEqual(undefined))
+})
+
+const incompleteConfigs: SentryProject = {
+    name: 'sourcegraph',
+    projectId: '1334031',
+    patternProperties: {
+        repoMatch: undefined,
+        fileMatches: [/(web|shared|src).*\.java?/, /(dev|src).*\.java?/, /.java?/],
+        lineMatches: [/logger\.debug\(['"`]([^'"`]+)['"`]\);/],
+    },
+}
+
+describe('missingConfig', () => {
+    it('check missing configs', () => expect(checkMissingConfig(incompleteConfigs)).toEqual(['repoMatch']))
 })
