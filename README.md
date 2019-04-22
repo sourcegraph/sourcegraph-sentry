@@ -1,4 +1,4 @@
-[![codecov](https://codecov.io/gh/sourcegraph/sourcegraph-sentry/branch/master/graph/badge.svg)](https://codecov.io/gh/sourcegraph/sourcegraph-sentry)
+[![codecov](https://codecov.io/gh/sourcegraph/sentry/branch/master/graph/badge.svg)](https://codecov.io/gh/sourcegraph/sourcegraph-sentry)
 
 # WIP: Sentry Sourcegraph extension
 
