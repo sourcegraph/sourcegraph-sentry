@@ -23,13 +23,13 @@ To work, the Sentry Sourcegraph extension must know how to recognize instances o
 Set the following configurations in your settings:
 
 ```
-"sentry.organization": "[Organization Name]",
+"sentry.organization": "[Sentry organization name]",
 "sentry.projects": [
   {
-    "name": "[Project Name]",
-    "projectId": "[Project ID, e.g. "1334031"]",
+    "name": "[Project name for the config overview, e.g. Webapp errors]",
+    "projectId": "[Sentry project ID, e.g. "1334031"]",
     "patternProperties": {
-      "repoMatch": "[repo name asociated with this project]",
+      "repoMatch": "[RegExp[] repo names asociated with this Sentry project]",
       "fileMatches": [
           [RegExp[] that matches file format, e.g. "\\.tsx?"]
         ],
@@ -60,7 +60,10 @@ File matches can also be narrowed down to certain folders by specifying this in 
   "patternProperties": {
       "repoMatch": "sourcegraph",
       "fileMatches": ["([^'\"]+)\/.*\\.ts?"],
-      "lineMatches": ["throw new Error+\\(['\"]([^'\"]+)['\"]\\)"]
+      "lineMatches": [
+          "throw new Error+\\(['\"]([^'\"]+)['\"]\\)",
+          "console\\.(warn|debug|info|error)\\(['\"`]([^'\"`]+)['\"`]\\)"
+          ]
     }
 
   ```

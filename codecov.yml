@@ -1,3 +1,10 @@
 coverage:
   status:
-    patch: off
+    patch:
+      default:
+        threshold: 50%
+    project:
+      default:
+        target: 80%
+ignore:
+  - "src/test"
