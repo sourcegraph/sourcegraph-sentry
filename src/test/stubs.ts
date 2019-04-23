@@ -16,6 +16,10 @@ class Range {
 class Location {
     constructor(public uri: URI, public range: Range) {}
 }
+export interface Unsubscribable {
+    unsubscribe(): void
+}
+
 /**
  * Creates an object that (mostly) implements the Sourcegraph API,
  * with all methods being Sinon spys and all Subscribables being Subjects.
@@ -40,9 +44,15 @@ export const createMockSourcegraphAPI = () => ({
                 projects,
             },
         }),
+        subscribe: (next: () => void) => void 0,
     },
     search: {},
     commands: {},
+    ExtensionContext: {
+        subscriptions: {
+            add: () => createMockSourcegraphAPI().configuration.subscribe(() => void 0),
+        },
+    },
 })
 
 export let projects: SentryProject[] = [
