@@ -1,4 +1,4 @@
-import { from } from 'rxjs'
+import { BehaviorSubject, combineLatest, from } from 'rxjs'
 import { filter, switchMap } from 'rxjs/operators'
 import * as sourcegraph from 'sourcegraph'
 import {
@@ -18,9 +18,7 @@ interface Params {
     file: string | null
 }
 
-const DECORATION_TYPE = sourcegraph.app.createDecorationType()
-const SETTINGSCONFIG = resolveSettings(sourcegraph.configuration.get<Settings>().value)
-const SENTRYORGANIZATION = SETTINGSCONFIG['sentry.organization']
+const SENTRYORGANIZATION = resolveSettings(sourcegraph.configuration.get<Settings>().value)['sentry.organization']
 
 /**
  * Common error log patterns to use in case no line matching regexes
@@ -41,8 +39,14 @@ const COMMON_ERRORLOG_PATTERNS = [
     // java
     /logger\.(debug|error)\(['"`]([^'"`]+)['"`]\);/gi,
 ]
+const DECORATION_TYPE = sourcegraph.app.createDecorationType()
 
 export function activate(context: sourcegraph.ExtensionContext): void {
+    // TODO(lguychard) sourcegraph.configuration is currently not rxjs-compatible.
+    // Fix this once it has been made compatible.
+    const configurationChanges = new BehaviorSubject<void>(undefined)
+    context.subscriptions.add(sourcegraph.configuration.subscribe(() => configurationChanges.next(undefined)))
+
     if (sourcegraph.app.activeWindowChanges) {
         const activeEditor = from(sourcegraph.app.activeWindowChanges).pipe(
             filter((window): window is sourcegraph.Window => window !== undefined),
@@ -51,13 +55,23 @@ export function activate(context: sourcegraph.ExtensionContext): void {
         )
         // When the active editor changes, publish new decorations.
         context.subscriptions.add(
-            activeEditor.subscribe(editor => {
-                const sentryProjects = SETTINGSCONFIG['sentry.projects']
+            combineLatest(configurationChanges, activeEditor).subscribe(([, editor]) => {
+                const settings = resolveSettings(sourcegraph.configuration.get<Settings>().value)
+                const sentryProjects = settings['sentry.projects']
+
                 if (editor.document.text) {
+                    const decorationSettings = settings['sentry.decorations.inline']
+                    if (!decorationSettings) {
+                        editor.setDecorations(DECORATION_TYPE, []) // clear decorations
+                        return
+                    }
+
                     const decorations = getDecorations(editor.document.uri, editor.document.text, sentryProjects)
+
                     if (decorations.length === 0) {
                         return
                     }
+
                     editor.setDecorations(DECORATION_TYPE, decorations)
                 }
             })
@@ -117,20 +131,25 @@ export function decorateEditor(
     lineMatches?: RegExp[]
 ): sourcegraph.TextDocumentDecoration[] {
     const decorations: sourcegraph.TextDocumentDecoration[] = []
+
     for (const [index, line] of documentText.split('\n').entries()) {
         let match: RegExpExecArray | null
+
         for (let pattern of lineMatches && lineMatches.length > 0 ? lineMatches : COMMON_ERRORLOG_PATTERNS) {
             pattern = new RegExp(pattern, 'gi')
+
             do {
                 match = pattern.exec(line)
                 // Depending on the line matching pattern the query m is indexed in position 1 or 2.
                 // TODO: Specify which capture group should be used through configuration.
+
                 if (match && match.length <= 2) {
                     decorations.push(decorateLine(index, match[1], missingConfigData, sentryProjectId))
                 } else if (match && match.length > 2) {
                     decorations.push(decorateLine(index, match[2], missingConfigData, sentryProjectId))
                 }
             } while (match)
+
             pattern.lastIndex = 0 // reset
         }
     }

@@ -64,12 +64,12 @@ const incompleteConfigs: SentryProject = {
     name: 'sourcegraph',
     projectId: '1334031',
     patternProperties: {
-        repoMatch: undefined,
+        repoMatches: undefined,
         fileMatches: [/(web|shared|src).*\.java?/, /(dev|src).*\.java?/, /.java?/],
         lineMatches: [/logger\.debug\(['"`]([^'"`]+)['"`]\);/],
     },
 }
 
 describe('missingConfig', () => {
-    it('check missing configs', () => expect(checkMissingConfig(incompleteConfigs)).toEqual(['repoMatch']))
+    it('check missing configs', () => expect(checkMissingConfig(incompleteConfigs)).toEqual(['repoMatches']))
 })

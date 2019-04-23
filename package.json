@@ -17,10 +17,53 @@
     "logs"
   ],
   "contributes": {
-    "actions": [],
+    "actions": [
+      {
+        "id": "sentry.decorations.toggle",
+        "command": "updateConfiguration",
+        "commandArguments": [
+          [
+            "sentry.decorations.inline"
+          ],
+          "${!config.sentry.decorations.inline}",
+          null,
+          "json"
+        ],
+        "title": "${config.sentry.decorations.inline && \"Hide\" || \"Show\"} inline Sentry links on file",
+        "category": "Sentry",
+        "actionItem": {
+          "label": "Sentry",
+          "description": "${config.sentry.decorations.inline && \"Hide\" || \"Show\"} inline Sentry links"
+        }
+      }
+    ],
     "menus": {
-      "editor/title": [],
-      "commandPalette": []
+      "editor/title": [
+        {
+          "action": "sentry.decorations.toggle",
+          "alt": "sentry.link.fileList",
+          "when": "resource && !config.sentry.hideSentryButton"
+        }
+
+      ],
+      "commandPalette": [
+        {
+          "action": "sentry.decorations.toggle",
+          "when": "resource"
+        },
+        {
+          "action": "sentry.link.fileList",
+          "when": "resource && get(context, `sentry.fileURL.${resource.uri}`)"
+        },
+        {
+          "action": "sentry.help"
+        }
+      ],
+      "help": [
+        {
+          "action": "sentry.help"
+        }
+      ]
     },
     "configuration": {
       "title": "Sentry extension settings",
@@ -43,16 +86,25 @@
               "type": "string"
             },
             "patternProperties": {
-              "repoMatch": {
-                "type": "string",
+              "repoMatches": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                  },
                 "description": "Regex to match repos associated to this Sentry project, e.g. github\\.com/sourcegraph/sourcegraph"
               },
-              "fileMatch": {
-                "type": "string",
+              "fileMatches": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                  },
                 "description": "Regex to match files associated with this project, e.g. (web|shared)/.*\\.tsx?$"
               },
-              "lineMatch": {
-                "type": "string",
+              "lineMatches": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                  },
                 "description": "Regex to match lines associated with this project, e.g. throw new Error\\([\"']([^'\"]+)[\"']\\)"
               }
             },

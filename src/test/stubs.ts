@@ -50,7 +50,7 @@ export let projects: SentryProject[] = [
         name: 'Webapp typescript errors',
         projectId: '1334031',
         patternProperties: {
-            repoMatch: [/sourcegraph\/sourcegraph/, /bucket/],
+            repoMatches: [/sourcegraph\/sourcegraph/, /bucket/],
             fileMatches: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/],
             lineMatches: [
                 /throw new Error+\(['"]([^'"]+)['"]\)/,
@@ -69,7 +69,7 @@ export let projects: SentryProject[] = [
         name: 'Dev env errors',
         projectId: '213332',
         patternProperties: {
-            repoMatch: [/dev-repo/],
+            repoMatches: [/dev-repo/],
             fileMatches: [/(dev)\/.*\\.go?/],
             lineMatches: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/],
         },

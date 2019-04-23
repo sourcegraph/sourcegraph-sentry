@@ -51,8 +51,8 @@ export function matchSentryProject(params: Params, projects: SentryProject[]): S
     // e.g. `sourcegraph-jetbrains` repo will match the `sourcegraph` project
 
     const project = projects.find(p =>
-        p.patternProperties.repoMatch
-            ? !!p.patternProperties.repoMatch.find(repo => !!new RegExp(repo).exec(params.repo!))
+        p.patternProperties.repoMatches
+            ? !!p.patternProperties.repoMatches.find(repo => !!new RegExp(repo).exec(params.repo!))
             : false
     )
 
@@ -115,6 +115,7 @@ export function createDecoration(
             ' Please fill out the following configurations in your Sentry extension settings: ' +
             missingConfigData.join(', ')
     }
+
     return {
         content: contentText,
         hover: hoverText,
