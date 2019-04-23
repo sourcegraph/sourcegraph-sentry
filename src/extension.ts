@@ -42,8 +42,7 @@ const COMMON_ERRORLOG_PATTERNS = [
 const DECORATION_TYPE = sourcegraph.app.createDecorationType()
 
 export function activate(context: sourcegraph.ExtensionContext): void {
-    // TODO(lguychard) sourcegraph.configuration is currently not rxjs-compatible.
-    // Fix this once it has been made compatible.
+    // TODO: Change this when https://github.com/sourcegraph/sourcegraph/issues/3557 is resolved
     const configurationChanges = new BehaviorSubject<void>(undefined)
     context.subscriptions.add(sourcegraph.configuration.subscribe(() => configurationChanges.next(undefined)))
 
