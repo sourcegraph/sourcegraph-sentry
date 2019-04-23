@@ -5,6 +5,7 @@
  * See the "contributes.configuration" field in package.json for the canonical documentation on these properties.
  */
 export interface Settings {
+    ['sentry.decorations.inline']: boolean
     ['sentry.organization']?: string
     ['sentry.projects']?: [SentryProject]
 }
@@ -13,7 +14,7 @@ export interface SentryProject {
     name: string
     projectId: string
     patternProperties: {
-        repoMatch?: RegExp[]
+        repoMatches?: RegExp[]
         fileMatches: RegExp[]
         // RexExp patterns to match log handeling code, e.g. /log\.(Printf|Print)\(['"]([^'"]+)['"]\)/
         lineMatches: RegExp[]
@@ -29,6 +30,7 @@ export interface SentryProject {
 /** Returns a copy of the extension settings with values normalized and defaults applied. */
 export function resolveSettings(raw: Partial<Settings>): Settings {
     return {
+        ['sentry.decorations.inline']: !!raw['sentry.decorations.inline'],
         ['sentry.organization']: raw['sentry.organization'],
         ['sentry.projects']: raw['sentry.projects'],
     }
