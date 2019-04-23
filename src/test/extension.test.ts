@@ -3,12 +3,12 @@ import expect from 'expect'
 import { uniqueId } from 'lodash'
 import mock from 'mock-require'
 
-import { activate, decorateEditor, decorateLine, getDecorations } from '../extension'
-import { SentryProject } from '../settings'
-
 export const sourcegraph = createStubSourcegraphAPI()
 // For modules importing Range/Location/Position/URI/etc
 mock('sourcegraph', sourcegraph)
+
+import { activate, decorateEditor, decorateLine, getDecorations } from '../extension'
+import { SentryProject } from '../settings'
 
 describe('extension', () => {
     it('works', () => void 0)
@@ -327,6 +327,13 @@ const supportedLanguageCode = [
         code: `   } catch (UnsupportedEncodingException err) {
             logger.debug("failed to build URL");
             err.printStackTrace();`,
+    },
+    {
+        lang: 'C++',
+        code: `   {
+            log_error("Exception occurred!");
+            throw;
+          }`,
     },
 ]
 
