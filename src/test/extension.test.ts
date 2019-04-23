@@ -6,10 +6,14 @@ const sourcegraph = createMockSourcegraphAPI()
 // For modules importing Range/Location/URI/etc
 mock('sourcegraph', sourcegraph)
 
-import { decorateEditor, decorateLine, getDecorations } from '../extension'
+import { activate, decorateEditor, decorateLine, getDecorations } from '../extension'
 
 describe('extension', () => {
     it('works', () => void 0)
+})
+
+describe('check for extension activation', () => {
+    it('activate extension', () => expect(activate(sourcegraph.ExtensionContext)).toEqual(void 0))
 })
 
 const data = [
@@ -38,6 +42,14 @@ const data = [
         goal: 'render warning link hinting to add projectId and render link to general issues page',
         index: 1,
         match: 'cannot determine file path',
+        missingConfigData: ['repoMatch', 'fileMatch'],
+        sentryProjectId: undefined,
+    },
+    {
+        goal:
+            'match line based on common pattern, render warning link hinting to add projectId and render link to general issues page',
+        index: 1,
+        match: '',
         missingConfigData: ['repoMatch', 'fileMatch'],
         sentryProjectId: undefined,
     },
@@ -79,6 +91,17 @@ const decorationsList = [
                 ' Please fill out the following configurations in your Sentry extension settings: repoMatch, fileMatch',
             linkURL:
                 'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+cannot%20determine%20file%20path&statsPeriod=14d',
+        },
+    },
+    {
+        range: new sourcegraph.Range(1, 0, 1, 0),
+        isWholeLine: true,
+        after: {
+            backgroundColor: '#f2736d',
+            color: 'rgba(255, 255, 255, 0.8)',
+            contentText: ' View logs in Sentry (❕)» ',
+            hoverMessage: ' Add Sentry projects to your Sentry extension settings for project matching.',
+            linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
         },
     },
     {
@@ -144,11 +167,27 @@ const decorationsData = [
     {
         goal: 'receive no decoration due to no line matches',
         documentUri:
-            'git://github.com/sourcegraph/sourcegraph?c436567c152bf40668c75815ed3ce62983af942d#client/browser/src/libs/github/file_info.php',
+            'git://github.com/sourcegraph/sourcegraph?c436567c152bf40668c75815ed3ce62983af942d#client/browser/src/libs/github/empty.ts',
         documentText: `export const resolveDiffFileInfo = (codeView: HTMLElement): Observable<FileInfo> =>
 of(codeView).pipe(
     map(({ codeView, ...rest }) => {
         const { headFilePath, baseFilePath } = getDeltaFileName(codeView)
+    }),`,
+    },
+    {
+        goal: 'receive no decoration due to empty textdocument',
+        documentUri:
+            'git://github.com/sourcegraph/sourcegraph?c436567c152bf40668c75815ed3ce62983af942d#client/browser/src/libs/github/file_info.php',
+        documentText: ``,
+    },
+    {
+        goal: 'receive one decoration on GitLab',
+        documentUri:
+            'git://gitlab.com/sourcegraph/sourcegraph?92a448bdda22fea9a422f37cf83d99edeaa7fe4c#client/browser/src/e2e/chrome.e2e.test.ts',
+        documentText: `if (!headFilePath) {
+            throw new Error('cannot determine file path')
+        }
+        return { ...rest, codeView, headFilePath, baseFilePath }
     }),`,
     },
 ]
@@ -200,6 +239,23 @@ const expectedDecorations = [
     [],
     // receive no decoration due to no line matches
     [],
+    // receive no decoration due to no textdocument
+    [],
+    // receive on decoration from GitLab
+    [
+        {
+            range: new sourcegraph.Range(1, 0, 1, 0),
+            isWholeLine: true,
+            after: {
+                backgroundColor: '#e03e2f',
+                color: 'rgba(255, 255, 255, 0.8)',
+                contentText: ' View logs in Sentry » ',
+                hoverMessage: ' View logs in Sentry » ',
+                linkURL:
+                    'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+cannot%20determine%20file%20path&statsPeriod=14d',
+            },
+        },
+    ],
 ]
 
 describe('get Decorations', () => {
@@ -235,14 +291,28 @@ const languageCode = [
             logger.debug("failed to build URL");
             err.printStackTrace();`,
     },
+    {
+        lang: 'C++',
+        code: `   {
+            log_error("Exception occurred!");
+            throw;
+          }`,
+    },
 ]
 
 describe('decorate Editor', () => {
     projects[0].patternProperties.lineMatches = []
     for (const [i, codeExample] of languageCode.entries()) {
-        it('check common pattern matching for ' + languageCode[i].lang, () =>
-            expect(decorateEditor([], codeExample.code)).toEqual([decorationsList[3]])
-        )
+        if (i < 4) {
+            it('check common pattern matching for ' + languageCode[i].lang, () =>
+                expect(decorateEditor([], codeExample.code)).toEqual([decorationsList[3]])
+            )
+        } else {
+            console.log(languageCode[i].lang)
+            it('should not render due to unsupported language ' + languageCode[i].lang, () =>
+                expect(decorateEditor([], codeExample.code)).toEqual([])
+            )
+        }
     }
     // set lineMatches back to original state for the other tests
     projects[0].patternProperties.lineMatches = [
