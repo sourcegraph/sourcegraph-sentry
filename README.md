@@ -4,7 +4,8 @@
 
 Sentry helps devs track, organize and break down errors more efficiently, facilitating their debug process. We want to make it more convenient for developers to access Sentry's error tracking tools directly from the code that is doing the error handling, code such as `throw new Error(QUERY)`, `console.log(QUERY)`, `console.error(QUERY)` etc..
 
-In this first version, the Sentry extension will render a `View logs in Sentry` link on each line it detects such error handling code, leading the devs directly to the corresponding Sentry issues stream page. Links will be rendereed when viewing files on [Sourcegraph](https://sourcegraph.com), GitHub and GitLab. 
+In this first version, the Sentry extension will render a `View logs in Sentry` link on each line it detects such error handling code, leading the devs directly to the corresponding Sentry issues stream page. Links will be rendereed when viewing files on [Sourcegraph](https://sourcegraph.com), GitHub and GitLab.
+
 - **Sentry: Show/hide Sentry**: toggles Sentry links decorations with each matching error handling code.
 
 [**🗃️ Source code**](https://github.com/sourcegraph/sentry)
