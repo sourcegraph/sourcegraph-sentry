@@ -1,10 +1,15 @@
 [![codecov](https://codecov.io/gh/sourcegraph/sentry/branch/master/graph/badge.svg)](https://codecov.io/gh/sourcegraph/sourcegraph-sentry)
 
-# WIP: Sentry Sourcegraph extension
+# WIP: Sentry extension
 
 Sentry helps devs track, organize and break down errors more efficiently, facilitating their debug process. We want to make it more convenient for developers to access Sentry's error tracking tools directly from the code that is doing the error handling, code such as `throw new Error(QUERY)`, `console.log(QUERY)`, `console.error(QUERY)` etc..
 
-In this first version, the Sentry extension will render a `View logs in Sentry` link on each line it detects such error handling code, leading the devs directly to the corresponding Sentry issues stream page.
+In this first version, the Sentry extension will render a `View logs in Sentry` link on each line it detects such error handling code, leading the devs directly to the corresponding Sentry issues stream page. Links will be rendereed when viewing files on [Sourcegraph](https://sourcegraph.com), GitHub and GitLab. 
+- **Sentry: Show/hide Sentry**: toggles Sentry links decorations with each matching error handling code.
+
+[**🗃️ Source code**](https://github.com/sourcegraph/sentry)
+
+[**➕ Add to Sourcegraph**](https://sourcegraph.com/extensions/sourcegraph/sentry)
 
 ![image](https://user-images.githubusercontent.com/9110008/54014672-d7b4fe00-41c0-11e9-9b92-66d851401fa0.png)
 
@@ -29,7 +34,7 @@ Set the following configurations in your settings:
     "name": "[Project name for the config overview, e.g. Webapp errors]",
     "projectId": "[Sentry project ID, e.g. "1334031"]",
     "patternProperties": {
-      "repoMatch": "[RegExp[] repo names asociated with this Sentry project]",
+      "repoMatches": "[RegExp[] repo names asociated with this Sentry project]",
       "fileMatches": [
           [RegExp[] that matches file format, e.g. "\\.tsx?"]
         ],
@@ -58,7 +63,7 @@ File matches can also be narrowed down to certain folders by specifying this in 
   ```
   ...
   "patternProperties": {
-      "repoMatch": "sourcegraph",
+      "repoMatches": "sourcegraph",
       "fileMatches": ["([^'\"]+)\/.*\\.ts?"],
       "lineMatches": [
           "throw new Error+\\(['\"]([^'\"]+)['\"]\\)",

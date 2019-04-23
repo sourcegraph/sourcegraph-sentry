@@ -21,13 +21,13 @@ interface LineDecorationText {
 export function getParamsFromUriPath(textDocumentURI: string): Params {
     // TODO: Support more than just GitHub.
     // TODO: Safeguard for cases where repo/fileMatch are null.
-    const repoPattern = /github\.com\/([^\?\#\/]+\/[^\?\#\/]*)/gi
+    const repoPattern = /(github\.com|gitlab\.com)\/([^\?\#\/]+\/[^\?\#\/]*)/gi
     const filePattern = /#.*\.(.*)$/gi
 
     const repoMatch = repoPattern.exec(textDocumentURI)
     const fileMatch = filePattern.exec(textDocumentURI)
     return {
-        repo: repoMatch && repoMatch[1],
+        repo: repoMatch && repoMatch[2],
         file: fileMatch && fileMatch[0],
     }
 }
@@ -55,7 +55,6 @@ export function matchSentryProject(params: Params, projects: SentryProject[]): S
             ? !!p.patternProperties.repoMatches.find(repo => !!new RegExp(repo).exec(params.repo!))
             : false
     )
-
     if (!project) {
         return undefined
     }
