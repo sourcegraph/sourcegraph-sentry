@@ -18,8 +18,6 @@ interface Params {
     file: string | null
 }
 
-const SENTRYORGANIZATION = resolveSettings(sourcegraph.configuration.get<Settings>().value)['sentry.organization']
-
 /**
  * Common error log patterns to use in case no line matching regexes
  * are set in the sentry extension settings.
@@ -170,7 +168,8 @@ export function decorateLine(
     missingConfigData: string[],
     sentryProjectId?: string
 ): sourcegraph.TextDocumentDecoration {
-    const lineDecorationText = createDecoration(missingConfigData, SENTRYORGANIZATION, sentryProjectId)
+    const sentryOrg = resolveSettings(sourcegraph.configuration.get<Settings>().value)['sentry.organization']
+    const lineDecorationText = createDecoration(missingConfigData, sentryOrg, sentryProjectId)
     const decoration: sourcegraph.TextDocumentDecoration = {
         range: new sourcegraph.Range(index, 0, index, 0),
         isWholeLine: true,
@@ -181,7 +180,7 @@ export function decorateLine(
             hoverMessage: lineDecorationText.hover,
             // TODO: If !SENTRYORGANIZATION is missing in config, link to $USER/settings and hint
             // user to fill it out.
-            linkURL: !SENTRYORGANIZATION
+            linkURL: !sentryOrg
                 ? ''
                 : sentryProjectId
                 ? buildUrl(match, sentryProjectId).toString()
@@ -199,9 +198,10 @@ export function decorateLine(
  */
 // TODO: Use URLSearchParams instead of encodeURIComponent
 function buildUrl(errorQuery: string, sentryProjectId?: string): URL {
+    const sentryOrg = resolveSettings(sourcegraph.configuration.get<Settings>().value)['sentry.organization']
     const url = new URL(
         'https://sentry.io/organizations/' +
-            encodeURIComponent(SENTRYORGANIZATION!) +
+            encodeURIComponent(sentryOrg!) +
             '/issues/' +
             (sentryProjectId
                 ? '?project=' +

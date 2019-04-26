@@ -781,6 +781,17 @@
   resolved "https://registry.yarnpkg.com/@sinonjs/text-encoding/-/text-encoding-0.7.1.tgz#8da5c6530915653f3a1f38fd5f101d8c3f8079c5"
   integrity sha512-+iTbntw2IZPb/anVDbypzfQa+ay64MW0Zo8aJ8gZPWMMK6/OubMVb6lUPMagqjOPnmtauXnFCACVl3O7ogjeqQ==
 
+"@sourcegraph/extension-api-stubs@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@sourcegraph/extension-api-stubs/-/extension-api-stubs-0.1.0.tgz#34cab8c9a4ddd3db0d34b34d1cd740cbe7662f57"
+  integrity sha512-IyBk1Vae8rXDi2AM4w3hT+XwveALDZCAswQErc3mlXBIlrG1zm5sHdFum6EQgxL1eAFLj9yaSNdtNB1uTY2gGg==
+  dependencies:
+    "@types/sinon" "7.0.11"
+    rxjs "^6.5.1"
+    sinon "^7.3.2"
+    sourcegraph "^23.0.0"
+    vscode-languageserver-types "^3.14.0"
+
 "@sourcegraph/prettierrc@^2.2.0":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@sourcegraph/prettierrc/-/prettierrc-2.2.0.tgz#af4a6fcd465b0a39a07ffbd8f2d3414d01e603e8"
@@ -3654,6 +3665,11 @@ lolex@^3.1.0:
   resolved "https://registry.yarnpkg.com/lolex/-/lolex-3.1.0.tgz#1a7feb2fefd75b3e3a7f79f0e110d9476e294434"
   integrity sha512-zFo5MgCJ0rZ7gQg69S4pqBsLURbFw11X68C18OcJjJQbqaXm2NoTrGl1IMM3TIz0/BnN1tIs2tzmmqvCsOMMjw==
 
+lolex@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/lolex/-/lolex-4.0.1.tgz#4a99c2251579d693c6a083446dae0e5c3844d3fa"
+  integrity sha512-UHuOBZ5jjsKuzbB/gRNNW8Vg8f00Emgskdq2kvZxgBJCS0aqquAuXai/SkWORlKeZEiNQWZjFZOqIUcH9LqKCw==
+
 loose-envify@^1.0.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/loose-envify/-/loose-envify-1.4.0.tgz#71ee51fa7be4caec1a63839f7e682d8132d30caf"
@@ -5482,6 +5498,13 @@ rxjs@^6.4.0:
   dependencies:
     tslib "^1.9.0"
 
+rxjs@^6.5.1:
+  version "6.5.1"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.5.1.tgz#f7a005a9386361921b8524f38f54cbf80e5d08f4"
+  integrity sha512-y0j31WJc83wPu31vS1VlAFW5JGrnGC+j+TtGAa1fRQphy48+fDYiDmX8tjGloToEsMkxnouOg/1IzXGKkJnZMg==
+  dependencies:
+    tslib "^1.9.0"
+
 safe-buffer@^5.0.1, safe-buffer@^5.1.0, safe-buffer@^5.1.1, safe-buffer@^5.1.2, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.2.tgz#991ec69d296e0313747d59bdfd2b745c35f8828d"
@@ -5645,6 +5668,19 @@ sinon@^7.3.1:
     "@sinonjs/samsam" "^3.3.1"
     diff "^3.5.0"
     lolex "^3.1.0"
+    nise "^1.4.10"
+    supports-color "^5.5.0"
+
+sinon@^7.3.2:
+  version "7.3.2"
+  resolved "https://registry.yarnpkg.com/sinon/-/sinon-7.3.2.tgz#82dba3a6d85f6d2181e1eca2c10d8657c2161f28"
+  integrity sha512-thErC1z64BeyGiPvF8aoSg0LEnptSaWE7YhdWWbWXgelOyThent7uKOnnEh9zBxDbKixtr5dEko+ws1sZMuFMA==
+  dependencies:
+    "@sinonjs/commons" "^1.4.0"
+    "@sinonjs/formatio" "^3.2.1"
+    "@sinonjs/samsam" "^3.3.1"
+    diff "^3.5.0"
+    lolex "^4.0.1"
     nise "^1.4.10"
     supports-color "^5.5.0"
 
@@ -6425,6 +6461,11 @@ vm-browserify@0.0.4:
   integrity sha1-XX6kW7755Kb/ZflUOOCofDV9WnM=
   dependencies:
     indexof "0.0.1"
+
+vscode-languageserver-types@^3.14.0:
+  version "3.14.0"
+  resolved "https://registry.yarnpkg.com/vscode-languageserver-types/-/vscode-languageserver-types-3.14.0.tgz#d3b5952246d30e5241592b6dde8280e03942e743"
+  integrity sha512-lTmS6AlAlMHOvPQemVwo3CezxBp0sNB95KNPkqp3Nxd5VFEnuG1ByM0zlRWos0zjO3ZWtkvhal0COgiV1xIA4A==
 
 w3c-hr-time@^1.0.1:
   version "1.0.1"

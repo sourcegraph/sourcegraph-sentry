@@ -44,7 +44,6 @@
           "alt": "sentry.link.fileList",
           "when": "resource && !config.sentry.hideSentryButton"
         }
-
       ],
       "commandPalette": [
         {
@@ -89,22 +88,22 @@
               "repoMatches": {
                 "type": "array",
                 "items": {
-                    "type": "string"
-                  },
+                  "type": "string"
+                },
                 "description": "Regex to match repos associated to this Sentry project, e.g. github\\.com/sourcegraph/sourcegraph"
               },
               "fileMatches": {
                 "type": "array",
                 "items": {
-                    "type": "string"
-                  },
+                  "type": "string"
+                },
                 "description": "Regex to match files associated with this project, e.g. (web|shared)/.*\\.tsx?$"
               },
               "lineMatches": {
                 "type": "array",
                 "items": {
-                    "type": "string"
-                  },
+                  "type": "string"
+                },
                 "description": "Regex to match lines associated with this project, e.g. throw new Error\\([\"']([^'\"]+)[\"']\\)"
               }
             },
@@ -200,5 +199,8 @@
     "ts-node": "^8.0.3",
     "tslint": "^5.15.0",
     "typescript": "^3.4.2"
+  },
+  "dependencies": {
+    "@sourcegraph/extension-api-stubs": "^0.1.0"
   }
 }
