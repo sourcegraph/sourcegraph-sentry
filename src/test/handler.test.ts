@@ -1,10 +1,17 @@
+import { createStubSourcegraphAPI } from '@sourcegraph/extension-api-stubs'
 import expect from 'expect'
+import { uniqueId } from 'lodash'
 import mock from 'mock-require'
-import { createMockSourcegraphAPI, projects } from './stubs'
+import { projects } from './extension.test'
 
-const sourcegraph = createMockSourcegraphAPI()
-// For modules importing Range/Location/URI/etc
+export const sourcegraph = createStubSourcegraphAPI()
+// For modules importing Range/Location/Position/URI/etc
 mock('sourcegraph', sourcegraph)
+
+sourcegraph.internal.sourcegraphURL = 'https://sourcegraph.test'
+sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
+sourcegraph.configuration.get().update('sentry.projects', projects)
+sourcegraph.app.createDecorationType = () => ({ key: uniqueId('decorationType') })
 
 import { checkMissingConfig, getParamsFromUriPath, matchSentryProject } from '../handler'
 import { SentryProject } from '../settings'
