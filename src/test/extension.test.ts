@@ -328,13 +328,6 @@ const supportedLanguageCode = [
             logger.debug("failed to build URL");
             err.printStackTrace();`,
     },
-    {
-        lang: 'C++',
-        code: `   {
-            log_error("Exception occurred!");
-            throw;
-          }`,
-    },
 ]
 
 const unsupportedLanguageCode = [
