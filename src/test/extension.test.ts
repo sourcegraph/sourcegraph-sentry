@@ -9,10 +9,6 @@ mock('sourcegraph', sourcegraph)
 import { activate, decorateEditor, decorateLine, getDecorations } from '../extension'
 import { SentryProject } from '../settings'
 
-describe('extension', () => {
-    it('works', () => void 0)
-})
-
 describe('check for extension activation', () => {
     const context = createStubExtensionContext()
     it('activate extension', () => expect(activate(context)).toEqual(void 0))
@@ -75,10 +71,10 @@ const data = [
         },
     },
     {
-        goal: 'warn about incomplete config with missing repoMatch',
+        goal: 'warn about incomplete config with missing repoMatches',
         index: 1,
         match: 'cannot determine file path',
-        missingConfigData: ['repoMatch'],
+        missingConfigData: ['repoMatches'],
         sentryProjectId: '134412',
         expected: {
             range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
@@ -88,17 +84,17 @@ const data = [
                 color: 'rgba(255, 255, 255, 0.8)',
                 contentText: ' View logs in Sentry (❕)» ',
                 hoverMessage:
-                    ' Please fill out the following configurations in your Sentry extension settings: repoMatch',
+                    ' Please fill out the following configurations in your Sentry extension settings: repoMatches',
                 linkURL:
                     'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+cannot%20determine%20file%20path&statsPeriod=14d',
             },
         },
     },
     {
-        goal: 'warn about incomplete config with missing repoMatch and fileMatch patterns',
+        goal: 'warn about incomplete config with missing repoMatches and fileMatches patterns',
         index: 1,
         match: 'cannot determine file path',
-        missingConfigData: ['repoMatch', 'fileMatch'],
+        missingConfigData: ['repoMatches', 'fileMatches'],
         sentryProjectId: '134412',
         expected: {
             range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
@@ -108,7 +104,7 @@ const data = [
                 color: 'rgba(255, 255, 255, 0.8)',
                 contentText: ' View logs in Sentry (❕)» ',
                 hoverMessage:
-                    ' Please fill out the following configurations in your Sentry extension settings: repoMatch, fileMatch',
+                    ' Please fill out the following configurations in your Sentry extension settings: repoMatches, fileMatches',
                 linkURL:
                     'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+cannot%20determine%20file%20path&statsPeriod=14d',
             },
@@ -118,7 +114,7 @@ const data = [
         goal: 'render warning link hinting to add projectId and render link to general issues page',
         index: 1,
         match: 'cannot determine file path',
-        missingConfigData: ['repoMatch', 'fileMatch'],
+        missingConfigData: ['repoMatches', 'fileMatches'],
         sentryProjectId: undefined,
         expected: {
             range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
@@ -137,7 +133,7 @@ const data = [
             'match line based on common pattern, render warning link hinting to add projectId and render link to general issues page',
         index: 1,
         match: '',
-        missingConfigData: ['repoMatch', 'fileMatch'],
+        missingConfigData: ['repoMatches', 'fileMatches'],
         sentryProjectId: undefined,
         expected: {
             range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
@@ -154,10 +150,10 @@ const data = [
 ]
 
 describe('decorate line', () => {
-    sourcegraph.internal.sourcegraphURL = 'https://sourcegraph.test'
     sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
     sourcegraph.configuration.get().update('sentry.projects', projects)
-    for (const [, deco] of data.entries()) {
+
+    for (const deco of data) {
         it('decorates the line with the following goal: ' + deco.goal, () =>
             expect(decorateLine(deco.index, deco.match, deco.missingConfigData, deco.sentryProjectId)).toEqual(
                 deco.expected
@@ -290,10 +286,10 @@ of(codeView).pipe(
 ]
 
 describe('get Decorations', () => {
-    sourcegraph.internal.sourcegraphURL = 'https://sourcegraph.test'
     sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
     sourcegraph.configuration.get().update('sentry.projects', projects)
-    for (const [, deco] of decorationsData.entries()) {
+
+    for (const deco of decorationsData) {
         it('fulfills the following goal:' + deco.goal, () =>
             expect(getDecorations(deco.documentUri, deco.documentText, projects)).toEqual(deco.expected)
         )
@@ -352,7 +348,6 @@ const expectedLanguageTestOutcome = [
 ]
 
 describe('decorate Editor', () => {
-    sourcegraph.internal.sourcegraphURL = 'https://sourcegraph.test'
     sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
     sourcegraph.configuration.get().update('sentry.projects', projects)
 

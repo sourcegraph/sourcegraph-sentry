@@ -201,6 +201,6 @@
     "typescript": "^3.4.2"
   },
   "dependencies": {
-    "@sourcegraph/extension-api-stubs": "^0.1.0"
+    "@sourcegraph/extension-api-stubs": "^0.1.1"
   }
 }
