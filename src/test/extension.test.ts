@@ -1,6 +1,5 @@
 import { createStubExtensionContext, createStubSourcegraphAPI } from '@sourcegraph/extension-api-stubs'
 import expect from 'expect'
-import { uniqueId } from 'lodash'
 import mock from 'mock-require'
 
 export const sourcegraph = createStubSourcegraphAPI()
@@ -55,11 +54,6 @@ export let projects: SentryProject[] = [
     },
 ]
 
-sourcegraph.internal.sourcegraphURL = 'https://sourcegraph.test'
-sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
-sourcegraph.configuration.get().update('sentry.projects', projects)
-sourcegraph.app.createDecorationType = () => ({ key: uniqueId('decorationType') })
-
 const data = [
     {
         goal: 'render complete Sentry link',
@@ -68,7 +62,7 @@ const data = [
         missingConfigData: [],
         sentryProjectId: '134412',
         expected: {
-            range: { start: 1, end: 0 },
+            range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
             isWholeLine: true,
             after: {
                 backgroundColor: '#e03e2f',
@@ -87,7 +81,7 @@ const data = [
         missingConfigData: ['repoMatch'],
         sentryProjectId: '134412',
         expected: {
-            range: { start: 1, end: 0 },
+            range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
             isWholeLine: true,
             after: {
                 backgroundColor: '#f2736d',
@@ -107,7 +101,7 @@ const data = [
         missingConfigData: ['repoMatch', 'fileMatch'],
         sentryProjectId: '134412',
         expected: {
-            range: { start: 1, end: 0 },
+            range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
             isWholeLine: true,
             after: {
                 backgroundColor: '#f2736d',
@@ -127,7 +121,7 @@ const data = [
         missingConfigData: ['repoMatch', 'fileMatch'],
         sentryProjectId: undefined,
         expected: {
-            range: { start: 1, end: 0 },
+            range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
             isWholeLine: true,
             after: {
                 backgroundColor: '#f2736d',
@@ -146,7 +140,7 @@ const data = [
         missingConfigData: ['repoMatch', 'fileMatch'],
         sentryProjectId: undefined,
         expected: {
-            range: { start: 1, end: 0 },
+            range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
             isWholeLine: true,
             after: {
                 backgroundColor: '#f2736d',
@@ -160,6 +154,9 @@ const data = [
 ]
 
 describe('decorate line', () => {
+    sourcegraph.internal.sourcegraphURL = 'https://sourcegraph.test'
+    sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
+    sourcegraph.configuration.get().update('sentry.projects', projects)
     for (const [, deco] of data.entries()) {
         it('decorates the line with the following goal: ' + deco.goal, () =>
             expect(decorateLine(deco.index, deco.match, deco.missingConfigData, deco.sentryProjectId)).toEqual(
@@ -223,7 +220,7 @@ const decorationsData = [
         // receive one decoration
         expected: [
             {
-                range: { start: 1, end: 0 },
+                range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
                 isWholeLine: true,
                 after: {
                     backgroundColor: '#e03e2f',
@@ -277,10 +274,7 @@ of(codeView).pipe(
     }),`,
         expected: [
             {
-                range: {
-                    start: { line: 1, character: 0 },
-                    end: { line: 1, character: 0 },
-                },
+                range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
                 isWholeLine: true,
                 after: {
                     backgroundColor: '#e03e2f',
@@ -296,6 +290,9 @@ of(codeView).pipe(
 ]
 
 describe('get Decorations', () => {
+    sourcegraph.internal.sourcegraphURL = 'https://sourcegraph.test'
+    sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
+    sourcegraph.configuration.get().update('sentry.projects', projects)
     for (const [, deco] of decorationsData.entries()) {
         it('fulfills the following goal:' + deco.goal, () =>
             expect(getDecorations(deco.documentUri, deco.documentText, projects)).toEqual(deco.expected)
@@ -342,7 +339,7 @@ const unsupportedLanguageCode = [
 
 const expectedLanguageTestOutcome = [
     {
-        range: { start: 1, end: 0 },
+        range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
         isWholeLine: true,
         after: {
             backgroundColor: '#f2736d',
@@ -355,6 +352,10 @@ const expectedLanguageTestOutcome = [
 ]
 
 describe('decorate Editor', () => {
+    sourcegraph.internal.sourcegraphURL = 'https://sourcegraph.test'
+    sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
+    sourcegraph.configuration.get().update('sentry.projects', projects)
+
     projects[0].patternProperties.lineMatches = []
     for (const [i, codeExample] of supportedLanguageCode.entries()) {
         it('check common pattern matching for ' + supportedLanguageCode[i].lang, () =>
