@@ -7,11 +7,54 @@ export const sourcegraph = createStubSourcegraphAPI()
 mock('sourcegraph', sourcegraph)
 
 import { activate, decorateEditor, decorateLine, getDecorations } from '../extension'
-import { SentryProject } from '../settings'
+import { resolveSettings, SentryProject } from '../settings'
 
 describe('check for extension activation', () => {
     const context = createStubExtensionContext()
     it('activate extension', () => expect(activate(context)).toEqual(void 0))
+})
+
+const settings = {
+    'sentry.decorations.inline': false,
+    'sentry.organization': 'sourcegraph',
+    'sentry.projects': [
+        {
+            additionalProperties: {
+                contentText: 'View sourcegraph/sourcegraph_dot_com errors',
+                hoverMessage: 'View errors matching "$1" in Sentry',
+                query: '$1',
+            },
+            name: 'Webapp typescript errors',
+            patternProperties: {
+                fileMatches: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/],
+                lineMatches: [
+                    /throw new Error+\(['"]([^'"]+)['"]\)/,
+                    /console\.(warn|debug|info|error|log)\(['"`]([^'"`]+)['"`]\)/,
+                    /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/,
+                ],
+                repoMatches: [/sourcegraph\/sourcegraph/, /bucket/],
+            },
+            projectId: '1334031',
+        },
+        {
+            additionalProperties: {
+                contentText: 'View sourcegraph/dev-repo errors',
+                hoverMessage: 'View errors matching "$1" in Sentry',
+                query: '$1',
+            },
+            name: 'Dev env errors',
+            patternProperties: {
+                fileMatches: [/(dev)\/.*\\.go?/],
+                lineMatches: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/],
+                repoMatches: [/dev-repo/],
+            },
+            projectId: '213332',
+        },
+    ],
+}
+
+describe('check for configurations', () => {
+    it('activate extension', () => expect(resolveSettings(sourcegraph.configuration.get().value)).toEqual(settings))
 })
 
 export let projects: SentryProject[] = [

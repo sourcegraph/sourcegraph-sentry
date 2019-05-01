@@ -50,6 +50,7 @@ export function activate(context: sourcegraph.ExtensionContext): void {
             switchMap(window => window.activeViewComponentChanges),
             filter((editor): editor is sourcegraph.CodeEditor => editor !== undefined)
         )
+
         // When the active editor changes, publish new decorations.
         context.subscriptions.add(
             combineLatest(configurationChanges, activeEditor).subscribe(([, editor]) => {
