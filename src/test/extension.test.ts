@@ -205,7 +205,7 @@ describe('decorate line', () => {
     }
 })
 
-const decorationsData = [
+const getDecorationsInput = [
     {
         goal: 'receive two decorations',
         documentUri:
@@ -256,7 +256,6 @@ const decorationsData = [
         }
         return { ...rest, codeView, headFilePath, baseFilePath }
     }),`,
-        // receive one decoration
         expected: [
             {
                 range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
@@ -326,13 +325,19 @@ of(codeView).pipe(
             },
         ],
     },
+    {
+        goal: 'returns empty array due to missing documentUri, documentText and projects list',
+        documentUri: '',
+        documentText: ``,
+        expected: [],
+    },
 ]
 
 describe('get Decorations', () => {
     sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
     sourcegraph.configuration.get().update('sentry.projects', projects)
 
-    for (const deco of decorationsData) {
+    for (const deco of getDecorationsInput) {
         it('fulfills the following goal:' + deco.goal, () =>
             expect(getDecorations(deco.documentUri, deco.documentText, projects)).toEqual(deco.expected)
         )

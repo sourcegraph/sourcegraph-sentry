@@ -43,7 +43,6 @@ export function activate(context: sourcegraph.ExtensionContext): void {
     // TODO: Change this when https://github.com/sourcegraph/sourcegraph/issues/3557 is resolved
     const configurationChanges = new BehaviorSubject<void>(undefined)
     context.subscriptions.add(sourcegraph.configuration.subscribe(() => configurationChanges.next(undefined)))
-
     if (sourcegraph.app.activeWindowChanges) {
         const activeEditor = from(sourcegraph.app.activeWindowChanges).pipe(
             filter((window): window is sourcegraph.Window => window !== undefined),

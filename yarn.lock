@@ -788,10 +788,10 @@
   dependencies:
     "@sourcegraph/extension-api-types" "^2.0.0"
 
-"@sourcegraph/extension-api-stubs@^0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@sourcegraph/extension-api-stubs/-/extension-api-stubs-0.1.1.tgz#8e161adec70fd5b7a78ace649a456b99f9c78977"
-  integrity sha512-TMVbHFUM/BF9odoQaiUBDbhax7joqUutkU22DI/KdtW9wz5O1nWT0oJr1wdv0xvYRDvKGG/gOXypd2ZC+aNE2A==
+"@sourcegraph/extension-api-stubs@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@sourcegraph/extension-api-stubs/-/extension-api-stubs-0.2.0.tgz#4deee465d96cb49c7790da95fa28aefbdf995177"
+  integrity sha512-EhI65jZnDB+/pnRHrwzlFq7JN9NuabJBiZoBmAMghnqtbVD/5pEqm9XJD0LPCg/Uc3FEIVTkVXjNylGn4s0JNA==
   dependencies:
     "@sourcegraph/extension-api-classes" "^1.0.2"
     "@types/sinon" "7.0.11"

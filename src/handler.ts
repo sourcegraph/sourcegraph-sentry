@@ -5,7 +5,7 @@ interface Params {
     file: string | null
 }
 
-interface LineDecorationText {
+export interface LineDecorationText {
     content: string
     hover: string
     backgroundColor: string
@@ -74,7 +74,7 @@ export function isFileMatched(params: Params, project: SentryProject): boolean |
  * Check for missing configurations in the Sentry extension settings
  * @param settings
  */
-export function checkMissingConfig(settings: SentryProject): string[] {
+export function checkMissingConfig(settings?: SentryProject): string[] {
     if (!settings) {
         return []
     }
