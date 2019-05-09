@@ -52,7 +52,7 @@ export function activate(context: sourcegraph.ExtensionContext): void {
 
         // When the active editor changes, publish new decorations.
         context.subscriptions.add(
-            combineLatest(configurationChanges, activeEditor).subscribe(([, editor]) => {
+            combineLatest([configurationChanges, activeEditor]).subscribe(([, editor]) => {
                 const settings = resolveSettings(sourcegraph.configuration.get<Settings>().value)
                 const sentryProjects = settings['sentry.projects']
 
