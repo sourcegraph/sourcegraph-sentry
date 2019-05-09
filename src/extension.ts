@@ -197,20 +197,15 @@ export function decorateLine(
  * @param sentryProjectId from the associated Sentry project receiving logs from the document's repo.
  * @return URL to the Sentry unresolved issues stream page for this kind of query.
  */
-// TODO: Use URLSearchParams instead of encodeURIComponent
 function buildUrl(errorQuery: string, sentryProjectId?: string): URL {
     const sentryOrg = resolveSettings(sourcegraph.configuration.get<Settings>().value)['sentry.organization']
-    const url = new URL(
-        'https://sentry.io/organizations/' +
-            encodeURIComponent(sentryOrg!) +
-            '/issues/' +
-            (sentryProjectId
-                ? '?project=' +
-                  encodeURIComponent(sentryProjectId) +
-                  '&query=is%3Aunresolved+' +
-                  encodeURIComponent(errorQuery) +
-                  '&statsPeriod=14d'
-                : '')
-    )
+    const url = new URL('https://sentry.io/organizations/' + sentryOrg + '/issues/')
+
+    if (sentryProjectId) {
+        url.searchParams.set('project', sentryProjectId)
+        url.searchParams.set('query', 'is:unresolved ' + errorQuery)
+        url.searchParams.set('statsPeriod', '14d')
+    }
+
     return url
 }

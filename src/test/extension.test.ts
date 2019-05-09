@@ -113,7 +113,7 @@ const data = [
                 contentText: ' View logs in Sentry » ',
                 hoverMessage: ' View logs in Sentry » ',
                 linkURL:
-                    'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+cannot%20determine%20file%20path&statsPeriod=14d',
+                    'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+cannot+determine+file+path&statsPeriod=14d',
             },
         },
     },
@@ -133,7 +133,7 @@ const data = [
                 hoverMessage:
                     ' Please fill out the following configurations in your Sentry extension settings: repoMatches',
                 linkURL:
-                    'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+cannot%20determine%20file%20path&statsPeriod=14d',
+                    'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+cannot+determine+file+path&statsPeriod=14d',
             },
         },
     },
@@ -153,7 +153,7 @@ const data = [
                 hoverMessage:
                     ' Please fill out the following configurations in your Sentry extension settings: repoMatches, fileMatches',
                 linkURL:
-                    'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+cannot%20determine%20file%20path&statsPeriod=14d',
+                    'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+cannot+determine+file+path&statsPeriod=14d',
             },
         },
     },
@@ -236,7 +236,7 @@ const getDecorationsInput = [
                     contentText: ' View logs in Sentry » ',
                     hoverMessage: ' View logs in Sentry » ',
                     linkURL:
-                        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+cannot%20determine%20file%20path&statsPeriod=14d',
+                        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+cannot+determine+file+path&statsPeriod=14d',
                 },
             },
             {
@@ -248,7 +248,7 @@ const getDecorationsInput = [
                     contentText: ' View logs in Sentry » ',
                     hoverMessage: ' View logs in Sentry » ',
                     linkURL:
-                        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+cannot%20determine%20delta%20info&statsPeriod=14d',
+                        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+cannot+determine+delta+info&statsPeriod=14d',
                 },
             },
         ],
@@ -272,7 +272,7 @@ const getDecorationsInput = [
                     contentText: ' View logs in Sentry » ',
                     hoverMessage: ' View logs in Sentry » ',
                     linkURL:
-                        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+cannot%20determine%20file%20path&statsPeriod=14d',
+                        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+cannot+determine+file+path&statsPeriod=14d',
                 },
             },
         ],
@@ -326,7 +326,7 @@ of(codeView).pipe(
                     contentText: ' View logs in Sentry » ',
                     hoverMessage: ' View logs in Sentry » ',
                     linkURL:
-                        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+cannot%20determine%20file%20path&statsPeriod=14d',
+                        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+cannot+determine+file+path&statsPeriod=14d',
                 },
             },
         ],
