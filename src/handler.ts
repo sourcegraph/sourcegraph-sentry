@@ -19,9 +19,9 @@ export interface LineDecorationText {
  * @returns repo and file part of URI.
  */
 export function getParamsFromUriPath(textDocumentURI: string): Params {
-    // TODO: Support more than just GitHub.
+    // TODO: Support more than just GitHub & Gitlab.
     // TODO: Safeguard for cases where repo/fileMatch are null.
-    const repoPattern = /(github\.com|gitlab\.com)\/([^\?\#\/]+\/[^\?\#\/]*)/gi
+    const repoPattern = /(github\.com|gitlab\.com)\/([^\?\#\/]+\/[^\?\#\/].*)/gi
     const filePattern = /#.*\.(.*)$/gi
 
     const repoMatch = repoPattern.exec(textDocumentURI)

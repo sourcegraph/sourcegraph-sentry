@@ -15,14 +15,17 @@ import { checkMissingConfig, createDecoration, getParamsFromUriPath, matchSentry
 describe('getParamsFromUriPath', () => {
     it('extracts repo and file params from root folder', () =>
         expect(getParamsFromUriPath('git://github.com/sourcegraph/sourcegraph?264...#index.tsx')).toEqual({
-            repo: 'sourcegraph/sourcegraph',
+            repo: 'sourcegraph/sourcegraph?264...#index.tsx',
             file: '#index.tsx',
         }))
 
     it('extracts repo and file params from subfolder', () =>
         expect(
             getParamsFromUriPath('git://github.com/sourcegraph/sourcegraph?264...#web/src/e2e/index.e2e.test.tsx')
-        ).toEqual({ repo: 'sourcegraph/sourcegraph', file: '#web/src/e2e/index.e2e.test.tsx' }))
+        ).toEqual({
+            repo: 'sourcegraph/sourcegraph?264...#web/src/e2e/index.e2e.test.tsx',
+            file: '#web/src/e2e/index.e2e.test.tsx',
+        }))
 
     it('return empty repo if host is not GitHub', () =>
         expect(getParamsFromUriPath('git://unknownhost.com/sourcegraph/testrepo#http/req/main.go')).toEqual({
@@ -32,7 +35,7 @@ describe('getParamsFromUriPath', () => {
 
     it('return empty file if document has no file format', () =>
         expect(getParamsFromUriPath('git://github.com/sourcegraph/sourcegraph/testrepo#formatless')).toEqual({
-            repo: 'sourcegraph/sourcegraph',
+            repo: 'sourcegraph/sourcegraph/testrepo#formatless',
             file: null,
         }))
 })

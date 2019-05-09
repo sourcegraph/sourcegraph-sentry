@@ -30,7 +30,7 @@ const COMMON_ERRORLOG_PATTERNS = [
     /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/gi,
     /fmt\.Errorf\(['"]([^'"]+)['"]\)/gi,
     /errors\.New\(['"]([^'"]+)['"]\)/gi,
-    /err\.message\(['"`]([^'"`]+)['"`]\)/gi,
+    /err\.message\(['"`]([^'"`$]+)['"`]\)/gi,
     /panic\(['"]([^'"]+)['"]\)/gi,
     // python
     /raise (TypeError|ValueError)\(['"`]([^'"`]+)['"`]\)/gi,
@@ -88,6 +88,7 @@ export function getDecorations(
     sentryProjects?: SentryProject[]
 ): sourcegraph.TextDocumentDecoration[] {
     const params: Params = getParamsFromUriPath(documentUri)
+
     const sentryProject = sentryProjects && matchSentryProject(params, sentryProjects)
     let missingConfigData: string[] = []
     let fileMatched: boolean | null
