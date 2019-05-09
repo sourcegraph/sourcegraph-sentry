@@ -7,12 +7,13 @@ export const sourcegraph = createStubSourcegraphAPI()
 // For modules importing Range/Location/Position/URI/etc
 mock('sourcegraph', sourcegraph)
 
-sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
-sourcegraph.configuration.get().update('sentry.projects', projects)
-
 import { checkMissingConfig, createDecoration, getParamsFromUriPath, matchSentryProject } from '../handler'
 
 describe('getParamsFromUriPath', () => {
+    beforeEach(async () => {
+        await sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
+        await sourcegraph.configuration.get().update('sentry.projects', projects)
+    })
     it('extracts repo and file params from root folder', () =>
         expect(getParamsFromUriPath('git://github.com/sourcegraph/sourcegraph?264...#index.tsx')).toEqual({
             repo: 'sourcegraph/sourcegraph?264...#index.tsx',
@@ -76,6 +77,10 @@ const paramsInput = [
 ]
 
 describe('matchSentryProject', () => {
+    beforeEach(async () => {
+        await sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
+        await sourcegraph.configuration.get().update('sentry.projects', projects)
+    })
     for (const paramsCase of paramsInput) {
         it('fullfils the following goal: ' + paramsCase.goal, () =>
             expect(matchSentryProject(paramsCase.params, projects)).toEqual(paramsCase.expected)

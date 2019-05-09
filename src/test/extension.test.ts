@@ -53,10 +53,6 @@ const settings = {
     ],
 }
 
-describe('check for configurations', () => {
-    it('activate extension', () => expect(resolveSettings(sourcegraph.configuration.get().value)).toEqual(settings))
-})
-
 export let projects: SentryProject[] = [
     {
         name: 'Webapp typescript errors',
@@ -92,6 +88,14 @@ export let projects: SentryProject[] = [
         },
     },
 ]
+
+describe('check for configurations', () => {
+    beforeEach(async () => {
+        await sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
+        await sourcegraph.configuration.get().update('sentry.projects', projects)
+    })
+    it('activate extension', () => expect(resolveSettings(sourcegraph.configuration.get().value)).toEqual(settings))
+})
 
 const data = [
     {
@@ -193,8 +197,10 @@ const data = [
 ]
 
 describe('decorate line', () => {
-    sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
-    sourcegraph.configuration.get().update('sentry.projects', projects)
+    beforeEach(async () => {
+        await sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
+        await sourcegraph.configuration.get().update('sentry.projects', projects)
+    })
 
     for (const deco of data) {
         it('decorates the line with the following goal: ' + deco.goal, () =>
@@ -334,8 +340,10 @@ of(codeView).pipe(
 ]
 
 describe('get Decorations', () => {
-    sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
-    sourcegraph.configuration.get().update('sentry.projects', projects)
+    beforeEach(async () => {
+        await sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
+        await sourcegraph.configuration.get().update('sentry.projects', projects)
+    })
 
     for (const deco of getDecorationsInput) {
         it('fulfills the following goal:' + deco.goal, () =>
@@ -396,8 +404,10 @@ const expectedLanguageTestOutcome = [
 ]
 
 describe('decorate Editor', () => {
-    sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
-    sourcegraph.configuration.get().update('sentry.projects', projects)
+    beforeEach(async () => {
+        await sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
+        await sourcegraph.configuration.get().update('sentry.projects', projects)
+    })
 
     projects[0].patternProperties.lineMatches = []
     for (const [i, codeExample] of supportedLanguageCode.entries()) {
