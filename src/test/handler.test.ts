@@ -133,6 +133,6 @@ const createDecorationWithoutOrgOutcome = {
 }
 
 describe('createDecoration', () => {
-    it('handle empty organization setting', () =>
+    it('handles an empty organization setting', () =>
         expect(createDecoration([])).toEqual(createDecorationWithoutOrgOutcome))
 })
