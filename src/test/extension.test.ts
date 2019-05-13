@@ -9,7 +9,7 @@ mock('sourcegraph', sourcegraph)
 import { activate, decorateEditor, decorateLine, getDecorations } from '../extension'
 import { resolveSettings, SentryProject } from '../settings'
 
-describe('check for extension activation', () => {
+describe('activation', () => {
     const context = createStubExtensionContext()
     it('activate extension', () => expect(activate(context)).toEqual(void 0))
 })
