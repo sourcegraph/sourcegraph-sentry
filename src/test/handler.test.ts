@@ -119,7 +119,7 @@ const incompleteConfigs = [
 
 describe('checkMissingConfig()', () => {
     for (const config of incompleteConfigs) {
-        it('check missing configs with goal to ' + config.goal, () =>
+        it('checks missing configs with goal to ' + config.goal, () =>
             expect(checkMissingConfig(config.settings)).toEqual(config.expected)
         )
     }
