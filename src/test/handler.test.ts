@@ -123,7 +123,7 @@ describe('missingConfig', () => {
             expect(checkMissingConfig(config.settings)).toEqual(config.expected)
         )
     }
-    it('handle empty settings', () => expect(checkMissingConfig()).toEqual([]))
+    it('handles empty settings', () => expect(checkMissingConfig()).toEqual([]))
 })
 
 const createDecorationWithoutOrgOutcome = {
