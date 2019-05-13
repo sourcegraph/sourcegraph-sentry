@@ -82,9 +82,7 @@ describe('matchSentryProject', () => {
         await sourcegraph.configuration.get().update('sentry.projects', projects)
     })
     for (const paramsCase of paramsInput) {
-        it('fullfils the following goal: ' + paramsCase.goal, () =>
-            expect(matchSentryProject(paramsCase.params, projects)).toEqual(paramsCase.expected)
-        )
+        it(paramsCase.goal, () => expect(matchSentryProject(paramsCase.params, projects)).toEqual(paramsCase.expected))
     }
 })
 

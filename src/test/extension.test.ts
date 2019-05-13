@@ -11,7 +11,7 @@ import { resolveSettings, SentryProject } from '../settings'
 
 describe('activation', () => {
     const context = createStubExtensionContext()
-    it('activate extension', () => expect(activate(context)).toEqual(void 0))
+    it('does not throw an error', () => expect(activate(context)).toEqual(void 0))
 })
 
 const settings = {
@@ -89,12 +89,13 @@ export let projects: SentryProject[] = [
     },
 ]
 
-describe('check for configurations', () => {
+describe('resolveSettings()', () => {
     beforeEach(async () => {
         await sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
         await sourcegraph.configuration.get().update('sentry.projects', projects)
     })
-    it('activate extension', () => expect(resolveSettings(sourcegraph.configuration.get().value)).toEqual(settings))
+    it('should return configuration with applied defaults', () =>
+        expect(resolveSettings(sourcegraph.configuration.get().value)).toEqual(settings))
 })
 
 const data = [
