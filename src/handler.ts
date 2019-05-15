@@ -21,14 +21,14 @@ export interface LineDecorationText {
 export function getParamsFromUriPath(textDocumentURI: string): Params {
     // TODO: Support more than just GitHub & Gitlab.
     // TODO: Safeguard for cases where repo/fileMatch are null.
-    const repoPattern = /(github\.com|gitlab\.com)\/([^\?\#\/]+\/[^\?\#\/].*)/gi
-    const filePattern = /#.*\.(.*)$/gi
+    const repoPattern = /(github\.com|gitlab\.com)\/([^\?\#\/]+\/[^\?\#\/]*)/gi
+    const filePattern = /#(:?.*\.(.*))$/gi
 
     const repoMatch = repoPattern.exec(textDocumentURI)
     const fileMatch = filePattern.exec(textDocumentURI)
     return {
         repo: repoMatch && repoMatch[2],
-        file: fileMatch && fileMatch[0],
+        file: fileMatch && fileMatch[1],
     }
 }
 
@@ -40,57 +40,84 @@ export function getParamsFromUriPath(textDocumentURI: string): Params {
  * @param projects Sentry extension projects configurations.
  * @return Sentry projectID this document reports to.
  */
-export function matchSentryProject(params: Params, projects: SentryProject[]): SentryProject | undefined {
+export function matchSentryProject(
+    params: Params,
+    projects: SentryProject[]
+): { project: SentryProject | undefined; fileMatched: boolean | undefined } {
     if (!projects || !params.repo || !params.file) {
-        return undefined
+        return { project: undefined, fileMatched: undefined }
     }
 
-    // Check if a Sentry project is associated with this document's repo and retrieve the project.
+    // Check if a Sentry project is associated with this document's repository and/or file and retrieve the project.
     // TODO: Handle the null case instead of using a non-null assertion !
     // TODO: Handle cases where the wrong project is matched due to similar repo name,
     // e.g. `sourcegraph-jetbrains` repo will match the `sourcegraph` project
 
-    const project = projects.find(p =>
-        p.patternProperties.repoMatches
-            ? !!p.patternProperties.repoMatches.find(repo => !!new RegExp(repo).exec(params.repo!))
-            : false
-    )
-    if (!project) {
-        return undefined
+    for (const project of projects) {
+        for (const filter of project.filters) {
+            // both repository and file match
+            if (
+                filter.repository &&
+                filter.file &&
+                !!filter.repository.find(repo => !!new RegExp(repo).exec(params.repo!)) &&
+                filter.file.some(file => !!new RegExp(file).exec(params.file!))
+            ) {
+                return { project, fileMatched: true }
+            }
+            // repository matches but file does not match
+            if (
+                filter.repository &&
+                filter.file &&
+                !!filter.repository.find(repo => !!new RegExp(repo).exec(params.repo!)) &&
+                !filter.file.some(file => !!new RegExp(file).exec(params.file!))
+            ) {
+                return { project, fileMatched: false }
+            }
+            // repository matches and there is no filter for file matching
+            if (
+                filter.repository &&
+                (!filter.file || filter.file.length === 0) &&
+                !!filter.repository.find(repo => !!new RegExp(repo).exec(params.repo!))
+            ) {
+                return { project, fileMatched: undefined }
+            }
+            // file matches and there is no filter for repository matching
+            if (
+                filter.file &&
+                (!filter.repository || filter.repository.length === 0) &&
+                filter.file.some(file => !!new RegExp(file).exec(params.file!))
+            ) {
+                return { project: undefined, fileMatched: true }
+            }
+        }
     }
-
-    return project
-}
-
-// Check if document file format matches the file pattern set of the project
-export function isFileMatched(params: Params, project: SentryProject): boolean | null {
-    // TODO: Handle edge case of when project.patternProperties.fileMatches is falsy and add a unit test for it.
-    return project.patternProperties.fileMatches && project.patternProperties.fileMatches.length > 0
-        ? project.patternProperties.fileMatches.some(pattern => !!new RegExp(pattern).exec(params.file!))
-        : null
+    return { project: undefined, fileMatched: undefined }
 }
 
 /**
  * Check for missing configurations in the Sentry extension settings
  * @param settings
  */
-export function checkMissingConfig(settings?: SentryProject): string[] {
-    if (!settings) {
-        return []
+export function findEmptyConfigs(settings?: SentryProject, path?: string): string[] {
+    if (!path) {
+        path = 'settings'
     }
-    const missingConfig: string[] = []
-    for (const [key, value] of Object.entries(settings)) {
-        if (value instanceof Object) {
-            for (const [k, v] of Object.entries(value)) {
-                if (!v || (v instanceof Object && Object.keys(v).length === 0)) {
-                    missingConfig.push(k)
-                }
-            }
-        } else if (!value) {
-            missingConfig.push(key)
+    if (!settings) {
+        return [path]
+    }
+
+    let missingConfigurations: string[] = []
+
+    if (settings instanceof Array) {
+        for (const [index, element] of settings.entries()) {
+            missingConfigurations = missingConfigurations.concat(findEmptyConfigs(element, path + '[' + index + ']'))
+        }
+    } else if (settings instanceof Object) {
+        for (const [k, v] of Object.entries(settings)) {
+            missingConfigurations = missingConfigurations.concat(findEmptyConfigs(v, path + '.' + k))
         }
     }
-    return missingConfig
+    return missingConfigurations
 }
 
 export function createDecoration(

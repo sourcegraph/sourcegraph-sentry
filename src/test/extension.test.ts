@@ -2,105 +2,97 @@ import { createStubExtensionContext, createStubSourcegraphAPI } from '@sourcegra
 import expect from 'expect'
 import mock from 'mock-require'
 
-export const sourcegraph = createStubSourcegraphAPI()
+const sourcegraph = createStubSourcegraphAPI()
 // For modules importing Range/Location/Position/URI/etc
 mock('sourcegraph', sourcegraph)
 
-import { activate, decorateEditor, decorateLine, getDecorations } from '../extension'
+import { activate, buildDecorations, decorateLine, getDecorations } from '../extension'
 import { resolveSettings, SentryProject } from '../settings'
 
 describe('activation', () => {
-    const context = createStubExtensionContext()
-    it('does not throw an error', () => expect(activate(context)).toEqual(void 0))
+    it('does not throw an error', () => {
+        const context = createStubExtensionContext()
+        expect(activate(context)).toEqual(void 0)
+    })
 })
 
-const settings = {
-    'sentry.decorations.inline': false,
-    'sentry.organization': 'sourcegraph',
-    'sentry.projects': [
-        {
-            additionalProperties: {
-                contentText: 'View sourcegraph/sourcegraph_dot_com errors',
-                hoverMessage: 'View errors matching "$1" in Sentry',
-                query: '$1',
-            },
-            name: 'Webapp typescript errors',
-            patternProperties: {
-                fileMatches: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/],
-                lineMatches: [
-                    /throw new Error+\(['"]([^'"]+)['"]\)/,
-                    /console\.(warn|debug|info|error|log)\(['"`]([^'"`]+)['"`]\)/,
-                    /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/,
-                ],
-                repoMatches: [/sourcegraph\/sourcegraph/, /bucket/],
-            },
-            projectId: '1334031',
-        },
-        {
-            additionalProperties: {
-                contentText: 'View sourcegraph/dev-repo errors',
-                hoverMessage: 'View errors matching "$1" in Sentry',
-                query: '$1',
-            },
-            name: 'Dev env errors',
-            patternProperties: {
-                fileMatches: [/(dev)\/.*\\.go?/],
-                lineMatches: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/],
-                repoMatches: [/dev-repo/],
-            },
-            projectId: '213332',
-        },
-    ],
-}
-
-export let projects: SentryProject[] = [
+const projects: SentryProject[] = [
     {
         name: 'Webapp typescript errors',
         projectId: '1334031',
-        patternProperties: {
-            repoMatches: [/sourcegraph\/sourcegraph/, /bucket/],
-            fileMatches: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/],
-            lineMatches: [
-                /throw new Error+\(['"]([^'"]+)['"]\)/,
-                /console\.(warn|debug|info|error|log)\(['"`]([^'"`]+)['"`]\)/,
-                /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/,
-            ],
-        },
-        additionalProperties: {
-            contentText: 'View sourcegraph/sourcegraph_dot_com errors',
-            hoverMessage: 'View errors matching "$1" in Sentry',
-            query: '$1',
-        },
+        linePatterns: [
+            /throw new Error+\(['"]([^'"]+)['"]\)/,
+            /console\.(warn|debug|info|error|log)\(['"`]([^'"`]+)['"`]\)/,
+            /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/,
+        ],
+        filters: [
+            {
+                repository: [/sourcegraph\/sourcegraph/, /bucket/],
+                file: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/],
+            },
+        ],
     },
 
     {
         name: 'Dev env errors',
         projectId: '213332',
-        patternProperties: {
-            repoMatches: [/dev-repo/],
-            fileMatches: [/(dev)\/.*\\.go?/],
-            lineMatches: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/],
-        },
-        additionalProperties: {
-            contentText: 'View sourcegraph/dev-repo errors',
-            hoverMessage: 'View errors matching "$1" in Sentry',
-            query: '$1',
-        },
+        linePatterns: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/],
+        filters: [
+            {
+                repository: [/dev-repo/],
+                file: [/(dev)\/.*\\.go?/],
+            },
+        ],
     },
 ]
 
+const setDefaults = async () => {
+    await sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
+    await sourcegraph.configuration.get().update('sentry.projects', projects)
+}
+
 describe('resolveSettings()', () => {
-    beforeEach(async () => {
-        await sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
-        await sourcegraph.configuration.get().update('sentry.projects', projects)
+    beforeEach(setDefaults)
+    it('should return configuration with applied defaults', () => {
+        const settings = {
+            'sentry.decorations.inline': false,
+            'sentry.organization': 'sourcegraph',
+            'sentry.projects': [
+                {
+                    projectId: '1334031',
+                    name: 'Webapp typescript errors',
+                    linePatterns: [
+                        /throw new Error+\(['"]([^'"]+)['"]\)/,
+                        /console\.(warn|debug|info|error|log)\(['"`]([^'"`]+)['"`]\)/,
+                        /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/,
+                    ],
+                    filters: [
+                        {
+                            repository: [/sourcegraph\/sourcegraph/, /bucket/],
+                            file: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/],
+                        },
+                    ],
+                },
+                {
+                    projectId: '213332',
+                    name: 'Dev env errors',
+                    linePatterns: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/],
+                    filters: [
+                        {
+                            repository: [/dev-repo/],
+                            file: [/(dev)\/.*\\.go?/],
+                        },
+                    ],
+                },
+            ],
+        }
+        expect(resolveSettings(sourcegraph.configuration.get().value)).toEqual(settings)
     })
-    it('should return configuration with applied defaults', () =>
-        expect(resolveSettings(sourcegraph.configuration.get().value)).toEqual(settings))
 })
 
 const data = [
     {
-        goal: 'render complete Sentry link',
+        goal: 'renders complete Sentry link',
         index: 1,
         match: 'cannot determine file path',
         missingConfigData: [],
@@ -119,7 +111,7 @@ const data = [
         },
     },
     {
-        goal: 'warn about incomplete config with missing repoMatches',
+        goal: 'warns about incomplete config with missing repoMatches',
         index: 1,
         match: 'cannot determine file path',
         missingConfigData: ['repoMatches'],
@@ -139,7 +131,7 @@ const data = [
         },
     },
     {
-        goal: 'warn about incomplete config with missing repoMatches and fileMatches patterns',
+        goal: 'warns about incomplete config with missing repoMatches and fileMatches patterns',
         index: 1,
         match: 'cannot determine file path',
         missingConfigData: ['repoMatches', 'fileMatches'],
@@ -159,7 +151,7 @@ const data = [
         },
     },
     {
-        goal: 'render warning link hinting to add projectId and render link to general issues page',
+        goal: 'renders warning link hinting to add projectId and render link to general issues page',
         index: 1,
         match: 'cannot determine file path',
         missingConfigData: ['repoMatches', 'fileMatches'],
@@ -178,7 +170,7 @@ const data = [
     },
     {
         goal:
-            'match line based on common pattern, render warning link hinting to add projectId and render link to general issues page',
+            'matches line based on common pattern, render warning link hinting to add projectId and render link to general issues page',
         index: 1,
         match: '',
         missingConfigData: ['repoMatches', 'fileMatches'],
@@ -197,14 +189,11 @@ const data = [
     },
 ]
 
-describe('decorate line', () => {
-    beforeEach(async () => {
-        await sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
-        await sourcegraph.configuration.get().update('sentry.projects', projects)
-    })
+describe('decorateLine()', () => {
+    beforeEach(setDefaults)
 
     for (const deco of data) {
-        it('decorates the line with the following goal: ' + deco.goal, () =>
+        it(deco.goal, () =>
             expect(decorateLine(deco.index, deco.match, deco.missingConfigData, deco.sentryProjectId)).toEqual(
                 deco.expected
             )
@@ -340,14 +329,11 @@ of(codeView).pipe(
     },
 ]
 
-describe('get Decorations', () => {
-    beforeEach(async () => {
-        await sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
-        await sourcegraph.configuration.get().update('sentry.projects', projects)
-    })
+describe('getDecorations()', () => {
+    beforeEach(setDefaults)
 
     for (const deco of getDecorationsInput) {
-        it('fulfills the following goal:' + deco.goal, () =>
+        it(deco.goal, () =>
             expect(getDecorations(deco.documentUri, deco.documentText, projects)).toEqual(deco.expected)
         )
     }
@@ -360,23 +346,67 @@ const supportedLanguageCode = [
         code: `// ErrInvalidToken is returned by DiscussionMailReplyTokens.Get when the token is invalid
     var ErrInvalidToken = errors.New("invalid token")
     // Get returns the user and thread ID found for the given token. If there`,
+        expected: {
+            range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
+            isWholeLine: true,
+            after: {
+                backgroundColor: '#f2736d',
+                color: 'rgba(255, 255, 255, 0.8)',
+                contentText: ' View logs in Sentry (❕)» ',
+                hoverMessage: ' Add Sentry projects to your Sentry extension settings for project matching.',
+                linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
+            },
+        },
     },
     {
         lang: 'typescript',
         code: `        if (!headFilePath) {
         throw new Error('cannot determine file path')
     }`,
+        expected: {
+            range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
+            isWholeLine: true,
+            after: {
+                backgroundColor: '#f2736d',
+                color: 'rgba(255, 255, 255, 0.8)',
+                contentText: ' View logs in Sentry (❕)» ',
+                hoverMessage: ' Add Sentry projects to your Sentry extension settings for project matching.',
+                linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
+            },
+        },
     },
     {
         lang: 'python',
         code: `def create_app():
             raise TypeError('bad bad factory!')`,
+        expected: {
+            range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
+            isWholeLine: true,
+            after: {
+                backgroundColor: '#f2736d',
+                color: 'rgba(255, 255, 255, 0.8)',
+                contentText: ' View logs in Sentry (❕)» ',
+                hoverMessage: ' Add Sentry projects to your Sentry extension settings for project matching.',
+                linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
+            },
+        },
     },
     {
         lang: 'java',
         code: `   } catch (UnsupportedEncodingException err) {
             logger.debug("failed to build URL");
             err.printStackTrace();`,
+        expected: {
+            range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
+            isWholeLine: true,
+            after: {
+                backgroundColor: '#f2736d',
+                color: 'rgba(255, 255, 255, 0.8)',
+                contentText: ' View logs in Sentry (❕)» ',
+                hoverMessage: ' Add Sentry projects to your Sentry extension settings for project matching.',
+                linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
+            },
+        },
     },
 ]
 
@@ -390,39 +420,22 @@ const unsupportedLanguageCode = [
     },
 ]
 
-const expectedLanguageTestOutcome = [
-    {
-        range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
-        isWholeLine: true,
-        after: {
-            backgroundColor: '#f2736d',
-            color: 'rgba(255, 255, 255, 0.8)',
-            contentText: ' View logs in Sentry (❕)» ',
-            hoverMessage: ' Add Sentry projects to your Sentry extension settings for project matching.',
-            linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
-        },
-    },
-]
+describe('buildDecorations()', () => {
+    beforeEach(setDefaults)
 
-describe('decorate Editor', () => {
-    beforeEach(async () => {
-        await sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
-        await sourcegraph.configuration.get().update('sentry.projects', projects)
-    })
-
-    projects[0].patternProperties.lineMatches = []
-    for (const [i, codeExample] of supportedLanguageCode.entries()) {
-        it('check common pattern matching for ' + supportedLanguageCode[i].lang, () =>
-            expect(decorateEditor([], codeExample.code)).toEqual(expectedLanguageTestOutcome)
+    projects[0].linePatterns = []
+    for (const [, codeExample] of supportedLanguageCode.entries()) {
+        it('check common pattern matching for ' + codeExample.lang, () =>
+            expect(buildDecorations([], codeExample.code)).toEqual([codeExample.expected])
         )
     }
-    for (const [i, codeExample] of unsupportedLanguageCode.entries()) {
-        it('should not render due to unsupported language ' + unsupportedLanguageCode[i].lang, () =>
-            expect(decorateEditor([], codeExample.code)).toEqual([])
+    for (const [, codeExample] of unsupportedLanguageCode.entries()) {
+        it('should not render due to unsupported language ' + codeExample.lang, () =>
+            expect(buildDecorations([], codeExample.code)).toEqual([])
         )
     }
-    // set lineMatches back to original state for the other tests
-    projects[0].patternProperties.lineMatches = [
+    // set linePatterns back to original state for the other tests
+    projects[0].linePatterns = [
         /throw new Error+\(['"]([^'"]+)['"]\)/,
         /console\.(warn|debug|info|error|log)\(['"`]([^'"`]+)['"`]\)/,
         /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/,

@@ -1,13 +1,7 @@
 import { BehaviorSubject, combineLatest, from } from 'rxjs'
 import { filter, switchMap } from 'rxjs/operators'
 import * as sourcegraph from 'sourcegraph'
-import {
-    checkMissingConfig,
-    createDecoration,
-    getParamsFromUriPath,
-    isFileMatched,
-    matchSentryProject,
-} from './handler'
+import { createDecoration, findEmptyConfigs, getParamsFromUriPath, matchSentryProject } from './handler'
 import { resolveSettings, SentryProject, Settings } from './settings'
 
 /**
@@ -89,28 +83,25 @@ export function getDecorations(
 ): sourcegraph.TextDocumentDecoration[] {
     const params: Params = getParamsFromUriPath(documentUri)
 
-    const sentryProject = sentryProjects && matchSentryProject(params, sentryProjects)
+    const matched = sentryProjects && matchSentryProject(params, sentryProjects)
     let missingConfigData: string[] = []
-    let fileMatched: boolean | null
 
-    if (sentryProject) {
-        missingConfigData = checkMissingConfig(sentryProject)
-        fileMatched = isFileMatched(params, sentryProject)
+    // Do not decorate lines if the document file format does not match the
+    // file matching patterns listed in the Sentry extension configurations.
+    if (matched && matched.fileMatched === false) {
+        return []
+    }
+    if (matched && matched.project) {
+        missingConfigData = findEmptyConfigs(matched.project)
 
-        // Do not decorate lines if the document file format does not match the
-        // file matching patterns listed in the Sentry extension configurations.
-        if (fileMatched === false) {
-            return []
-        }
-
-        return decorateEditor(
+        return buildDecorations(
             missingConfigData,
             documentText,
-            sentryProject.projectId,
-            sentryProject.patternProperties.lineMatches
+            matched.project.projectId,
+            matched.project.linePatterns
         )
     }
-    return decorateEditor(missingConfigData, documentText)
+    return buildDecorations(missingConfigData, documentText)
 }
 
 /**
@@ -118,22 +109,22 @@ export function getDecorations(
  * @param missingConfigData list of missing configs that will appear as a hover warning on the Sentry link
  * @param documentText content of the document being scanned for error handling code
  * @param sentryProjectId Sentry project id retrieved from Sentry extension settings
- * @param lineMatches line patching patterns set in the user's Sentry extension configurations
+ * @param linePatterns line patching patterns set in the user's Sentry extension configurations
  * @return a list of decorations to render as links on each matching line
  */
 // TODO: add tests for that new function (kind of like getBlameDecorations())
-export function decorateEditor(
+export function buildDecorations(
     missingConfigData: string[],
     documentText: string,
     sentryProjectId?: string,
-    lineMatches?: RegExp[]
+    linePatterns?: RegExp[]
 ): sourcegraph.TextDocumentDecoration[] {
     const decorations: sourcegraph.TextDocumentDecoration[] = []
 
     for (const [index, line] of documentText.split('\n').entries()) {
         let match: RegExpExecArray | null
 
-        for (let pattern of lineMatches && lineMatches.length > 0 ? lineMatches : COMMON_ERRORLOG_PATTERNS) {
+        for (let pattern of linePatterns && linePatterns.length > 0 ? linePatterns : COMMON_ERRORLOG_PATTERNS) {
             pattern = new RegExp(pattern, 'gi')
 
             do {
