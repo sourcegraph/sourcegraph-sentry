@@ -148,7 +148,7 @@ const incompleteConfigs = [
     },
 ]
 
-describe('checkMissingConfig()', () => {
+describe('findEmptyConfigs()', () => {
     for (const config of incompleteConfigs) {
         it(config.goal, () => expect(findEmptyConfigs(config.settings)).toEqual(config.expected))
     }

@@ -135,6 +135,9 @@ export function createDecoration(
     } else if (!sentryProjectId) {
         contentText = ' View logs in Sentry (❕)» '
         hoverText = ' Add Sentry projects to your Sentry extension settings for project matching.'
+    } else if (missingConfigData.length > 0 && missingConfigData[0] === 'settings') {
+        contentText = ' View logs in Sentry (❕)» '
+        hoverText = ' Please fill out the configurations in your Sentry extension settings.'
     } else if (missingConfigData.length > 0) {
         contentText = ' View logs in Sentry (❕)» '
         hoverText =
