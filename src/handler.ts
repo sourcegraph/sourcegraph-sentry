@@ -55,33 +55,22 @@ export function matchSentryProject(params: Params, projects: SentryProject[]): M
     // e.g. `sourcegraph-jetbrains` repo will match the `sourcegraph` project
     for (const project of projects) {
         for (const filter of project.filters) {
-            // both repository and file match
+            // if repository and file filter are grouped
             if (filter.repository && filter.file) {
-                if (
-                    !!filter.repository.find(repo => !!new RegExp(repo).exec(params.repo!)) &&
-                    filter.file.some(file => !!new RegExp(file).exec(params.file!))
-                ) {
+                // both repository and file match
+                if (matchesRepository(filter.repository, params.repo) && matchesFile(filter.file, params.file)) {
                     matched = { project, fileMatched: true }
                 }
                 // repository doesn't match and file matches
-                if (
-                    !!!filter.repository.find(repo => !!new RegExp(repo).exec(params.repo!)) &&
-                    filter.file.some(file => !!new RegExp(file).exec(params.file!))
-                ) {
+                if (!matchesRepository(filter.repository, params.repo) && matchesFile(filter.file, params.file)) {
                     matched = { project: undefined, fileMatched: true }
                 }
                 // repository matches and file does not match
-                if (
-                    !!filter.repository.find(repo => !!new RegExp(repo).exec(params.repo!)) &&
-                    !filter.file.some(file => !!new RegExp(file).exec(params.file!))
-                ) {
+                if (matchesRepository(filter.repository, params.repo) && !matchesFile(filter.file, params.file)) {
                     matched = { project, fileMatched: false }
                 }
                 // repository doesn't match and file does not match
-                if (
-                    !!!filter.repository.find(repo => !!new RegExp(repo).exec(params.repo!)) &&
-                    !filter.file.some(file => !!new RegExp(file).exec(params.file!))
-                ) {
+                if (!matchesRepository(filter.repository, params.repo) && !matchesFile(filter.file, params.file)) {
                     matched = { project: undefined, fileMatched: false }
                 }
             }
@@ -89,7 +78,7 @@ export function matchSentryProject(params: Params, projects: SentryProject[]): M
             if (
                 (!filter.file || filter.file.length === 0) &&
                 filter.repository &&
-                !!filter.repository.find(repo => !!new RegExp(repo).exec(params.repo!))
+                matchesRepository(filter.repository, params.repo)
             ) {
                 matched = { project, fileMatched: undefined }
             }
@@ -97,7 +86,7 @@ export function matchSentryProject(params: Params, projects: SentryProject[]): M
             if (
                 (!filter.repository || filter.repository.length === 0) &&
                 filter.file &&
-                filter.file.some(file => !!new RegExp(file).exec(params.file!))
+                matchesFile(filter.file, params.file)
             ) {
                 matched = { project, fileMatched: true }
             }
@@ -109,6 +98,14 @@ export function matchSentryProject(params: Params, projects: SentryProject[]): M
         }
     }
     return matched
+}
+
+function matchesRepository(repository: RegExp[], repoParam: string): boolean {
+    return !!repository.find(repo => !!new RegExp(repo).exec(repoParam))
+}
+
+function matchesFile(file: RegExp[], fileParam: string): boolean {
+    return file.some(file => !!new RegExp(file).exec(fileParam))
 }
 
 /**

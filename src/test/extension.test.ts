@@ -90,7 +90,7 @@ describe('resolveSettings()', () => {
     })
 })
 
-const data = [
+const decorateLineInput = [
     {
         goal: 'renders complete Sentry link',
         index: 1,
@@ -111,10 +111,10 @@ const data = [
         },
     },
     {
-        goal: 'warns about incomplete config with missing repoMatches',
+        goal: 'warns about incomplete config with missing repository',
         index: 1,
         match: 'cannot determine file path',
-        missingConfigData: ['repoMatches'],
+        missingConfigData: ['repository'],
         sentryProjectId: '134412',
         expected: {
             range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
@@ -123,18 +123,17 @@ const data = [
                 backgroundColor: '#f2736d',
                 color: 'rgba(255, 255, 255, 0.8)',
                 contentText: ' View logs in Sentry (❕)» ',
-                hoverMessage:
-                    ' Please fill out the following configurations in your Sentry extension settings: repoMatches',
+                hoverMessage: ' Add this repository to your Sentry extension settings for project matching.',
                 linkURL:
                     'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+cannot+determine+file+path&statsPeriod=14d',
             },
         },
     },
     {
-        goal: 'warns about incomplete config with missing repoMatches and fileMatches patterns',
+        goal: 'warns about incomplete config with missing repository and file patterns',
         index: 1,
         match: 'cannot determine file path',
-        missingConfigData: ['repoMatches', 'fileMatches'],
+        missingConfigData: ['repository', 'file'],
         sentryProjectId: '134412',
         expected: {
             range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
@@ -143,8 +142,7 @@ const data = [
                 backgroundColor: '#f2736d',
                 color: 'rgba(255, 255, 255, 0.8)',
                 contentText: ' View logs in Sentry (❕)» ',
-                hoverMessage:
-                    ' Please fill out the following configurations in your Sentry extension settings: repoMatches, fileMatches',
+                hoverMessage: ' Add this repository to your Sentry extension settings for project matching.',
                 linkURL:
                     'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+cannot+determine+file+path&statsPeriod=14d',
             },
@@ -154,7 +152,7 @@ const data = [
         goal: 'renders warning link hinting to add projectId and render link to general issues page',
         index: 1,
         match: 'cannot determine file path',
-        missingConfigData: ['repoMatches', 'fileMatches'],
+        missingConfigData: ['file'],
         sentryProjectId: undefined,
         expected: {
             range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
@@ -173,7 +171,7 @@ const data = [
             'matches line based on common pattern, render warning link hinting to add projectId and render link to general issues page',
         index: 1,
         match: '',
-        missingConfigData: ['repoMatches', 'fileMatches'],
+        missingConfigData: ['file'],
         sentryProjectId: undefined,
         expected: {
             range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
@@ -192,11 +190,11 @@ const data = [
 describe('decorateLine()', () => {
     beforeEach(setDefaults)
 
-    for (const deco of data) {
-        it(deco.goal, () =>
-            expect(decorateLine(deco.index, deco.match, deco.missingConfigData, deco.sentryProjectId)).toEqual(
-                deco.expected
-            )
+    for (const decoInput of decorateLineInput) {
+        it(decoInput.goal, () =>
+            expect(
+                decorateLine(decoInput.index, decoInput.match, decoInput.missingConfigData, decoInput.sentryProjectId)
+            ).toEqual(decoInput.expected)
         )
     }
 })
