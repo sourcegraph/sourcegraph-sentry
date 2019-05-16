@@ -223,6 +223,15 @@ const createDecorationInputs = [
             hover: ' Add this repository to your Sentry extension settings for project matching.',
         },
     },
+    {
+        goal: 'informs user to add to add missing configs to their Sentry settings.',
+        params: { missingConfigData: ['linePatterns', 'file'], sentryProjectId: '1334031', sentryOrg: 'sourcegraph' },
+        expected: {
+            content: ' View logs in Sentry (❕)» ',
+            hover:
+                ' Please fill out the following configurations in your Sentry extension settings: linePatterns, file',
+        },
+    },
 ]
 
 describe('createDecoration', () => {
@@ -231,7 +240,8 @@ describe('createDecoration', () => {
             expect(
                 createDecoration(
                     decoInput.params.missingConfigData,
-                    decoInput.params.sentryOrg ? decoInput.params.sentryOrg : ''
+                    decoInput.params.sentryOrg,
+                    decoInput.params.sentryProjectId
                 )
             ).toEqual(decoInput.expected)
         )

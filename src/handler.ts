@@ -145,7 +145,7 @@ export function createDecoration(
             hover: ' Please fill out the configurations in your Sentry extension settings.',
         }
     }
-    if (missingConfigData.length > 0 && missingConfigData.includes('repository')) {
+    if (missingConfigData.includes('repository')) {
         return {
             content: ' View logs in Sentry (❕)» ',
             hover: ' Add this repository to your Sentry extension settings for project matching.',

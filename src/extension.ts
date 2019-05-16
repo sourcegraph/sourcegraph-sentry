@@ -82,7 +82,6 @@ export function getDecorations(
     sentryProjects?: SentryProject[]
 ): sourcegraph.TextDocumentDecoration[] {
     const params: Params = getParamsFromUriPath(documentUri)
-
     const matched = sentryProjects && matchSentryProject(params, sentryProjects)
     let missingConfigData: string[] = []
 
