@@ -8,7 +8,6 @@ interface Params {
 export interface LineDecorationText {
     content: string
     hover: string
-    backgroundColor: string
 }
 
 /**
@@ -32,7 +31,7 @@ export function getParamsFromUriPath(textDocumentURI: string): Params {
 }
 
 interface Matched {
-    project: SentryProject | undefined
+    project: SentryProject | undefined | false
     fileMatched: boolean | undefined
 }
 /**
@@ -143,26 +142,35 @@ export function createDecoration(
     sentryOrg?: string,
     sentryProjectId?: string
 ): LineDecorationText {
-    let contentText = ' View logs in Sentry » '
-    let hoverText = ' View logs in Sentry » '
-    const color = '#e03e2f'
-
-    if ((missingConfigData.length > 0 && missingConfigData[0] === 'settings') || !sentryOrg) {
-        contentText = ' Configure the Sentry extension to view logs (❕)» '
-        hoverText = ' Please fill out the configurations in your Sentry extension settings.'
-    } else if (!sentryProjectId) {
-        contentText = ' View logs in Sentry (❕)» '
-        hoverText = ' Add Sentry projects to your Sentry extension settings for project matching.'
-    } else if (missingConfigData.length > 0 && missingConfigData[0] !== 'settings') {
-        contentText = ' View logs in Sentry (❕)» '
-        hoverText =
-            ' Please fill out the following configurations in your Sentry extension settings: ' +
-            missingConfigData.join(', ')
+    if ((missingConfigData.length > 0 && missingConfigData.includes('settings')) || !sentryOrg) {
+        return {
+            content: ' Configure the Sentry extension to view logs (❕)» ',
+            hover: ' Please fill out the configurations in your Sentry extension settings.',
+        }
+    }
+    if (missingConfigData.length > 0 && missingConfigData.includes('repository')) {
+        return {
+            content: ' View logs in Sentry (❕)» ',
+            hover: ' Add this repository to your Sentry extension settings for project matching.',
+        }
+    }
+    if (!sentryProjectId) {
+        return {
+            content: ' View logs in Sentry (❕)» ',
+            hover: ' Add Sentry projects to your Sentry extension settings for project matching.',
+        }
+    }
+    if (missingConfigData.length > 0 && missingConfigData[0] !== 'settings') {
+        return {
+            content: ' View logs in Sentry (❕)» ',
+            hover:
+                ' Please fill out the following configurations in your Sentry extension settings: ' +
+                missingConfigData.join(', '),
+        }
     }
 
     return {
-        content: contentText,
-        hover: hoverText,
-        backgroundColor: color,
+        content: ' View logs in Sentry » ',
+        hover: ' View logs in Sentry » ',
     }
 }

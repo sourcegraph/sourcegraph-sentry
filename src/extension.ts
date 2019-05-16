@@ -101,6 +101,10 @@ export function getDecorations(
             matched.project.linePatterns
         )
     }
+    if (matched && !matched.project) {
+        missingConfigData.push('repository')
+        return buildDecorations(missingConfigData, documentText)
+    }
     return buildDecorations(missingConfigData, documentText)
 }
 

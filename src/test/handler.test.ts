@@ -154,7 +154,6 @@ const paramsInput = [
 describe('matchSentryProject', () => {
     beforeEach(setDefaults)
     for (const paramsCase of paramsInput) {
-        // tslint:disable-next-line:ban
         it(paramsCase.goal, () => expect(matchSentryProject(paramsCase.params, projects)).toEqual(paramsCase.expected))
     }
 })
@@ -202,21 +201,39 @@ describe('findEmptyConfigs()', () => {
 const createDecorationInputs = [
     {
         goal: 'handles an empty organization setting',
-        params: [],
+        params: { missingConfigData: [] },
+        expected: {
+            content: ' Configure the Sentry extension to view logs (❕)» ',
+            hover: ' Please fill out the configurations in your Sentry extension settings.',
+        },
     },
     {
         goal: 'informs user to fill out settings.',
-        params: ['settings'],
+        params: { missingConfigData: ['settings'] },
+        expected: {
+            content: ' Configure the Sentry extension to view logs (❕)» ',
+            hover: ' Please fill out the configurations in your Sentry extension settings.',
+        },
+    },
+    {
+        goal: 'informs user to add the repository to their Sentry settings.',
+        params: { missingConfigData: ['repository'], sentryOrg: 'sourcegraph' },
+        expected: {
+            content: ' View logs in Sentry (❕)» ',
+            hover: ' Add this repository to your Sentry extension settings for project matching.',
+        },
     },
 ]
 
-const createDecorationOutput = {
-    content: ' Configure the Sentry extension to view logs (❕)» ',
-    hover: ' Please fill out the configurations in your Sentry extension settings.',
-    backgroundColor: '#e03e2f',
-}
 describe('createDecoration', () => {
     for (const decoInput of createDecorationInputs) {
-        it(decoInput.goal, () => expect(createDecoration(decoInput.params)).toEqual(createDecorationOutput))
+        it(decoInput.goal, () =>
+            expect(
+                createDecoration(
+                    decoInput.params.missingConfigData,
+                    decoInput.params.sentryOrg ? decoInput.params.sentryOrg : ''
+                )
+            ).toEqual(decoInput.expected)
+        )
     }
 })
