@@ -25,7 +25,6 @@ const projects: SentryProject[] = [
             },
         ],
     },
-
     {
         name: 'Dev env errors',
         projectId: '213332',
@@ -34,6 +33,26 @@ const projects: SentryProject[] = [
             {
                 repository: [/dev-repo/],
                 file: [/dev\/.*.go?/],
+            },
+        ],
+    },
+    {
+        name: 'docs pages errors',
+        projectId: '544533',
+        linePatterns: [/throw new Error+\(['"]([^'"]+)['"]\)/],
+        filters: [
+            {
+                repository: [/sourcegraph\/docs/],
+            },
+        ],
+    },
+    {
+        name: 'dot com errors',
+        projectId: '242677',
+        linePatterns: [/throw new Error+\(['"]([^'"]+)['"]\)/],
+        filters: [
+            {
+                file: [/\.tsx?/],
             },
         ],
     },
@@ -91,12 +110,20 @@ const paramsInput = [
         expected: { project: projects[1], fileMatched: true },
     },
     {
-        goal: 'returns undefined for not matching repo and file patterns',
+        goal: 'returns file false for not matching file patterns',
+        params: {
+            repo: 'sourcegraph/dev-repo',
+            file: 'dev/test/start.rb',
+        },
+        expected: { project: projects[1], fileMatched: false },
+    },
+    {
+        goal: 'returns undefined for not matching repo and false for not matching file patterns',
         params: {
             repo: 'sourcegraph/test-repo',
             file: 'dev/test/start.rb',
         },
-        expected: { project: undefined, fileMatched: undefined },
+        expected: { project: undefined, fileMatched: false },
     },
     {
         goal: 'returns undefined for not matching repo and file patterns',
@@ -104,13 +131,30 @@ const paramsInput = [
             repo: 'sourcegraph/test-repo',
             file: 'dev/test/start.rb',
         },
-        expected: { project: undefined, fileMatched: undefined },
+        expected: { project: undefined, fileMatched: false },
+    },
+    {
+        goal: 'returns project for matching repo and undefined for not having file patterns',
+        params: {
+            repo: 'sourcegraph/docs',
+            file: 'src/development/tutorial.tsx',
+        },
+        expected: { project: projects[2], fileMatched: undefined },
+    },
+    {
+        goal: 'returns project for matching file patterns',
+        params: {
+            repo: 'sourcegraph/website',
+            file: 'web/search/start.tsx',
+        },
+        expected: { project: projects[3], fileMatched: true },
     },
 ]
 
 describe('matchSentryProject', () => {
     beforeEach(setDefaults)
     for (const paramsCase of paramsInput) {
+        // tslint:disable-next-line:ban
         it(paramsCase.goal, () => expect(matchSentryProject(paramsCase.params, projects)).toEqual(paramsCase.expected))
     }
 })
@@ -155,13 +199,24 @@ describe('findEmptyConfigs()', () => {
     it('handles empty settings', () => expect(findEmptyConfigs()).toEqual(['settings']))
 })
 
-const createDecorationWithoutOrgOutcome = {
-    content: ' Configure the Sentry extension to view logs. ',
-    hover: ' Configure the Sentry extension to view logs in Sentry. ',
+const createDecorationInputs = [
+    {
+        goal: 'handles an empty organization setting',
+        params: [],
+    },
+    {
+        goal: 'informs user to fill out settings.',
+        params: ['settings'],
+    },
+]
+
+const createDecorationOutput = {
+    content: ' Configure the Sentry extension to view logs (❕)» ',
+    hover: ' Please fill out the configurations in your Sentry extension settings.',
     backgroundColor: '#e03e2f',
 }
-
 describe('createDecoration', () => {
-    it('handles an empty organization setting', () =>
-        expect(createDecoration([])).toEqual(createDecorationWithoutOrgOutcome))
+    for (const decoInput of createDecorationInputs) {
+        it(decoInput.goal, () => expect(createDecoration(decoInput.params)).toEqual(createDecorationOutput))
+    }
 })
