@@ -107,7 +107,7 @@ export function createDecoration(
     sentryOrg?: string,
     sentryProjectId?: string
 ): LineDecorationText {
-    if ((missingConfigData.length > 0 && missingConfigData.includes('settings')) || !sentryOrg) {
+    if (missingConfigData.includes('settings') || !sentryOrg) {
         return {
             content: ' Configure the Sentry extension to view logs (❕)» ',
             hover: ' Please fill out the configurations in your Sentry extension settings.',
