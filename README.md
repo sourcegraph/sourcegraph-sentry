@@ -52,6 +52,7 @@ Set the following configurations in your settings:
   }
 
 ```
+
 ## Important features:
 
 File patterns can also be narrowed down to certain folders by specifying this in the RegExp:
@@ -69,9 +70,9 @@ File patterns can also be narrowed down to certain folders by specifying this in
   Configuration:
 
   ```
-"sentry.decorations.inline": true,
-"sentry.organization": "sourcegraph",
-"sentry.projects": [
+  "sentry.decorations.inline": true,
+  "sentry.organization": "sourcegraph",
+  "sentry.projects": [
     {
         "name": "sourcegraph",
         "projectId": "1334031",
@@ -90,7 +91,7 @@ File patterns can also be narrowed down to certain folders by specifying this in
 
         ]
     }
-]
+  ]
 
   ```
 
@@ -101,28 +102,28 @@ File patterns can also be narrowed down to certain folders by specifying this in
 
 Configuration:
 
-  ```
+```
 "sentry.decorations.inline": true,
 "sentry.organization": "sourcegraph",
 "sentry.projects": [
-    "name": "Dev env errors",
-    "projectId": "213332",
-    "linePatterns": ["errors\\.New\\(['\"`](.*)['\"`]\\)"],
-    "filters": [
-        {
-            "repositories": ["sourcegraph\/sourcegraph", "sourcegraph\/dev-repo"],
-            "files": ["/auth\/.*.go?/"],
-        },
-        {
-            "repositories": ["/dev-env/"]
-        }
-    ],
+  "name": "Dev env errors",
+  "projectId": "213332",
+  "linePatterns": ["errors\\.New\\(['\"`](.*)['\"`]\\)"],
+  "filters": [
+      {
+          "repositories": ["sourcegraph\/sourcegraph", "sourcegraph\/dev-repo"],
+          "files": ["/auth\/.*.go?/"],
+      },
+      {
+          "repositories": ["/dev-env/"]
+      }
+  ],
 ]
 
-  ```
+```
 
-  - [On Sourcegraph](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/cmd/frontend/auth/user_test.go#L54:19)
-  - [On GitHub](https://github.com/sourcegraph/sourcegraph/blob/master/cmd/frontend/auth/user_test.go#L54)
+- [On Sourcegraph](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/cmd/frontend/auth/user_test.go#L54:19)
+- [On GitHub](https://github.com/sourcegraph/sourcegraph/blob/master/cmd/frontend/auth/user_test.go#L54)
 
 - JavaScript
 
