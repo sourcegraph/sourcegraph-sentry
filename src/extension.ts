@@ -117,16 +117,15 @@ export function buildDecorations(
     missingConfigData: string[],
     documentText: string,
     sentryProjectId?: string,
-    linePatterns?: RegExp[]
+    linePatterns?: string[]
 ): sourcegraph.TextDocumentDecoration[] {
     const decorations: sourcegraph.TextDocumentDecoration[] = []
 
     for (const [index, line] of documentText.split('\n').entries()) {
         let match: RegExpExecArray | null
 
-        for (let pattern of linePatterns && linePatterns.length > 0 ? linePatterns : COMMON_ERRORLOG_PATTERNS) {
-            pattern = new RegExp(pattern, 'gi')
-
+        const patterns = linePatterns ? linePatterns.map(s => new RegExp(s, 'gi')) : COMMON_ERRORLOG_PATTERNS
+        for (const pattern of patterns) {
             do {
                 match = pattern.exec(line)
                 // Depending on the line matching pattern the query m is indexed in position 1 or 2.

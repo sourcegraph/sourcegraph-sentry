@@ -16,6 +16,8 @@ describe('activation', () => {
     })
 })
 
+const asString = (re: RegExp): string => re.source
+
 const projects: SentryProject[] = [
     {
         name: 'Webapp typescript errors',
@@ -24,11 +26,11 @@ const projects: SentryProject[] = [
             /throw new Error+\(['"]([^'"]+)['"]\)/,
             /console\.(warn|debug|info|error|log)\(['"`]([^'"`]+)['"`]\)/,
             /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/,
-        ],
+        ].map(asString),
         filters: [
             {
-                repositories: [/sourcegraph\/sourcegraph/, /bucket/],
-                files: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/],
+                repositories: [/sourcegraph\/sourcegraph/, /bucket/].map(asString),
+                files: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/].map(asString),
             },
         ],
     },
@@ -36,11 +38,11 @@ const projects: SentryProject[] = [
     {
         name: 'Dev env errors',
         projectId: '213332',
-        linePatterns: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/],
+        linePatterns: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/].map(asString),
         filters: [
             {
-                repositories: [/dev-repo/],
-                files: [/(dev)\/.*\\.go?/],
+                repositories: [/dev-repo/].map(asString),
+                files: [/(dev)\/.*\\.go?/].map(asString),
             },
         ],
     },
@@ -65,22 +67,22 @@ describe('resolveSettings()', () => {
                         /throw new Error+\(['"]([^'"]+)['"]\)/,
                         /console\.(warn|debug|info|error|log)\(['"`]([^'"`]+)['"`]\)/,
                         /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/,
-                    ],
+                    ].map(asString),
                     filters: [
                         {
-                            repositories: [/sourcegraph\/sourcegraph/, /bucket/],
-                            files: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/],
+                            repositories: [/sourcegraph\/sourcegraph/, /bucket/].map(asString),
+                            files: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/].map(asString),
                         },
                     ],
                 },
                 {
                     projectId: '213332',
                     name: 'Dev env errors',
-                    linePatterns: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/],
+                    linePatterns: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/].map(asString),
                     filters: [
                         {
-                            repositories: [/dev-repo/],
-                            files: [/(dev)\/.*\\.go?/],
+                            repositories: [/dev-repo/].map(asString),
+                            files: [/(dev)\/.*\\.go?/].map(asString),
                         },
                     ],
                 },
@@ -461,5 +463,5 @@ describe('buildDecorations()', () => {
         /throw new Error+\(['"]([^'"]+)['"]\)/,
         /console\.(warn|debug|info|error|log)\(['"`]([^'"`]+)['"`]\)/,
         /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/,
-    ]
+    ].map(asString)
 })

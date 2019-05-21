@@ -9,6 +9,8 @@ mock('sourcegraph', sourcegraph)
 import { createDecoration, findEmptyConfigs, getParamsFromUriPath, matchSentryProject } from '../handler'
 import { SentryProject } from '../settings'
 
+const asString = (re: RegExp): string => re.source
+
 const projects: SentryProject[] = [
     {
         name: 'Webapp typescript errors',
@@ -17,42 +19,42 @@ const projects: SentryProject[] = [
             /throw new Error+\(['"]([^'"]+)['"]\)/,
             /console\.(warn|debug|info|error|log)\(['"`]([^'"`]+)['"`]\)/,
             /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/,
-        ],
+        ].map(asString),
         filters: [
             {
-                repositories: [/sourcegraph\/sourcegraph/, /bucket/],
-                files: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/],
+                repositories: [/sourcegraph\/sourcegraph/, /bucket/].map(asString),
+                files: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/].map(asString),
             },
         ],
     },
     {
         name: 'Dev env errors',
         projectId: '213332',
-        linePatterns: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/],
+        linePatterns: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/].map(asString),
         filters: [
             {
-                repositories: [/dev-repo/],
-                files: [/dev\/.*.go?/],
+                repositories: [/dev-repo/].map(asString),
+                files: [/dev\/.*.go?/].map(asString),
             },
         ],
     },
     {
         name: 'docs pages errors',
         projectId: '544533',
-        linePatterns: [/throw new Error+\(['"]([^'"]+)['"]\)/],
+        linePatterns: [/throw new Error+\(['"]([^'"]+)['"]\)/].map(asString),
         filters: [
             {
-                repositories: [/sourcegraph\/docs/],
+                repositories: [/sourcegraph\/docs/].map(asString),
             },
         ],
     },
     {
         name: 'dot com errors',
         projectId: '242677',
-        linePatterns: [/throw new Error+\(['"]([^'"]+)['"]\)/],
+        linePatterns: [/throw new Error+\(['"]([^'"]+)['"]\)/].map(asString),
         filters: [
             {
-                files: [/\.tsx?/],
+                files: [/\.tsx?/].map(asString),
             },
         ],
     },
@@ -158,17 +160,17 @@ describe('matchSentryProject', () => {
     }
 })
 
-const incompleteConfigs = [
+const incompleteConfigs: { goal: string; settings: SentryProject; expected: string[] }[] = [
     {
         goal: 'returns one missing config',
         settings: {
             name: 'sourcegraph',
             projectId: '1334031',
-            linePatterns: [/logger\.debug\(['"`]([^'"`]+)['"`]\);/],
+            linePatterns: [/logger\.debug\(['"`]([^'"`]+)['"`]\);/].map(asString),
             filters: [
                 {
                     repositories: undefined,
-                    files: [/(web|shared|src).*\.java?/, /(dev|src).*\.java?/, /.java?/],
+                    files: [/(web|shared|src).*\.java?/, /(dev|src).*\.java?/, /.java?/].map(asString),
                 },
             ],
         },
@@ -179,11 +181,11 @@ const incompleteConfigs = [
         settings: {
             name: 'sourcegraph',
             projectId: '',
-            linePatterns: [/logger\.debug\(['"`]([^'"`]+)['"`]\);/],
+            linePatterns: [/logger\.debug\(['"`]([^'"`]+)['"`]\);/].map(asString),
             filters: [
                 {
                     repositories: undefined,
-                    files: [/(web|shared|src).*\.java?/, /(dev|src).*\.java?/, /.java?/],
+                    files: [/(web|shared|src).*\.java?/, /(dev|src).*\.java?/, /.java?/].map(asString),
                 },
             ],
         },
