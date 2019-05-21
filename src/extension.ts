@@ -62,14 +62,10 @@ export function activate(context: sourcegraph.ExtensionContext): void {
                     if (!sentryProjects) {
                         const decorations = buildDecorations(['settings'], editor.document.text)
                         editor.setDecorations(DECORATION_TYPE, decorations)
-                    }
-
-                    const decorations = getDecorations(editor.document.uri, editor.document.text, sentryProjects)
-
-                    if (decorations.length === 0) {
                         return
                     }
 
+                    const decorations = getDecorations(editor.document.uri, editor.document.text, sentryProjects)
                     editor.setDecorations(DECORATION_TYPE, decorations)
                 }
             })
