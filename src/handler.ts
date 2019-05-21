@@ -68,12 +68,12 @@ export function matchSentryProject(params: Params, projects: SentryProject[]): M
     return null
 }
 
-function matchesRepository(repository: string[], repoParam: string): boolean {
-    return !!repository.find(repo => !!new RegExp(repo).exec(repoParam))
+function matchesRepository(repositories: string[], repoParam: string): boolean {
+    return repositories.some(repo => !!new RegExp(repo).exec(repoParam))
 }
 
-function matchesFile(file: string[], fileParam: string): boolean {
-    return file.some(file => !!new RegExp(file).exec(fileParam))
+function matchesFile(files: string[], fileParam: string): boolean {
+    return files.some(file => !!new RegExp(file).exec(fileParam))
 }
 
 /**
