@@ -31,8 +31,8 @@ export function getParamsFromUriPath(textDocumentURI: string): Params {
 }
 
 interface Matched {
-    project: SentryProject | undefined | false
-    fileMatched: boolean | undefined
+    project: SentryProject
+    missingConfigs: string[]
 }
 /**
  * Verify if the params from the document URI match with the repo and file formats specified
@@ -42,62 +42,30 @@ interface Matched {
  * @param projects Sentry extension projects configurations.
  * @return Sentry projectID this document reports to.
  */
-export function matchSentryProject(params: Params, projects: SentryProject[]): Matched {
-    let matched: Matched = { project: undefined, fileMatched: undefined }
-
+export function matchSentryProject(params: Params, projects: SentryProject[]): Matched | null {
     if (!projects || !params.repo || !params.file) {
-        return matched
+        return null
     }
-
     // Check if a Sentry project is associated with this document's repository and/or file and retrieve the project.
     // TODO: Handle the null case instead of using a non-null assertion !
     // TODO: Handle cases where the wrong project is matched due to similar repo name,
     // e.g. `sourcegraph-jetbrains` repo will match the `sourcegraph` project
     for (const project of projects) {
+        const missingConfigs = findEmptyConfigs(project)
+
         for (const filter of project.filters) {
-            // if repository and file filter are grouped
-            if (filter.repository && filter.file) {
-                // both repository and file match
-                if (matchesRepository(filter.repository, params.repo) && matchesFile(filter.file, params.file)) {
-                    matched = { project, fileMatched: true }
-                }
-                // repository doesn't match and file matches
-                if (!matchesRepository(filter.repository, params.repo) && matchesFile(filter.file, params.file)) {
-                    matched = { project: undefined, fileMatched: true }
-                }
-                // repository matches and file does not match
-                if (matchesRepository(filter.repository, params.repo) && !matchesFile(filter.file, params.file)) {
-                    matched = { project, fileMatched: false }
-                }
-                // repository doesn't match and file does not match
-                if (!matchesRepository(filter.repository, params.repo) && !matchesFile(filter.file, params.file)) {
-                    matched = { project: undefined, fileMatched: false }
-                }
-            }
-            // repository matches and there is no filter for file matching
-            if (
-                (!filter.file || filter.file.length === 0) &&
-                filter.repository &&
-                matchesRepository(filter.repository, params.repo)
-            ) {
-                matched = { project, fileMatched: undefined }
-            }
-            // file matches and there is no filter for repository matching
-            if (
-                (!filter.repository || filter.repository.length === 0) &&
-                filter.file &&
-                matchesFile(filter.file, params.file)
-            ) {
-                matched = { project, fileMatched: true }
+            // both repository and file match
+            if (filter.files && !matchesFile(filter.files, params.file)) {
+                break
             }
 
-            // if project is matched return project
-            if (matched.project) {
-                return matched
+            if (filter.repositories && !matchesRepository(filter.repositories, params.repo)) {
+                break
             }
+            return { project, missingConfigs }
         }
     }
-    return matched
+    return null
 }
 
 function matchesRepository(repository: RegExp[], repoParam: string): boolean {
@@ -145,7 +113,7 @@ export function createDecoration(
             hover: ' Please fill out the configurations in your Sentry extension settings.',
         }
     }
-    if (missingConfigData.includes('repository')) {
+    if (missingConfigData.includes('repositories')) {
         return {
             content: ' View logs in Sentry (❕)» ',
             hover: ' Add this repository to your Sentry extension settings for project matching.',

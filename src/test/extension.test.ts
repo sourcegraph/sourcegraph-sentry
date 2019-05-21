@@ -27,8 +27,8 @@ const projects: SentryProject[] = [
         ],
         filters: [
             {
-                repository: [/sourcegraph\/sourcegraph/, /bucket/],
-                file: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/],
+                repositories: [/sourcegraph\/sourcegraph/, /bucket/],
+                files: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/],
             },
         ],
     },
@@ -39,8 +39,8 @@ const projects: SentryProject[] = [
         linePatterns: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/],
         filters: [
             {
-                repository: [/dev-repo/],
-                file: [/(dev)\/.*\\.go?/],
+                repositories: [/dev-repo/],
+                files: [/(dev)\/.*\\.go?/],
             },
         ],
     },
@@ -68,8 +68,8 @@ describe('resolveSettings()', () => {
                     ],
                     filters: [
                         {
-                            repository: [/sourcegraph\/sourcegraph/, /bucket/],
-                            file: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/],
+                            repositories: [/sourcegraph\/sourcegraph/, /bucket/],
+                            files: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/],
                         },
                     ],
                 },
@@ -79,8 +79,8 @@ describe('resolveSettings()', () => {
                     linePatterns: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/],
                     filters: [
                         {
-                            repository: [/dev-repo/],
-                            file: [/(dev)\/.*\\.go?/],
+                            repositories: [/dev-repo/],
+                            files: [/(dev)\/.*\\.go?/],
                         },
                     ],
                 },
@@ -114,7 +114,7 @@ const decorateLineInput = [
         goal: 'warns about incomplete config with missing repository',
         index: 1,
         match: 'cannot determine file path',
-        missingConfigData: ['repository'],
+        missingConfigData: ['repositories'],
         sentryProjectId: '134412',
         expected: {
             range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
@@ -133,7 +133,7 @@ const decorateLineInput = [
         goal: 'warns about incomplete config with missing repository and file patterns',
         index: 1,
         match: 'cannot determine file path',
-        missingConfigData: ['repository', 'file'],
+        missingConfigData: ['repositories', 'files'],
         sentryProjectId: '134412',
         expected: {
             range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
@@ -152,7 +152,7 @@ const decorateLineInput = [
         goal: 'renders warning link hinting to add projectId and render link to general issues page',
         index: 1,
         match: 'cannot determine file path',
-        missingConfigData: ['file'],
+        missingConfigData: ['files'],
         sentryProjectId: undefined,
         expected: {
             range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
@@ -171,7 +171,7 @@ const decorateLineInput = [
             'matches line based on common pattern, render warning link hinting to add projectId and render link to general issues page',
         index: 1,
         match: '',
-        missingConfigData: ['file'],
+        missingConfigData: ['files'],
         sentryProjectId: undefined,
         expected: {
             range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
@@ -344,6 +344,7 @@ const supportedLanguageCode = [
         code: `// ErrInvalidToken is returned by DiscussionMailReplyTokens.Get when the token is invalid
     var ErrInvalidToken = errors.New("invalid token")
     // Get returns the user and thread ID found for the given token. If there`,
+        missingConfig: ['sentryProjectId'],
         expected: {
             range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
             isWholeLine: true,
@@ -361,6 +362,7 @@ const supportedLanguageCode = [
         code: `        if (!headFilePath) {
         throw new Error('cannot determine file path')
     }`,
+        missingConfig: ['sentryProjectId'],
         expected: {
             range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
             isWholeLine: true,
@@ -377,6 +379,7 @@ const supportedLanguageCode = [
         lang: 'python',
         code: `def create_app():
             raise TypeError('bad bad factory!')`,
+        missingConfig: ['sentryProjectId'],
         expected: {
             range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
             isWholeLine: true,
@@ -394,6 +397,7 @@ const supportedLanguageCode = [
         code: `   } catch (UnsupportedEncodingException err) {
             logger.debug("failed to build URL");
             err.printStackTrace();`,
+        missingConfig: ['sentryProjectId'],
         expected: {
             range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
             isWholeLine: true,
@@ -402,6 +406,25 @@ const supportedLanguageCode = [
                 color: 'rgba(255, 255, 255, 0.8)',
                 contentText: ' View logs in Sentry (❕)» ',
                 hoverMessage: ' Add Sentry projects to your Sentry extension settings for project matching.',
+                linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
+            },
+        },
+    },
+    {
+        // should render a link with warning to setup settings
+        lang: 'go',
+        code: `// ErrInvalidToken is returned by DiscussionMailReplyTokens.Get when the token is invalid
+    var ErrInvalidToken = errors.New("invalid token")
+    // Get returns the user and thread ID found for the given token. If there`,
+        missingConfig: ['settings'],
+        expected: {
+            range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
+            isWholeLine: true,
+            after: {
+                backgroundColor: '#f2736d',
+                color: 'rgba(255, 255, 255, 0.8)',
+                contentText: ' Configure the Sentry extension to view logs (❕)» ',
+                hoverMessage: ' Please fill out the configurations in your Sentry extension settings.',
                 linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
             },
         },
@@ -424,7 +447,7 @@ describe('buildDecorations()', () => {
     projects[0].linePatterns = []
     for (const [, codeExample] of supportedLanguageCode.entries()) {
         it('check common pattern matching for ' + codeExample.lang, () =>
-            expect(buildDecorations([], codeExample.code)).toEqual([codeExample.expected])
+            expect(buildDecorations(codeExample.missingConfig, codeExample.code)).toEqual([codeExample.expected])
         )
     }
     for (const [, codeExample] of unsupportedLanguageCode.entries()) {
@@ -432,6 +455,7 @@ describe('buildDecorations()', () => {
             expect(buildDecorations([], codeExample.code)).toEqual([])
         )
     }
+    it('should not render anything due to missing code ', () => expect(buildDecorations([], '')).toEqual([]))
     // set linePatterns back to original state for the other tests
     projects[0].linePatterns = [
         /throw new Error+\(['"]([^'"]+)['"]\)/,

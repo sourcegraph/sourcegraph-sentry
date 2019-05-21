@@ -1,7 +1,7 @@
 import { BehaviorSubject, combineLatest, from } from 'rxjs'
 import { filter, switchMap } from 'rxjs/operators'
 import * as sourcegraph from 'sourcegraph'
-import { createDecoration, findEmptyConfigs, getParamsFromUriPath, matchSentryProject } from './handler'
+import { createDecoration, getParamsFromUriPath, matchSentryProject } from './handler'
 import { resolveSettings, SentryProject, Settings } from './settings'
 
 /**
@@ -51,10 +51,17 @@ export function activate(context: sourcegraph.ExtensionContext): void {
                 const sentryProjects = settings['sentry.projects']
 
                 if (editor.document.text) {
-                    const decorationSettings = settings['sentry.decorations.inline']
-                    if (!decorationSettings) {
+                    const showDecorations = settings['sentry.decorations.inline']
+                    if (!showDecorations) {
                         editor.setDecorations(DECORATION_TYPE, []) // clear decorations
                         return
+                    }
+
+                    // render links by matching common error handling code
+                    // TODO: safegaurd for when sentryProjects is an empty array
+                    if (!sentryProjects) {
+                        const decorations = buildDecorations(['settings'], editor.document.text)
+                        editor.setDecorations(DECORATION_TYPE, decorations)
                     }
 
                     const decorations = getDecorations(editor.document.uri, editor.document.text, sentryProjects)
@@ -83,28 +90,18 @@ export function getDecorations(
 ): sourcegraph.TextDocumentDecoration[] {
     const params: Params = getParamsFromUriPath(documentUri)
     const matched = sentryProjects && matchSentryProject(params, sentryProjects)
-    let missingConfigData: string[] = []
 
     // Do not decorate lines if the document file format does not match the
     // file matching patterns listed in the Sentry extension configurations.
-    if (matched && matched.fileMatched === false) {
+    if (!matched) {
         return []
     }
-    if (matched && matched.project) {
-        missingConfigData = findEmptyConfigs(matched.project)
-
-        return buildDecorations(
-            missingConfigData,
-            documentText,
-            matched.project.projectId,
-            matched.project.linePatterns
-        )
-    }
-    if (matched && !matched.project) {
-        missingConfigData.push('repository')
-        return buildDecorations(missingConfigData, documentText)
-    }
-    return buildDecorations(missingConfigData, documentText)
+    return buildDecorations(
+        matched.missingConfigs,
+        documentText,
+        matched.project.projectId,
+        matched.project.linePatterns
+    )
 }
 
 /**

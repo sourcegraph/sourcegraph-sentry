@@ -16,8 +16,8 @@ export interface SentryProject {
     // RexExp patterns to match log handeling code, e.g. /log\.(Printf|Print)\(['"]([^'"]+)['"]\)/
     linePatterns: RegExp[]
     filters: {
-        repository?: RegExp[]
-        file?: RegExp[]
+        repositories?: RegExp[]
+        files?: RegExp[]
     }[]
 
     // TODO: Add these to v1.

@@ -20,8 +20,8 @@ const projects: SentryProject[] = [
         ],
         filters: [
             {
-                repository: [/sourcegraph\/sourcegraph/, /bucket/],
-                file: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/],
+                repositories: [/sourcegraph\/sourcegraph/, /bucket/],
+                files: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/],
             },
         ],
     },
@@ -31,8 +31,8 @@ const projects: SentryProject[] = [
         linePatterns: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/],
         filters: [
             {
-                repository: [/dev-repo/],
-                file: [/dev\/.*.go?/],
+                repositories: [/dev-repo/],
+                files: [/dev\/.*.go?/],
             },
         ],
     },
@@ -42,7 +42,7 @@ const projects: SentryProject[] = [
         linePatterns: [/throw new Error+\(['"]([^'"]+)['"]\)/],
         filters: [
             {
-                repository: [/sourcegraph\/docs/],
+                repositories: [/sourcegraph\/docs/],
             },
         ],
     },
@@ -52,7 +52,7 @@ const projects: SentryProject[] = [
         linePatterns: [/throw new Error+\(['"]([^'"]+)['"]\)/],
         filters: [
             {
-                file: [/\.tsx?/],
+                files: [/\.tsx?/],
             },
         ],
     },
@@ -99,7 +99,7 @@ const paramsInput = [
             repo: 'sourcegraph/sourcegraph',
             file: 'web/src/storm/index.tsx',
         },
-        expected: { project: projects[0], fileMatched: true },
+        expected: { project: projects[0], missingConfigs: [] },
     },
     {
         goal: 'returns a dev project that matches the repo and file patterns',
@@ -107,7 +107,7 @@ const paramsInput = [
             repo: 'sourcegraph/dev-repo',
             file: 'dev/backend/main.go',
         },
-        expected: { project: projects[1], fileMatched: true },
+        expected: { project: projects[1], missingConfigs: [] },
     },
     {
         goal: 'returns file false for not matching file patterns',
@@ -115,7 +115,7 @@ const paramsInput = [
             repo: 'sourcegraph/dev-repo',
             file: 'dev/test/start.rb',
         },
-        expected: { project: projects[1], fileMatched: false },
+        expected: null,
     },
     {
         goal: 'returns undefined for not matching repo and false for not matching file patterns',
@@ -123,7 +123,7 @@ const paramsInput = [
             repo: 'sourcegraph/test-repo',
             file: 'dev/test/start.rb',
         },
-        expected: { project: undefined, fileMatched: false },
+        expected: null,
     },
     {
         goal: 'returns undefined for not matching repo and file patterns',
@@ -131,7 +131,7 @@ const paramsInput = [
             repo: 'sourcegraph/test-repo',
             file: 'dev/test/start.rb',
         },
-        expected: { project: undefined, fileMatched: false },
+        expected: null,
     },
     {
         goal: 'returns project for matching repo and undefined for not having file patterns',
@@ -139,7 +139,7 @@ const paramsInput = [
             repo: 'sourcegraph/docs',
             file: 'src/development/tutorial.tsx',
         },
-        expected: { project: projects[2], fileMatched: undefined },
+        expected: { project: projects[2], missingConfigs: [] },
     },
     {
         goal: 'returns project for matching file patterns',
@@ -147,7 +147,7 @@ const paramsInput = [
             repo: 'sourcegraph/website',
             file: 'web/search/start.tsx',
         },
-        expected: { project: projects[3], fileMatched: true },
+        expected: { project: projects[3], missingConfigs: [] },
     },
 ]
 
@@ -167,12 +167,12 @@ const incompleteConfigs = [
             linePatterns: [/logger\.debug\(['"`]([^'"`]+)['"`]\);/],
             filters: [
                 {
-                    repository: undefined,
-                    file: [/(web|shared|src).*\.java?/, /(dev|src).*\.java?/, /.java?/],
+                    repositories: undefined,
+                    files: [/(web|shared|src).*\.java?/, /(dev|src).*\.java?/, /.java?/],
                 },
             ],
         },
-        expected: ['settings.filters[0].repository'],
+        expected: ['settings.filters[0].repositories'],
     },
     {
         goal: 'returns two missing configs',
@@ -182,12 +182,12 @@ const incompleteConfigs = [
             linePatterns: [/logger\.debug\(['"`]([^'"`]+)['"`]\);/],
             filters: [
                 {
-                    repository: undefined,
-                    file: [/(web|shared|src).*\.java?/, /(dev|src).*\.java?/, /.java?/],
+                    repositories: undefined,
+                    files: [/(web|shared|src).*\.java?/, /(dev|src).*\.java?/, /.java?/],
                 },
             ],
         },
-        expected: ['settings.projectId', 'settings.filters[0].repository'],
+        expected: ['settings.projectId', 'settings.filters[0].repositories'],
     },
 ]
 
@@ -217,7 +217,7 @@ const createDecorationInputs = [
     },
     {
         goal: 'informs user to add the repository to their Sentry settings.',
-        params: { missingConfigData: ['repository'], sentryOrg: 'sourcegraph' },
+        params: { missingConfigData: ['repositories'], sentryOrg: 'sourcegraph' },
         expected: {
             content: ' View logs in Sentry (❕)» ',
             hover: ' Add this repository to your Sentry extension settings for project matching.',
@@ -225,11 +225,11 @@ const createDecorationInputs = [
     },
     {
         goal: 'informs user to add to add missing configs to their Sentry settings.',
-        params: { missingConfigData: ['linePatterns', 'file'], sentryProjectId: '1334031', sentryOrg: 'sourcegraph' },
+        params: { missingConfigData: ['linePatterns', 'files'], sentryProjectId: '1334031', sentryOrg: 'sourcegraph' },
         expected: {
             content: ' View logs in Sentry (❕)» ',
             hover:
-                ' Please fill out the following configurations in your Sentry extension settings: linePatterns, file',
+                ' Please fill out the following configurations in your Sentry extension settings: linePatterns, files',
         },
     },
 ]
