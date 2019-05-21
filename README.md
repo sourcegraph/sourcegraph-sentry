@@ -1,6 +1,6 @@
 # Sentry extension
 
-[![build](https://travis-ci.org/sourcegraph/sentry.svg?branch=master)](https://travis-ci.org/sourcegraph/sentry)
+[![build](https://travis-ci.org/sourcegraph/sourcegraph-sentry.svg?branch=master)](https://travis-ci.org/sourcegraph/sentry)
 [![codecov](https://codecov.io/gh/sourcegraph/sentry/branch/master/graph/badge.svg)](https://codecov.io/gh/sourcegraph/sourcegraph-sentry)
 
 Sentry helps devs track, organize and break down errors more efficiently, facilitating their debug process. We want to make it more convenient for developers to access Sentry's error tracking tools directly from the code that is doing the error handling, code such as `throw new Error(QUERY)`, `console.log(QUERY)`, `console.error(QUERY)` etc..
