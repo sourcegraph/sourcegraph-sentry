@@ -1,110 +1,207 @@
+import { createStubExtensionContext, createStubSourcegraphAPI } from '@sourcegraph/extension-api-stubs'
 import expect from 'expect'
 import mock from 'mock-require'
-import { createMockSourcegraphAPI, projects } from './stubs'
 
-const sourcegraph = createMockSourcegraphAPI()
-// For modules importing Range/Location/URI/etc
+const sourcegraph = createStubSourcegraphAPI()
+// For modules importing Range/Location/Position/URI/etc
 mock('sourcegraph', sourcegraph)
 
-import { decorateEditor, decorateLine, getDecorations } from '../extension'
+import { activate, buildDecorations, decorateLine, getDecorations } from '../extension'
+import { resolveSettings, SentryProject } from '../settings'
 
-describe('extension', () => {
-    it('works', () => void 0)
+describe('activation', () => {
+    it('does not throw an error', () => {
+        const context = createStubExtensionContext()
+        expect(activate(context)).toEqual(void 0)
+    })
 })
 
-const data = [
+const asString = (re: RegExp): string => re.source
+
+const projects: SentryProject[] = [
     {
-        goal: 'render complete Sentry link',
+        name: 'Webapp typescript errors',
+        projectId: '1334031',
+        linePatterns: [
+            /throw new Error+\(['"]([^'"]+)['"]\)/,
+            /console\.(warn|debug|info|error|log)\(['"`]([^'"`]+)['"`]\)/,
+            /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/,
+        ].map(asString),
+        filters: [
+            {
+                repositories: [/sourcegraph\/sourcegraph/, /bucket/].map(asString),
+                files: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/].map(asString),
+            },
+        ],
+    },
+
+    {
+        name: 'Dev env errors',
+        projectId: '213332',
+        linePatterns: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/].map(asString),
+        filters: [
+            {
+                repositories: [/dev-repo/].map(asString),
+                files: [/(dev)\/.*\\.go?/].map(asString),
+            },
+        ],
+    },
+]
+
+const setDefaults = async () => {
+    await sourcegraph.configuration.get().update('sentry.organization', 'sourcegraph')
+    await sourcegraph.configuration.get().update('sentry.projects', projects)
+}
+
+describe('resolveSettings()', () => {
+    beforeEach(setDefaults)
+    it('should return configuration with applied defaults', () => {
+        const settings = {
+            'sentry.decorations.inline': false,
+            'sentry.organization': 'sourcegraph',
+            'sentry.projects': [
+                {
+                    projectId: '1334031',
+                    name: 'Webapp typescript errors',
+                    linePatterns: [
+                        /throw new Error+\(['"]([^'"]+)['"]\)/,
+                        /console\.(warn|debug|info|error|log)\(['"`]([^'"`]+)['"`]\)/,
+                        /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/,
+                    ].map(asString),
+                    filters: [
+                        {
+                            repositories: [/sourcegraph\/sourcegraph/, /bucket/].map(asString),
+                            files: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/].map(asString),
+                        },
+                    ],
+                },
+                {
+                    projectId: '213332',
+                    name: 'Dev env errors',
+                    linePatterns: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/].map(asString),
+                    filters: [
+                        {
+                            repositories: [/dev-repo/].map(asString),
+                            files: [/(dev)\/.*\\.go?/].map(asString),
+                        },
+                    ],
+                },
+            ],
+        }
+        expect(resolveSettings(sourcegraph.configuration.get().value)).toEqual(settings)
+    })
+})
+
+const decorateLineInput = [
+    {
+        goal: 'renders complete Sentry link',
         index: 1,
         match: 'cannot determine file path',
         missingConfigData: [],
         sentryProjectId: '134412',
+        expected: {
+            range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
+            isWholeLine: true,
+            after: {
+                backgroundColor: '#e03e2f',
+                color: 'rgba(255, 255, 255, 0.8)',
+                contentText: ' View logs in Sentry » ',
+                hoverMessage: ' View logs in Sentry » ',
+                linkURL:
+                    'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+cannot+determine+file+path&statsPeriod=14d',
+            },
+        },
     },
     {
-        goal: 'warn about incomplete config with missing repoMatch',
+        goal: 'warns about incomplete config with missing repository',
         index: 1,
         match: 'cannot determine file path',
-        missingConfigData: ['repoMatch'],
+        missingConfigData: ['repositories'],
         sentryProjectId: '134412',
+        expected: {
+            range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
+            isWholeLine: true,
+            after: {
+                backgroundColor: '#f2736d',
+                color: 'rgba(255, 255, 255, 0.8)',
+                contentText: ' View logs in Sentry (❕)» ',
+                hoverMessage: ' Add this repository to your Sentry extension settings for project matching.',
+                linkURL:
+                    'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+cannot+determine+file+path&statsPeriod=14d',
+            },
+        },
     },
     {
-        goal: 'warn about incomplete config with missing repoMatch and fileMatch patterns',
+        goal: 'warns about incomplete config with missing repository and file patterns',
         index: 1,
         match: 'cannot determine file path',
-        missingConfigData: ['repoMatch', 'fileMatch'],
+        missingConfigData: ['repositories', 'files'],
         sentryProjectId: '134412',
+        expected: {
+            range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
+            isWholeLine: true,
+            after: {
+                backgroundColor: '#f2736d',
+                color: 'rgba(255, 255, 255, 0.8)',
+                contentText: ' View logs in Sentry (❕)» ',
+                hoverMessage: ' Add this repository to your Sentry extension settings for project matching.',
+                linkURL:
+                    'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+cannot+determine+file+path&statsPeriod=14d',
+            },
+        },
     },
     {
-        goal: 'render warning link hinting to add projectId and render link to general issues page',
+        goal: 'renders warning link hinting to add projectId and render link to general issues page',
         index: 1,
         match: 'cannot determine file path',
-        missingConfigData: ['repoMatch', 'fileMatch'],
+        missingConfigData: ['files'],
         sentryProjectId: undefined,
-    },
-]
-
-const decorationsList = [
-    {
-        range: new sourcegraph.Range(1, 0, 1, 0),
-        isWholeLine: true,
-        after: {
-            backgroundColor: '#e03e2f',
-            color: 'rgba(255, 255, 255, 0.8)',
-            contentText: ' View logs in Sentry » ',
-            hoverMessage: ' View logs in Sentry » ',
-            linkURL:
-                'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+cannot%20determine%20file%20path&statsPeriod=14d',
+        expected: {
+            range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
+            isWholeLine: true,
+            after: {
+                backgroundColor: '#f2736d',
+                color: 'rgba(255, 255, 255, 0.8)',
+                contentText: ' View logs in Sentry (❕)» ',
+                hoverMessage: ' Add Sentry projects to your Sentry extension settings for project matching.',
+                linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
+            },
         },
     },
     {
-        range: new sourcegraph.Range(1, 0, 1, 0),
-        isWholeLine: true,
-        after: {
-            backgroundColor: '#f2736d',
-            color: 'rgba(255, 255, 255, 0.8)',
-            contentText: ' View logs in Sentry (❕)» ',
-            hoverMessage: ' Please fill out the following configurations in your Sentry extension settings: repoMatch',
-            linkURL:
-                'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+cannot%20determine%20file%20path&statsPeriod=14d',
-        },
-    },
-    {
-        range: new sourcegraph.Range(1, 0, 1, 0),
-        isWholeLine: true,
-        after: {
-            backgroundColor: '#f2736d',
-            color: 'rgba(255, 255, 255, 0.8)',
-            contentText: ' View logs in Sentry (❕)» ',
-            hoverMessage:
-                ' Please fill out the following configurations in your Sentry extension settings: repoMatch, fileMatch',
-            linkURL:
-                'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+cannot%20determine%20file%20path&statsPeriod=14d',
-        },
-    },
-    {
-        range: new sourcegraph.Range(1, 0, 1, 0),
-        isWholeLine: true,
-        after: {
-            backgroundColor: '#f2736d',
-            color: 'rgba(255, 255, 255, 0.8)',
-            contentText: ' View logs in Sentry (❕)» ',
-            hoverMessage: ' Add Sentry projects to your Sentry extension settings for project matching.',
-            linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
+        goal:
+            'matches line based on common pattern, render warning link hinting to add projectId and render link to general issues page',
+        index: 1,
+        match: '',
+        missingConfigData: ['files'],
+        sentryProjectId: undefined,
+        expected: {
+            range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
+            isWholeLine: true,
+            after: {
+                backgroundColor: '#f2736d',
+                color: 'rgba(255, 255, 255, 0.8)',
+                contentText: ' View logs in Sentry (❕)» ',
+                hoverMessage: ' Add Sentry projects to your Sentry extension settings for project matching.',
+                linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
+            },
         },
     },
 ]
 
-describe('decorate line', () => {
-    for (const [i, deco] of data.entries()) {
-        it('decorates the line with the following goal: ' + deco.goal, () =>
-            expect(decorateLine(deco.index, deco.match, deco.missingConfigData, deco.sentryProjectId)).toEqual(
-                decorationsList[i]
-            )
+describe('decorateLine()', () => {
+    beforeEach(setDefaults)
+
+    for (const decoInput of decorateLineInput) {
+        it(decoInput.goal, () =>
+            expect(
+                decorateLine(decoInput.index, decoInput.match, decoInput.missingConfigData, decoInput.sentryProjectId)
+            ).toEqual(decoInput.expected)
         )
     }
 })
 
-const decorationsData = [
+const getDecorationsInput = [
     {
         goal: 'receive two decorations',
         documentUri:
@@ -119,6 +216,32 @@ const decorationsData = [
         if (!diffResolvedRev) {
             throw new Error('cannot determine delta info')
         },`,
+        expected: [
+            {
+                range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
+                isWholeLine: true,
+                after: {
+                    backgroundColor: '#e03e2f',
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    contentText: ' View logs in Sentry » ',
+                    hoverMessage: ' View logs in Sentry » ',
+                    linkURL:
+                        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+cannot+determine+file+path&statsPeriod=14d',
+                },
+            },
+            {
+                range: new sourcegraph.Range(new sourcegraph.Position(8, 0), new sourcegraph.Position(8, 0)),
+                isWholeLine: true,
+                after: {
+                    backgroundColor: '#e03e2f',
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    contentText: ' View logs in Sentry » ',
+                    hoverMessage: ' View logs in Sentry » ',
+                    linkURL:
+                        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+cannot+determine+delta+info&statsPeriod=14d',
+                },
+            },
+        ],
     },
     {
         goal: 'receive one decoration',
@@ -129,6 +252,20 @@ const decorationsData = [
         }
         return { ...rest, codeView, headFilePath, baseFilePath }
     }),`,
+        expected: [
+            {
+                range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
+                isWholeLine: true,
+                after: {
+                    backgroundColor: '#e03e2f',
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    contentText: ' View logs in Sentry » ',
+                    hoverMessage: ' View logs in Sentry » ',
+                    linkURL:
+                        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+cannot+determine+file+path&statsPeriod=14d',
+                },
+            },
+        ],
     },
     {
         goal: 'receive no decoration due to file format mismatch',
@@ -140,114 +277,191 @@ const decorationsData = [
 
         return { ...rest, codeView, headFilePath, baseFilePath }
     }),`,
+        expected: [],
     },
     {
         goal: 'receive no decoration due to no line matches',
         documentUri:
-            'git://github.com/sourcegraph/sourcegraph?c436567c152bf40668c75815ed3ce62983af942d#client/browser/src/libs/github/file_info.php',
+            'git://github.com/sourcegraph/sourcegraph?c436567c152bf40668c75815ed3ce62983af942d#client/browser/src/libs/github/empty.ts',
         documentText: `export const resolveDiffFileInfo = (codeView: HTMLElement): Observable<FileInfo> =>
 of(codeView).pipe(
     map(({ codeView, ...rest }) => {
         const { headFilePath, baseFilePath } = getDeltaFileName(codeView)
     }),`,
+        expected: [],
+    },
+    {
+        goal: 'receive no decoration due to empty textdocument',
+        documentUri:
+            'git://github.com/sourcegraph/sourcegraph?c436567c152bf40668c75815ed3ce62983af942d#client/browser/src/libs/github/file_info.php',
+        documentText: ``,
+        expected: [],
+    },
+    {
+        goal: 'receive one decoration on GitLab',
+        documentUri:
+            'git://gitlab.com/sourcegraph/sourcegraph?92a448bdda22fea9a422f37cf83d99edeaa7fe4c#client/browser/src/e2e/chrome.e2e.test.ts',
+        documentText: `if (!headFilePath) {
+            throw new Error('cannot determine file path')
+        }
+        return { ...rest, codeView, headFilePath, baseFilePath }
+    }),`,
+        expected: [
+            {
+                range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
+                isWholeLine: true,
+                after: {
+                    backgroundColor: '#e03e2f',
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    contentText: ' View logs in Sentry » ',
+                    hoverMessage: ' View logs in Sentry » ',
+                    linkURL:
+                        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+cannot+determine+file+path&statsPeriod=14d',
+                },
+            },
+        ],
+    },
+    {
+        goal: 'returns empty array due to missing documentUri, documentText and projects list',
+        documentUri: '',
+        documentText: ``,
+        expected: [],
     },
 ]
 
-const expectedDecorations = [
-    // receive two decorations
-    [
-        {
-            range: new sourcegraph.Range(1, 0, 1, 0),
-            isWholeLine: true,
-            after: {
-                backgroundColor: '#e03e2f',
-                color: 'rgba(255, 255, 255, 0.8)',
-                contentText: ' View logs in Sentry » ',
-                hoverMessage: ' View logs in Sentry » ',
-                linkURL:
-                    'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+cannot%20determine%20file%20path&statsPeriod=14d',
-            },
-        },
-        {
-            range: new sourcegraph.Range(8, 0, 8, 0),
-            isWholeLine: true,
-            after: {
-                backgroundColor: '#e03e2f',
-                color: 'rgba(255, 255, 255, 0.8)',
-                contentText: ' View logs in Sentry » ',
-                hoverMessage: ' View logs in Sentry » ',
-                linkURL:
-                    'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+cannot%20determine%20delta%20info&statsPeriod=14d',
-            },
-        },
-    ],
-    // receive one decoration
-    [
-        {
-            range: new sourcegraph.Range(1, 0, 1, 0),
-            isWholeLine: true,
-            after: {
-                backgroundColor: '#e03e2f',
-                color: 'rgba(255, 255, 255, 0.8)',
-                contentText: ' View logs in Sentry » ',
-                hoverMessage: ' View logs in Sentry » ',
-                linkURL:
-                    'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+cannot%20determine%20file%20path&statsPeriod=14d',
-            },
-        },
-    ],
-    // receive no decoration due to file format mismatch
-    [],
-    // receive no decoration due to no line matches
-    [],
-]
+describe('getDecorations()', () => {
+    beforeEach(setDefaults)
 
-describe('get Decorations', () => {
-    for (const [i, deco] of decorationsData.entries()) {
-        it('fulfills the following goal:' + deco.goal, () =>
-            expect(getDecorations(deco.documentUri, deco.documentText, projects)).toEqual(expectedDecorations[i])
+    for (const deco of getDecorationsInput) {
+        it(deco.goal, () =>
+            expect(getDecorations(deco.documentUri, deco.documentText, projects)).toEqual(deco.expected)
         )
     }
 })
 
 // make sure matching code is located on line 1 to ensure same start/end as decorationsList[3]
-const languageCode = [
+const supportedLanguageCode = [
     {
         lang: 'go',
         code: `// ErrInvalidToken is returned by DiscussionMailReplyTokens.Get when the token is invalid
     var ErrInvalidToken = errors.New("invalid token")
     // Get returns the user and thread ID found for the given token. If there`,
+        missingConfig: ['sentryProjectId'],
+        expected: {
+            range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
+            isWholeLine: true,
+            after: {
+                backgroundColor: '#f2736d',
+                color: 'rgba(255, 255, 255, 0.8)',
+                contentText: ' View logs in Sentry (❕)» ',
+                hoverMessage: ' Add Sentry projects to your Sentry extension settings for project matching.',
+                linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
+            },
+        },
     },
     {
         lang: 'typescript',
         code: `        if (!headFilePath) {
         throw new Error('cannot determine file path')
     }`,
+        missingConfig: ['sentryProjectId'],
+        expected: {
+            range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
+            isWholeLine: true,
+            after: {
+                backgroundColor: '#f2736d',
+                color: 'rgba(255, 255, 255, 0.8)',
+                contentText: ' View logs in Sentry (❕)» ',
+                hoverMessage: ' Add Sentry projects to your Sentry extension settings for project matching.',
+                linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
+            },
+        },
     },
     {
         lang: 'python',
         code: `def create_app():
             raise TypeError('bad bad factory!')`,
+        missingConfig: ['sentryProjectId'],
+        expected: {
+            range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
+            isWholeLine: true,
+            after: {
+                backgroundColor: '#f2736d',
+                color: 'rgba(255, 255, 255, 0.8)',
+                contentText: ' View logs in Sentry (❕)» ',
+                hoverMessage: ' Add Sentry projects to your Sentry extension settings for project matching.',
+                linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
+            },
+        },
     },
     {
         lang: 'java',
         code: `   } catch (UnsupportedEncodingException err) {
             logger.debug("failed to build URL");
             err.printStackTrace();`,
+        missingConfig: ['sentryProjectId'],
+        expected: {
+            range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
+            isWholeLine: true,
+            after: {
+                backgroundColor: '#f2736d',
+                color: 'rgba(255, 255, 255, 0.8)',
+                contentText: ' View logs in Sentry (❕)» ',
+                hoverMessage: ' Add Sentry projects to your Sentry extension settings for project matching.',
+                linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
+            },
+        },
+    },
+    {
+        // should render a link with warning to setup settings
+        lang: 'go',
+        code: `// ErrInvalidToken is returned by DiscussionMailReplyTokens.Get when the token is invalid
+    var ErrInvalidToken = errors.New("invalid token")
+    // Get returns the user and thread ID found for the given token. If there`,
+        missingConfig: ['settings'],
+        expected: {
+            range: new sourcegraph.Range(new sourcegraph.Position(1, 0), new sourcegraph.Position(1, 0)),
+            isWholeLine: true,
+            after: {
+                backgroundColor: '#f2736d',
+                color: 'rgba(255, 255, 255, 0.8)',
+                contentText: ' Configure the Sentry extension to view logs (❕)» ',
+                hoverMessage: ' Please fill out the configurations in your Sentry extension settings.',
+                linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
+            },
+        },
     },
 ]
 
-describe('decorate Editor', () => {
-    projects[0].patternProperties.lineMatches = []
-    for (const [i, codeExample] of languageCode.entries()) {
-        it('check common pattern matching for ' + languageCode[i].lang, () =>
-            expect(decorateEditor([], codeExample.code)).toEqual([decorationsList[3]])
+const unsupportedLanguageCode = [
+    {
+        lang: 'C++',
+        code: `   {
+            log_error("Exception occurred!");
+            throw;
+          }`,
+    },
+]
+
+describe('buildDecorations()', () => {
+    beforeEach(setDefaults)
+
+    projects[0].linePatterns = []
+    for (const [, codeExample] of supportedLanguageCode.entries()) {
+        it('check common pattern matching for ' + codeExample.lang, () =>
+            expect(buildDecorations(codeExample.missingConfig, codeExample.code)).toEqual([codeExample.expected])
         )
     }
-    // set lineMatches back to original state for the other tests
-    projects[0].patternProperties.lineMatches = [
+    for (const [, codeExample] of unsupportedLanguageCode.entries()) {
+        it('should not render due to unsupported language ' + codeExample.lang, () =>
+            expect(buildDecorations([], codeExample.code)).toEqual([])
+        )
+    }
+    it('should not render anything due to missing code ', () => expect(buildDecorations([], '')).toEqual([]))
+    // set linePatterns back to original state for the other tests
+    projects[0].linePatterns = [
         /throw new Error+\(['"]([^'"]+)['"]\)/,
         /console\.(warn|debug|info|error|log)\(['"`]([^'"`]+)['"`]\)/,
         /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/,
-    ]
+    ].map(asString)
 })

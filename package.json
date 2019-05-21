@@ -44,7 +44,6 @@
           "alt": "sentry.link.fileList",
           "when": "resource && !config.sentry.hideSentryButton"
         }
-
       ],
       "commandPalette": [
         {
@@ -89,22 +88,22 @@
               "repoMatches": {
                 "type": "array",
                 "items": {
-                    "type": "string"
-                  },
+                  "type": "string"
+                },
                 "description": "Regex to match repos associated to this Sentry project, e.g. github\\.com/sourcegraph/sourcegraph"
               },
               "fileMatches": {
                 "type": "array",
                 "items": {
-                    "type": "string"
-                  },
+                  "type": "string"
+                },
                 "description": "Regex to match files associated with this project, e.g. (web|shared)/.*\\.tsx?$"
               },
               "lineMatches": {
                 "type": "array",
                 "items": {
-                    "type": "string"
-                  },
+                  "type": "string"
+                },
                 "description": "Regex to match lines associated with this project, e.g. throw new Error\\([\"']([^'\"]+)[\"']\\)"
               }
             },
@@ -175,6 +174,7 @@
     "last 1 Safari versions"
   ],
   "devDependencies": {
+    "@sourcegraph/extension-api-stubs": "^0.2.0",
     "@sourcegraph/prettierrc": "^2.2.0",
     "@sourcegraph/tsconfig": "^4.0.0",
     "@sourcegraph/tslint-config": "^13.2.0",
@@ -188,17 +188,17 @@
     "lnfs-cli": "^2.1.0",
     "lodash": "^4.17.11",
     "mkdirp": "^0.5.1",
-    "mocha": "^6.1.2",
+    "mocha": "^6.1.4",
     "mock-require": "^3.0.3",
-    "nyc": "^13.3.0",
+    "nyc": "^14.1.0",
     "parcel-bundler": "^1.12.3",
     "prettier": "1.17.0",
-    "rxjs": "^6.4.0",
-    "sinon": "^7.3.1",
+    "rxjs": "^6.5.1",
+    "sinon": "^7.3.2",
     "source-map-support": "^0.5.12",
     "sourcegraph": "^23.0.1",
-    "ts-node": "^8.0.3",
-    "tslint": "^5.15.0",
-    "typescript": "^3.4.2"
+    "ts-node": "^8.1.0",
+    "tslint": "^5.16.0",
+    "typescript": "^3.4.5"
   }
 }
