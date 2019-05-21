@@ -35,24 +35,30 @@ Set the following configurations in your settings:
   {
     "name": "[Project name for the config overview, e.g. Webapp errors]",
     "projectId": "[Sentry project ID, e.g. "1334031"]",
-    "patternProperties": {
-      "repoMatches": "[RegExp[] repo names asociated with this Sentry project]",
-      "fileMatches": [
-          [RegExp[] that matches file format, e.g. "\\.tsx?"]
-        ],
-      "lineMatches": [
-        [RegExp[] that matches error handling code, e.g. "throw new Error+\\(['\"]([^'\"]+)['\"]\\)"],
+    "linePatterns": [
+        // List of RegExp patterns that match error handling code, e.g. "throw new Error+\\(['\"]([^'\"]+)['\"]\\)",
+        // !! Make sure to capture the error message in a RegExp group !!
       ]
+    "filters": {
+        [
+            "repositories": [
+                // List of RegExp repo names asociated with this Sentry project
+            ],
+            "files": [
+                // List of RegExp that matches file format, e.g. "\\.tsx?",
+                // or for more specific matching, folder matching, e.g. "(?:web|shared|src)\/.*\\.tsx?"
+        ],
     }
   }
 
 ```
+## Important features:
 
-File matches can also be narrowed down to certain folders by specifying this in the RegExp:
+File patterns can also be narrowed down to certain folders by specifying this in the RegExp:
 
 ```
 ...
-"fileMatches": ["(web|shared|src)\/.*\\.tsx?"]
+"files": ["(?:web|shared|src)\/.*\\.tsx?"]
 ...
 ```
 
@@ -63,22 +69,57 @@ File matches can also be narrowed down to certain folders by specifying this in 
   Configuration:
 
   ```
-  ...
-  "patternProperties": {
-      "repoMatches": "sourcegraph",
-      "fileMatches": ["([^'\"]+)\/.*\\.ts?"],
-      "lineMatches": [
-          "throw new Error+\\(['\"]([^'\"]+)['\"]\\)",
-          "console\\.(warn|debug|info|error)\\(['\"`]([^'\"`]+)['\"`]\\)"
-          ]
+"sentry.decorations.inline": true,
+"sentry.organization": "sourcegraph",
+"sentry.projects": [
+    {
+        "name": "sourcegraph",
+        "projectId": "1334031",
+        "linePatterns": [
+            "throw new Error+\\(['\"]([^'\"]+)['\"]\\)",
+            "console\\.(warn|debug|info|error)\\(['\"`]([^'\"`]+)['\"`]\\)"
+            ]
+        "filters": [
+            {
+                "repositories": "sourcegraph\/sourcegraph",
+                "files": ["web\/.*\\.ts?"],
+            },
+            {
+                "files": ["sourcegraph-subfolder\/.*\\.tsx?"]
+            }
+
+        ]
     }
+]
 
   ```
 
-  - [On Sourcegraph](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/client/browser/src/libs/github/file_info.ts#L16)
-  - [On GitHub](https://github.com/sourcegraph/sourcegraph/blob/master/client/browser/src/libs/github/file_info.ts#L16)
+  - [On Sourcegraph](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/browser/src/libs/github/file_info.ts#L22)
+  - [On GitHub](https://github.com/sourcegraph/sourcegraph/blob/master/browser/src/libs/github/file_info.ts#L22)
 
 - Go
+
+Configuration:
+
+  ```
+"sentry.decorations.inline": true,
+"sentry.organization": "sourcegraph",
+"sentry.projects": [
+    "name": "Dev env errors",
+    "projectId": "213332",
+    "linePatterns": ["errors\\.New\\(['\"`](.*)['\"`]\\)"],
+    "filters": [
+        {
+            "repositories": ["sourcegraph\/sourcegraph", "sourcegraph\/dev-repo"],
+            "files": ["/auth\/.*.go?/"],
+        },
+        {
+            "repositories": ["/dev-env/"]
+        }
+    ],
+]
+
+  ```
 
   - [On Sourcegraph](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/cmd/frontend/auth/user_test.go#L54:19)
   - [On GitHub](https://github.com/sourcegraph/sourcegraph/blob/master/cmd/frontend/auth/user_test.go#L54)
