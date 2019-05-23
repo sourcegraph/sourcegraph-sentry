@@ -18,15 +18,18 @@ export interface LineDecorationText {
  * @returns repo and file part of URI.
  */
 export function getParamsFromUriPath(textDocumentURI: string): Params {
-    // TODO: Support more than just GitHub & Gitlab.
-    // TODO: Safeguard for cases where repo/fileMatch are null.
-    const repoPattern = /(github\.com|gitlab\.com)\/([^\?\#\/]+\/[^\?\#\/]*)/gi
-    const filePattern = /#(.*\.(.*))$/gi
-    const repoMatch = repoPattern.exec(textDocumentURI)
-    const fileMatch = filePattern.exec(textDocumentURI)
+    if (textDocumentURI) {
+        const paramsRepo = new URL(textDocumentURI).pathname
+        const filePattern = /#(.*\.(.*))$/gi
+        const fileMatch = filePattern.exec(textDocumentURI)
+        return {
+            repo: paramsRepo,
+            file: fileMatch && fileMatch[1],
+        }
+    }
     return {
-        repo: repoMatch && repoMatch[2],
-        file: fileMatch && fileMatch[1],
+        repo: '',
+        file: null,
     }
 }
 
