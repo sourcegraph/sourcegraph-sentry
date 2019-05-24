@@ -37,7 +37,7 @@ Set the following configurations in your settings:
     "projectId": "[Sentry project ID, e.g. "1334031"]",
     "linePatterns": [
         // List of RegExp patterns that match error handling code, e.g. "throw new Error+\\(['\"]([^'\"]+)['\"]\\)",
-        // !! Make sure to capture the error message in a RegExp group and escape special characters to ensure compatability with JSON Schema!!
+        // !! Make sure to capture the error message in a RegExp group and escape special characters to ensure compatibility with JSON Schema!!
       ]
     "filters": {
         [
