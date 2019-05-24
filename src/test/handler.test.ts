@@ -78,13 +78,13 @@ describe('getParamsFromUriPath', () => {
             file: 'web/src/e2e/index.e2e.test.tsx',
         }))
 
-    it('return null if URI is corupt', () =>
+    it('returns null if URI is corrupted', () =>
         expect(getParamsFromUriPath('git://thisisnotavaliduri')).toEqual({
             repo: '',
             file: null,
         }))
 
-    it('return empty file if document has no file format', () =>
+    it('returns empty file if document has no file format', () =>
         expect(getParamsFromUriPath('git://github.com/sourcegraph/testrepo#formatless')).toEqual({
             repo: '/sourcegraph/testrepo',
             file: null,
@@ -93,7 +93,7 @@ describe('getParamsFromUriPath', () => {
 
 const paramsInput = [
     {
-        goal: 'returns a web project that matches the repo and file patterns',
+        goal: 'returns a web project that matches the repo and file patterns and an empty missingConfigs list',
         params: {
             repo: '/sourcegraph/sourcegraph',
             file: 'web/src/storm/index.tsx',
@@ -101,7 +101,7 @@ const paramsInput = [
         expected: { project: projects[0], missingConfigs: [] },
     },
     {
-        goal: 'returns a dev project that matches the repo and file patterns',
+        goal: 'returns a dev project that matches the repo and file patterns and an empty missingConfigs list',
         params: {
             repo: '/sourcegraph/dev-repo',
             file: 'dev/backend/main.go',
@@ -109,7 +109,7 @@ const paramsInput = [
         expected: { project: projects[1], missingConfigs: [] },
     },
     {
-        goal: 'returns file false for not matching file patterns',
+        goal: 'returns null for not matching file patterns',
         params: {
             repo: '/sourcegraph/dev-repo',
             file: 'dev/test/start.rb',
@@ -117,7 +117,7 @@ const paramsInput = [
         expected: null,
     },
     {
-        goal: 'returns undefined for not matching repo and false for not matching file patterns',
+        goal: 'returns null for not matching repo and file patterns',
         params: {
             repo: '/sourcegraph/test-repo',
             file: 'dev/test/start.rb',
@@ -125,15 +125,7 @@ const paramsInput = [
         expected: null,
     },
     {
-        goal: 'returns undefined for not matching repo and file patterns',
-        params: {
-            repo: '/sourcegraph/test-repo',
-            file: 'dev/test/start.rb',
-        },
-        expected: null,
-    },
-    {
-        goal: 'returns project for matching repo and undefined for not having file patterns',
+        goal: 'returns project for matching repo despite not having a files config and an empty missingConfigs list',
         params: {
             repo: '/sourcegraph/docs',
             file: 'src/development/tutorial.tsx',
@@ -141,7 +133,8 @@ const paramsInput = [
         expected: { project: projects[2], missingConfigs: [] },
     },
     {
-        goal: 'returns project for matching file patterns',
+        goal:
+            'returns project for matching file patterns despite not having a repositories config and an empty missingConfigs list',
         params: {
             repo: '/sourcegraph/website',
             file: 'web/search/start.tsx',
