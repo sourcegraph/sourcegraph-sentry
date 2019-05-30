@@ -38,7 +38,7 @@ Set the following configurations in your settings:
     "linePatterns": [
         // List of RegExp patterns that match error handling code, e.g. "throw new Error+\\(['\"]([^'\"]+)['\"]\\)",
         // !! Make sure to capture the error message in a RegExp group !!
-      ]
+      ],
     "filters": [
         // List of repositories/files filters
         {
