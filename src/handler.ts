@@ -17,19 +17,19 @@ export interface LineDecorationText {
  * @param textDocumentURI A document URI.
  * @returns repo and file part of URI.
  */
-export function getParamsFromUriPath(textDocumentURI: string): Params {
-    if (textDocumentURI) {
-        const paramsRepo = new URL(textDocumentURI).pathname
-        const filePattern = /#(.*\.(.*))$/gi
-        const fileMatch = filePattern.exec(textDocumentURI)
-        return {
-            repo: paramsRepo,
-            file: fileMatch && fileMatch[1],
-        }
+export function getParamsFromUriPath(textDocumentURI: string): Params | null {
+    let paramsRepo
+    let fileMatch
+    const filePattern = /#(.*\.(.*))$/gi
+    try {
+        paramsRepo = new URL(textDocumentURI).pathname
+        fileMatch = filePattern.exec(textDocumentURI)
+    } catch (err) {
+        return null
     }
     return {
-        repo: '',
-        file: null,
+        repo: paramsRepo,
+        file: fileMatch && fileMatch[1],
     }
 }
 
@@ -45,8 +45,8 @@ interface Matched {
  * @param projects Sentry extension projects configurations.
  * @return Sentry projectID this document reports to.
  */
-export function matchSentryProject(params: Params, projects: SentryProject[]): Matched | null {
-    if (!projects || !params.repo || !params.file) {
+export function matchSentryProject(params: Params | null, projects: SentryProject[]): Matched | null {
+    if (!projects || !params || !params.repo || !params.file) {
         return null
     }
     // Check if a Sentry project is associated with this document's repository and/or file and retrieve the project.
