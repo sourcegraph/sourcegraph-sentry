@@ -30,27 +30,33 @@ To work, the Sentry Sourcegraph extension must know how to recognize instances o
 Set the following configurations in your settings:
 
 ```
-"sentry.organization": "[Sentry organization name]",
+"sentry.organization": "[
+        // "<sentry_organization_name>"
+    ]",
 "sentry.projects": [
   {
-    "name": "[Project name for the config overview, e.g. Webapp errors]",
-    "projectId": "[Sentry project ID, e.g. "1334031"]",
-    "linePatterns": [
-        // List of RegExp patterns that match error handling code, e.g. "throw new Error+\\(['\"]([^'\"]+)['\"]\\)",
-        // !! Make sure to capture the error message in a RegExp group !!
-      ],
+    "name": "[
+            // "<sentry_project_name>" // Project name for the config overview, e.g. Webapp errors
+        ]",
+    "projectId": "[
+            // "<sentry_project_id>" // Sentry project ID number
+        ]",
     "filters": [
         // List of repositories/files filters
         {
             "repositories": [
-                // List of RegExp repo names asociated with this Sentry project
+                // "<repository_name>" // List of RegExp repository names associated with this Sentry project
             ],
             "files": [
-                // List of RegExp that matches file format, e.g. "\\.tsx?",
-                // or for more specific matching, folder matching, e.g. "(?:web|shared|src)\/.*\\.tsx?"
+                // e.g. "\\.tsx?" // List of RegExp that matches file format
+                // e.g. "(?:web|shared|src)\/.*\\.tsx?" // For more specific matching or folder matching
             ],
         }
-    ]
+    ],
+    "linePatterns": [
+        // "throw new Error+\\(['\"]([^'\"]+)['\"]\\)" // List of RegExp patterns that match error handling code
+        // !! Make sure to capture the error message in a RegExp group !!
+      ],
   }
 
 ```
@@ -78,10 +84,6 @@ File patterns can also be narrowed down to certain folders by specifying this in
     {
         "name": "sourcegraph",
         "projectId": "1334031",
-        "linePatterns": [
-            "throw new Error+\\(['\"]([^'\"]+)['\"]\\)",
-            "console\\.(warn|debug|info|error)\\(['\"`]([^'\"`]+)['\"`]\\)"
-            ]
         "filters": [
             {
                 "repositories": "sourcegraph\/sourcegraph",
@@ -91,6 +93,10 @@ File patterns can also be narrowed down to certain folders by specifying this in
                 "files": ["sourcegraph-subfolder\/.*\\.tsx?"]
             }
 
+        ],
+        "linePatterns": [
+            "throw new Error+\\(['\"]([^'\"]+)['\"]\\)",
+            "console\\.(warn|debug|info|error)\\(['\"`]([^'\"`]+)['\"`]\\)"
         ]
     }
   ]
@@ -110,7 +116,6 @@ Configuration:
 "sentry.projects": [
   "name": "Dev env errors",
   "projectId": "213332",
-  "linePatterns": ["errors\\.New\\(['\"`](.*)['\"`]\\)"],
   "filters": [
       {
           "repositories": ["sourcegraph\/sourcegraph", "sourcegraph\/dev-repo"],
@@ -120,6 +125,7 @@ Configuration:
           "repositories": ["/dev-env/"]
       }
   ],
+  "linePatterns": ["errors\\.New\\(['\"`](.*)['\"`]\\)"],
 ]
 
 ```
