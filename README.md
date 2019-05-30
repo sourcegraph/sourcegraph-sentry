@@ -39,16 +39,18 @@ Set the following configurations in your settings:
         // List of RegExp patterns that match error handling code, e.g. "throw new Error+\\(['\"]([^'\"]+)['\"]\\)",
         // !! Make sure to capture the error message in a RegExp group !!
       ]
-    "filters": {
-        [
+    "filters": [
+        // List of repositories/files filters
+        {
             "repositories": [
                 // List of RegExp repo names asociated with this Sentry project
             ],
             "files": [
                 // List of RegExp that matches file format, e.g. "\\.tsx?",
                 // or for more specific matching, folder matching, e.g. "(?:web|shared|src)\/.*\\.tsx?"
-        ],
-    }
+            ],
+        }
+    ]
   }
 
 ```
