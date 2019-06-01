@@ -190,7 +190,7 @@
     "mkdirp": "^0.5.1",
     "mocha": "^6.1.4",
     "mock-require": "^3.0.3",
-    "nyc": "^14.1.0",
+    "nyc": "^14.1.1",
     "parcel-bundler": "^1.12.3",
     "prettier": "1.17.0",
     "rxjs": "^6.5.1",
