@@ -5,14 +5,6 @@ import { createDecoration, getParamsFromUriPath, matchSentryProject } from './ha
 import { resolveSettings, SentryProject, Settings } from './settings'
 
 /**
- * Params derived from the document's URI.
- */
-interface Params {
-    repo: string | null
-    file: string | null
-}
-
-/**
  * Common error log patterns to use in case no line matching regexes
  * are set in the sentry extension settings.
  */
