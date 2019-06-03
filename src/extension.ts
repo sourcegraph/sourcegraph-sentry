@@ -181,7 +181,8 @@ function buildUrl(errorQuery: string, sentryProjectId?: string): URL {
 
     if (sentryProjectId) {
         url.searchParams.set('project', sentryProjectId)
-        url.searchParams.set('query', 'is:unresolved ' + errorQuery)
+        // Query must be wrapped in double quotes to be used as a search query in Sentry
+        url.searchParams.set('query', 'is:unresolved ' + '"' + errorQuery + '"')
         url.searchParams.set('statsPeriod', '14d')
     }
 
