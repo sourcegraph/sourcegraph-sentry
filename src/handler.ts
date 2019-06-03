@@ -46,6 +46,11 @@ export function matchSentryProject(params: Params, projects: SentryProject[]): M
     if (!projects || !params.repo || !params.file) {
         return null
     }
+
+    if (projects.length === 1 && !projects[0].filters) {
+        const missingConfigs = findEmptyConfigs(projects[0])
+        return { project: projects[0], missingConfigs }
+    }
     // Check if a Sentry project is associated with this document's repository and/or file and retrieve the project.
     // TODO: Handle the null case instead of using a non-null assertion !
     // TODO: Handle cases where the wrong project is matched due to similar repo name,
