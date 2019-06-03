@@ -100,7 +100,7 @@ You can add multiple Sentry projects and add file `filters` to have them only ma
             {
                 "files": [
                     "\\.js?" // RegExp that matches file names reporting to this Sentry project
-                ],
+                ]
             }
         ]
     },
@@ -111,7 +111,7 @@ You can add multiple Sentry projects and add file `filters` to have them only ma
             {
                 "files": [
                     "\\.go?"
-                ],
+                ]
             }
         ]
     }
@@ -138,7 +138,7 @@ To do this, simply add to your Sentry project config a regex that captures the s
             "throw new (?:[A-Z][a-z]+)+\\(['\"]([^'\"]+)['\"]\\)"
             // Note how the first regex group is ignored with `?:`. It will match with a variety of `throw new` error types, but doesn't
             // need to be captured. The second regex group captures the error string, which will be used as the search when linked to Sentry.
-        ],
+        ]
     }
 ]
 ```
@@ -190,18 +190,20 @@ Configuration:
 "sentry.decorations.inline": true,
 "sentry.organization": "sourcegraph",
 "sentry.projects": [
-  // Dev environment errors
-  "projectId": "213332",
-  "filters": [
-      {
-          "repositories": ["sourcegraph/sourcegraph", "sourcegraph/dev-repo"],
-          "files": ["auth/.*.go?/"],
-      },
-      {
-          "repositories": ["/dev-env"]
-      }
-  ],
-  "linePatterns": ["errors\\.New\\(['\"`](.*)['\"`]\\)"],
+    {
+        // Dev environment errors
+        "projectId": "213332",
+        "filters": [
+            {
+                "repositories": ["sourcegraph/sourcegraph", "sourcegraph/dev-repo"],
+                "files": ["auth/.*.go?/"],
+            },
+            {
+                "repositories": ["/dev-env"]
+            }
+        ],
+        "linePatterns": ["errors\\.New\\(['\"`](.*)['\"`]\\)"]
+    }
 ]
 
 ```
