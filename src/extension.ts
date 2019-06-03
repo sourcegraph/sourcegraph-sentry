@@ -10,7 +10,7 @@ import { resolveSettings, SentryProject, Settings } from './settings'
  */
 const COMMON_ERRORLOG_PATTERNS = [
     // typescript/javascript
-    /throw new Error+\(['"]([^'"]+)['"]\)/gi,
+    /throw new ([A-Z][a-z]+)+\(['"]([^'"]+)['"]\)/gi,
     /console\.(error|info|warn)\(['"`]([^'"`]+)['"`]\)/gi,
     // go
     /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/gi,
