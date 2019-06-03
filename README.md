@@ -135,8 +135,9 @@ To do this, simply add to your Sentry project config a regex that captures the s
         "projectId": "<your_sentry_project_id>",
         "linePatterns": [
             // Matches JS/TS throw statements:
-            "throw new Error+\\(['\"]([^'\"]+)['\"]\\)"
-            // Note how the regex capture group captures the error string, which will be used as the search when linked to Sentry
+            "throw new (?:[A-Z][a-z]+)+\\(['\"]([^'\"]+)['\"]\\)"
+            // Note how the first regex group is ignored with `?:`. It will match with a variety of `throw new` error types, but doesn't
+            // need to be captured. The second regex group captures the error string, which will be used as the search when linked to Sentry.
         ],
     }
 ]
@@ -170,8 +171,8 @@ To do this, simply add to your Sentry project config a regex that captures the s
 
         ],
         "linePatterns": [
-            "throw new Error+\\(['\"]([^'\"]+)['\"]\\)",
-            "console\\.(warn|debug|info|error)\\(['\"`]([^'\"`]+)['\"`]\\)"
+            "throw (?:[A-Z][a-z]+)+\\(['\"]([^'\"]+)['\"]\\)",
+            "console\\.(?:warn|debug|info|error)\\(['\"`]([^'\"`]+)['\"`]\\)"
         ]
     }
   ]
