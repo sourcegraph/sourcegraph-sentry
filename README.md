@@ -47,6 +47,7 @@ To find your Sentry organization and project ID, go to sentry.io and look at the
 ```
 https://sentry.io/organizations/sourcegraph/events/?project=1251215
 ```
+
 In the above, `sourcegraph` is the organization and `1251215` is the project ID.
 
 ## If you have multiple repositories reporting to different Sentry projects
@@ -81,6 +82,7 @@ You can add multiple Sentry projects and add repository `filters` to have them m
     }
 ]
 ```
+
 Now errors found in `repositoryA` will link to `project_a` and errors in `repositoryB` will link to `project_b` on Sentry.
 
 ## If you have code in the same repository reporting to different Sentry projects
@@ -115,6 +117,7 @@ You can add multiple Sentry projects and add file `filters` to have them only ma
     }
 ]
 ```
+
 Now errors found in JS files will link to `project_a` and errors in Go files will link to `project_b` on Sentry.
 
 You can match subdirectories of code using regex like e.g. `"(?:web|node)\/.*\\.tsx?"` to match any files with the `.tsx` extension below a directory named web or node.
