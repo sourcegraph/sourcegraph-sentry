@@ -163,7 +163,7 @@ To do this, simply add to your Sentry project config a regex that captures the s
         "filters": [
             {
                 "repositories": "sourcegraph/sourcegraph",
-                "files": ["web/.*\\.ts?"],
+                "files": ["web/.*\\.ts?"]
             },
             {
                 "files": ["sourcegraph-about/.*\\.tsx?"]
@@ -196,7 +196,7 @@ Configuration:
         "filters": [
             {
                 "repositories": ["sourcegraph/sourcegraph", "sourcegraph/dev-repo"],
-                "files": ["auth/.*.go?/"],
+                "files": ["auth/.*.go?/"]
             },
             {
                 "repositories": ["/dev-env"]
