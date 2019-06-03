@@ -84,7 +84,7 @@ export function getDecorations(
     documentText: string,
     sentryProjects?: SentryProject[]
 ): sourcegraph.TextDocumentDecoration[] {
-    const params: Params | null = getParamsFromUriPath(documentUri)
+    const params = getParamsFromUriPath(documentUri)
     const matched = sentryProjects && matchSentryProject(params, sentryProjects)
 
     // Do not decorate lines if the document file format does not match the
