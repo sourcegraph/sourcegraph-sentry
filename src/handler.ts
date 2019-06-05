@@ -67,7 +67,11 @@ export function matchSentryProject(params: Params | null, projects: SentryProjec
                     break
                 }
 
-                if (filter.repositories && !matchesRepository(filter.repositories, params.repo)) {
+                if (
+                    filter.repositories &&
+                    filter.repositories.length > 0 &&
+                    !matchesRepository(filter.repositories, params.repo)
+                ) {
                     break
                 }
 
@@ -103,10 +107,12 @@ export function findEmptyConfigs(settings?: SentryProject, path?: string, index?
     if (path === 'project' && typeof index === 'number') {
         path += '[' + index + ']'
     }
-    if (!settings && path) {
+    // Check object key length to safeguard against user error of setting an empty repositories array
+    if ((!settings || Object.keys(settings).length === 0) && path) {
         return [path]
     }
 
+    // Add repositories to missingConfigs array when no settings.filters are set and return
     let missingConfigurations: string[] = []
     if (settings instanceof Object && 'projectId' in settings && !settings.filters) {
         return missingConfigurations.concat(path + '[' + index + '].filters[0].repositories')
