@@ -162,10 +162,6 @@ See the [default error patterns](https://sourcegraph.com/github.com/sourcegraph/
     {
         // Web errors
         "projectId": "1334031",
-        "linePatterns": [
-            "throw new Error+\\(['\"]([^'\"]+)['\"]\\)",
-            "console\\.(?:warn|debug|info|error)\\(['\"`]([^'\"`]+)['\"`]\\)"
-            ]
         "filters": [
             {
                 "repositories": "sourcegraph/sourcegraph",
