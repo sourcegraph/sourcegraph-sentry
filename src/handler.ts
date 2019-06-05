@@ -34,7 +34,7 @@ export function getParamsFromUriPath(textDocumentURI: string): Params | null {
 }
 
 interface Matched {
-    project: SentryProject
+    project: SentryProject | undefined
     missingConfigs: string[]
 }
 /**
@@ -50,27 +50,34 @@ export function matchSentryProject(params: Params | null, projects: SentryProjec
         return null
     }
 
-    if (projects.length === 1 && !projects[0].filters) {
-        const missingConfigs = findEmptyConfigs(projects[0])
-        return { project: projects[0], missingConfigs }
-    }
+    let missingConfigs
+
     // Check if a Sentry project is associated with this document's repository and/or file and retrieve the project.
     // TODO: Handle the null case instead of using a non-null assertion !
     // TODO: Handle cases where the wrong project is matched due to similar repo name,
     // e.g. `sourcegraph-jetbrains` repo will match the `sourcegraph` project
-    for (const project of projects) {
-        const missingConfigs = findEmptyConfigs(project)
+    for (const [index, project] of projects.entries()) {
+        missingConfigs = missingConfigs
+            ? missingConfigs.concat(findEmptyConfigs(project, 'project', index))
+            : findEmptyConfigs(project, 'project', index)
 
-        for (const filter of project.filters) {
-            // both repository and file match
-            if (filter.files && !matchesFile(filter.files, params.file)) {
-                break
-            }
+        if (project.filters) {
+            for (const filter of project.filters) {
+                if (filter.files && !matchesFile(filter.files, params.file)) {
+                    break
+                }
 
-            if (filter.repositories && !matchesRepository(filter.repositories, params.repo)) {
-                break
+                if (filter.repositories && !matchesRepository(filter.repositories, params.repo)) {
+                    break
+                }
+
+                // both repository and file match
+                return { project, missingConfigs }
             }
-            return { project, missingConfigs }
+            // if there is only one project in the settings and no filters,
+            // always match with that Sentry project
+        } else if (projects.length === 1) {
+            return { project, missingConfigs: [] }
         }
     }
     return null
@@ -88,16 +95,22 @@ function matchesFile(files: string[], fileParam: string): boolean {
  * Check for missing configurations in the Sentry extension settings
  * @param settings
  */
-export function findEmptyConfigs(settings?: SentryProject, path?: string): string[] {
-    if (!path) {
-        path = 'settings'
+export function findEmptyConfigs(settings?: SentryProject, path?: string, index?: number): string[] {
+    if (!settings && !path && !index) {
+        return ['settings']
     }
-    if (!settings) {
+
+    if (path === 'project' && typeof index === 'number') {
+        path += '[' + index + ']'
+    }
+    if (!settings && path) {
         return [path]
     }
 
     let missingConfigurations: string[] = []
-
+    if (settings instanceof Object && 'projectId' in settings && !settings.filters) {
+        return missingConfigurations.concat(path + '[' + index + '].filters[0].repositories')
+    }
     if (settings instanceof Array) {
         for (const [index, element] of settings.entries()) {
             missingConfigurations = missingConfigurations.concat(findEmptyConfigs(element, path + '[' + index + ']'))
@@ -137,7 +150,7 @@ export function createDecoration(
         return {
             content: ' View logs in Sentry (❕)» ',
             hover:
-                ' Please fill out the following configurations in your Sentry extension settings: ' +
+                ' Please fill out these configurations for better Sentry project matching: ' +
                 missingConfigData.join(', '),
         }
     }

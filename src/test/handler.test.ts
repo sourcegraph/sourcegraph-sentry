@@ -164,7 +164,7 @@ const incompleteConfigs: { goal: string; settings: SentryProject; expected: stri
                 },
             ],
         },
-        expected: ['settings.filters[0].repositories'],
+        expected: ['project[0].filters[0].repositories'],
     },
     {
         goal: 'returns two missing configs',
@@ -179,13 +179,13 @@ const incompleteConfigs: { goal: string; settings: SentryProject; expected: stri
                 },
             ],
         },
-        expected: ['settings.projectId', 'settings.filters[0].repositories'],
+        expected: ['project[1].projectId', 'project[1].filters[0].repositories'],
     },
 ]
 
 describe('findEmptyConfigs()', () => {
-    for (const config of incompleteConfigs) {
-        it(config.goal, () => expect(findEmptyConfigs(config.settings)).toEqual(config.expected))
+    for (const [index, config] of incompleteConfigs.entries()) {
+        it(config.goal, () => expect(findEmptyConfigs(config.settings, 'project', index)).toEqual(config.expected))
     }
     it('handles empty settings', () => expect(findEmptyConfigs()).toEqual(['settings']))
 })
@@ -220,8 +220,7 @@ const createDecorationInputs = [
         params: { missingConfigData: ['linePatterns', 'files'], sentryProjectId: '1334031', sentryOrg: 'sourcegraph' },
         expected: {
             content: ' View logs in Sentry (❕)» ',
-            hover:
-                ' Please fill out the following configurations in your Sentry extension settings: linePatterns, files',
+            hover: ' Please fill out these configurations for better Sentry project matching: linePatterns, files',
         },
     },
 ]

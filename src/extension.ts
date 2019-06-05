@@ -8,6 +8,7 @@ import { resolveSettings, SentryProject, Settings } from './settings'
  * Common error log patterns to use in case no line matching regexes
  * are set in the sentry extension settings.
  */
+// TODO: Add these to the Readme
 const COMMON_ERRORLOG_PATTERNS = [
     // typescript/javascript
     /throw new ([A-Z][a-z]+)+\(['"]([^'"]+)['"]\)/gi,
@@ -78,7 +79,6 @@ export function getDecorations(
 ): sourcegraph.TextDocumentDecoration[] {
     const params = getParamsFromUriPath(documentUri)
     const matched = sentryProjects && matchSentryProject(params, sentryProjects)
-
     // Do not decorate lines if the document file format does not match the
     // file matching patterns listed in the Sentry extension configurations.
     if (!matched) {
@@ -87,8 +87,8 @@ export function getDecorations(
     return buildDecorations(
         matched.missingConfigs,
         documentText,
-        matched.project.projectId,
-        matched.project.linePatterns
+        matched.project && matched.project.projectId && matched.project.projectId,
+        matched.project && matched.project.linePatterns && matched.project.linePatterns
     )
 }
 
