@@ -3,9 +3,9 @@
 [![build](https://travis-ci.org/sourcegraph/sourcegraph-sentry.svg?branch=master)](https://travis-ci.org/sourcegraph/sentry)
 [![codecov](https://codecov.io/gh/sourcegraph/sourcegraph-sentry/branch/master/graph/badge.svg)](https://codecov.io/gh/sourcegraph/sourcegraph-sentry)
 
-Sentry helps devs track, organize and break down errors more efficiently, facilitating their debug process. We want to make it more convenient for developers to access Sentry's error tracking tools directly from the code that is doing the error handling, code such as `throw new Error(QUERY)`, `console.log(QUERY)`, `console.error(QUERY)` etc..
+Sentry facilitates the debugging process by helping developers track, organize, and break down errors more efficiently. At Sourcegraph, we want to make it more convenient for developers to access Sentry's error tracking tools directly from the code that is doing the error handling. For example: `throw new Error(QUERY)`, `console.log(QUERY)`, and `console.error(QUERY)`.
 
-The Sentry extension renders a `View logs in Sentry` next to error throwing statements, linking directly to the corresponding Sentry issues stream page. Links are rendered when viewing files on [Sourcegraph](https://sourcegraph.com), GitHub and GitLab.
+The Sentry extension renders `View logs in Sentry` next to error throwing statements, and links directly to the corresponding Sentry issues stream page. Links are rendered when viewing files on [Sourcegraph](https://sourcegraph.com), GitHub, and GitLab.
 
 - **Sentry: Show/hide Sentry**: toggles Sentry links decorations with each matching error handling code.
 
@@ -17,7 +17,7 @@ The Sentry extension renders a `View logs in Sentry` next to error throwing stat
 
 ## Language support
 
-To work, the Sentry Sourcegraph extension must know how to recognize instances of error handling and/or exception throwing for each language. The first version will support:
+The Sentry Sourcegraph extension uses common error handling and/or exception throwing patterns specific to each language to identfy Sentry relevant lines of code. The following languages are currently supported:
 
 - TypeScript
 - Go
@@ -25,24 +25,24 @@ To work, the Sentry Sourcegraph extension must know how to recognize instances o
 - Python
 - Java
 
-## Setup
+## Basic Setup
 
-In your user, organization, or global settings, add the following configurations:
+In your Sourcegraph settings (user, organization, or global), add the following configuration:
 
 ```
 "sentry.decorations.inline": true,
 "sentry.organization": "<your_sentry_organization>",
 "sentry.projects": [
     {
-        // Frontend errors
+        // All matching error statements in your sourcegraph instance will link to this project
         "projectId": "<your_sentry_project_id>",
     }
 ]
 ```
 
-This will make it so that any time code that produces an error is found, a link to that one specified Sentry project will be generated.
+With this simple configuration, any error that matches the default patterns will link to the specified Sentry organization and project.
 
-To find your Sentry organization and project ID, go to sentry.io and look at the URL when on your project page, e.g.:
+To find your Sentry organization and project ID, go to [sentry.io](http://sentry.io) and look at the URL when on your project page, e.g.:
 
 ```
 https://sentry.io/organizations/sourcegraph/events/?project=1251215
@@ -50,16 +50,16 @@ https://sentry.io/organizations/sourcegraph/events/?project=1251215
 
 In the above, `sourcegraph` is the organization and `1251215` is the project ID.
 
-## If you have multiple repositories reporting to different Sentry projects
+## Mapping multiple Sentry projects to various repositories
 
-You can add multiple Sentry projects and add repository `filters` to have them match only specific repositories, like so:
+Some organizations have multiple Sentry projects that capture errors from various repositories within their organization. Inside each Sentry project, use repository `filters` like so:
 
 ```
 "sentry.decorations.inline": true,
 "sentry.organization": "<your_sentry_organization>",
 "sentry.projects": [
     {
-        // Frontend errors
+        // All repositoryA error patterns link to Project A in Sentry
         "projectId": "<project_a>",
         "filters": [
             {
@@ -70,7 +70,7 @@ You can add multiple Sentry projects and add repository `filters` to have them m
         ]
     },
     {
-        // Backend errors
+        // All repositoryB error patterns link to Project B in Sentry
         "projectId": "<project_b>",
         "filters": [
             {
@@ -83,29 +83,31 @@ You can add multiple Sentry projects and add repository `filters` to have them m
 ]
 ```
 
-Now errors found in `repositoryA` will link to `project_a` and errors in `repositoryB` will link to `project_b` on Sentry.
+In this example, errors found in `repositoryA` will link to `project_a`, and errors in `repositoryB` will link to `project_b` in Sentry.
 
-## If you have code in the same repository reporting to different Sentry projects
+## Mapping a single repository to multiple Sentry projects
 
-You can add multiple Sentry projects and add file `filters` to have them only match specific files or folders, like so:
+Some organizations will have different parts of their code base map to different Sentry projects. For example, all frontend code is sent to one Sentry project, and all backend code is sent to another. 
+
+You can add multiple Sentry projects and add file `filters` to match specific files or folders, like so:
 
 ```
 "sentry.decorations.inline": true,
 "sentry.organization": "<your_sentry_organization>",
 "sentry.projects": [
     {
-        // Frontend errors
+        // All JS files link to Project A in Sentry
         "projectId": "<project_a>",
         "filters": [
             {
                 "files": [
-                    "\\.js?" // RegExp that matches file names reporting to this Sentry project
+                    "\\.js?" // RegExp that matches JavaScript files
                 ]
             }
         ]
     },
     {
-        // Backend errors
+        // All Go files link to Project B in Sentry
         "projectId": "<project_b>",
         "filters": [
             {
@@ -118,32 +120,36 @@ You can add multiple Sentry projects and add file `filters` to have them only ma
 ]
 ```
 
-Now errors found in JS files will link to `project_a` and errors in Go files will link to `project_b` on Sentry.
+Now, errors found in JS files will link to `project_a` and errors in Go files will link to `project_b` in Sentry.
 
-You can match subdirectories of code using regex like e.g. `"(?:web|node)\/.*\\.tsx?"` to match any files with the `.tsx` extension below a directory named web or node.
+You can also match repository subdirectories using a regex (e.g. `"(?:web|node)\/.*\\.tsx?"` to match any files with the `.tsx` extension within directories named `web` or `node`).
 
-## Better error pattern recognition
+## Improving error pattern recognition for your organization
 
-By default the extension matches error messages from a few popular languages, but you may need to define your own patterns to match error generation sites in code that we don't currently support.
+By default, the extension matches error messages from a few popular languages. However, you may need to define your own patterns to enhance matches for your specific codebase, or that we do not currently support.
 
-To do this, simply add to your Sentry project config a regex that captures the static error message generated. For example, to match JS/TS throw statements:
+To do this, add a regex to your Sentry project config that captures the static error message generated. For example, to match JS/TS throw statements:
 
 ```
 "sentry.projects": [
     {
         // Frontend errors
-        "projectId": "<your_sentry_project_id>",
+        "projectId": "<project_a>",
         "linePatterns": [
             // Matches JS/TS throw statements:
             "throw new (?:[A-Z][a-z]+)+\\(['\"]([^'\"]+)['\"]\\)"
-            // Note how the first regex group is ignored with `?:`. It will match with a variety of `throw new` error types, but doesn't
-            // need to be captured. The second regex group captures the error string, which will be used as the search when linked to Sentry.
         ]
     }
 ]
 ```
 
-## Examples
+In the above example, note how the first regex group is ignored with `?:`. It will match a variety of `throw new` error types, but doesn't need to be captured. The second regex group captures the error string, which will be used as the search when linked to Sentry.
+
+### Default error patterns
+
+See the [default error patterns](https://sourcegraph.com/github.com/sourcegraph/sourcegraph-sentry@master/-/blob/src/extension.ts?diff=21f9b0716040dd96f917580ec4cacd59f3f1b5be&utm_source=chrome-extension#L11-25).
+
+## Language Specific Examples
 
 - TypeScript
 
@@ -172,7 +178,6 @@ To do this, simply add to your Sentry project config a regex that captures the s
         ]
     }
   ]
-
   ```
 
   - [On Sourcegraph](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/browser/src/libs/github/file_info.ts#L22)
@@ -180,32 +185,31 @@ To do this, simply add to your Sentry project config a regex that captures the s
 
 - Go
 
-Configuration:
+  Configuration:
 
-```
-"sentry.decorations.inline": true,
-"sentry.organization": "sourcegraph",
-"sentry.projects": [
-    {
-        // Dev environment errors
-        "projectId": "213332",
-        "filters": [
-            {
-                "repositories": ["sourcegraph/sourcegraph", "sourcegraph/dev-repo"],
-                "files": ["auth/.*.go?/"]
-            },
-            {
-                "repositories": ["/dev-env"]
-            }
-        ],
-        "linePatterns": ["errors\\.New\\(['\"`](.*)['\"`]\\)"]
-    }
-]
+  ```
+  "sentry.decorations.inline": true,
+  "sentry.organization": "sourcegraph",
+  "sentry.projects": [
+      {
+          // Dev environment errors
+          "projectId": "213332",
+          "filters": [
+              {
+                  "repositories": ["sourcegraph/sourcegraph", "sourcegraph/dev-repo"],
+                  "files": ["auth/.*.go?/"]
+              },
+              {
+                  "repositories": ["/dev-env"]
+              }
+          ],
+          "linePatterns": ["errors\\.New\\(['\"`](.*)['\"`]\\)"]
+      }
+  ]
+  ```
 
-```
-
-- [On Sourcegraph](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/cmd/frontend/auth/user_test.go#L54:19)
-- [On GitHub](https://github.com/sourcegraph/sourcegraph/blob/master/cmd/frontend/auth/user_test.go#L54)
+  - [On Sourcegraph](https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/cmd/frontend/auth/user_test.go#L54:19)
+  - [On GitHub](https://github.com/sourcegraph/sourcegraph/blob/master/cmd/frontend/auth/user_test.go#L54)
 
 - JavaScript
 
