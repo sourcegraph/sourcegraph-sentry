@@ -9,52 +9,50 @@ mock('sourcegraph', sourcegraph)
 import { createDecoration, findEmptyConfigs, getParamsFromUriPath, matchSentryProject } from '../handler'
 import { SentryProject } from '../settings'
 
-const asString = (re: RegExp): string => re.source
-
 const projects: SentryProject[] = [
     {
         name: 'Webapp typescript errors',
         projectId: '1334031',
         linePatterns: [
-            /throw new Error+\(['"]([^'"]+)['"]\)/,
-            /console\.(warn|debug|info|error|log)\(['"`]([^'"`]+)['"`]\)/,
-            /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/,
-        ].map(asString),
+            'throw new Error+\\([\'"]([^\'"]+)[\'"]\\)',
+            'console\\.(?:warn|debug|info|error|log)\\([\'"`]([^\'"`]+)[\'"`]\\)',
+            'log\\.(Printf|Print|Println)\\([\'"]([^\'"]+)[\'"]\\)',
+        ],
         filters: [
             {
-                repositories: [/sourcegraph\/sourcegraph/, /bucket/].map(asString),
-                files: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/].map(asString),
+                repositories: ['sourcegraph/sourcegraph', '/bucket'],
+                files: ['(?:web|shared|src)/.*\\.tsx?', '\\.ts?'],
             },
         ],
     },
     {
         name: 'Dev env errors',
         projectId: '213332',
-        linePatterns: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/].map(asString),
+        linePatterns: ['log\\.(?:Printf|Print|Println)\\([\'"]([^\'"]+)[\'"]\\)'],
         filters: [
             {
-                repositories: [/dev-repo/].map(asString),
-                files: [/dev\/.*.go?/].map(asString),
+                repositories: ['/dev-repo'],
+                files: ['dev/.*\\.go?'],
             },
         ],
     },
     {
         name: 'docs pages errors',
         projectId: '544533',
-        linePatterns: [/throw new Error+\(['"]([^'"]+)['"]\)/].map(asString),
+        linePatterns: ['throw new Error+\\([\'"]([^\'"]+)[\'"]\\)'],
         filters: [
             {
-                repositories: [/sourcegraph\/docs/].map(asString),
+                repositories: ['sourcegraph/docs'],
             },
         ],
     },
     {
         name: 'dot com errors',
         projectId: '242677',
-        linePatterns: [/throw new Error+\(['"]([^'"]+)['"]\)/].map(asString),
+        linePatterns: ['throw new Error+\\([\'"]([^\'"]+)[\'"]\\)'],
         filters: [
             {
-                files: [/\.tsx?/].map(asString),
+                files: ['\\.tsx?'],
             },
         ],
     },
@@ -66,10 +64,9 @@ const setDefaults = async () => {
 }
 
 describe('getParamsFromUriPath', () => {
-    beforeEach(setDefaults)
     it('extracts repo and file params from root folder', () =>
         expect(getParamsFromUriPath('git://github.com/sourcegraph/sourcegraph?264...#index.tsx')).toEqual({
-            repo: 'sourcegraph/sourcegraph',
+            repo: '/sourcegraph/sourcegraph',
             file: 'index.tsx',
         }))
 
@@ -77,76 +74,69 @@ describe('getParamsFromUriPath', () => {
         expect(
             getParamsFromUriPath('git://github.com/sourcegraph/sourcegraph?264...#web/src/e2e/index.e2e.test.tsx')
         ).toEqual({
-            repo: 'sourcegraph/sourcegraph',
+            repo: '/sourcegraph/sourcegraph',
             file: 'web/src/e2e/index.e2e.test.tsx',
         }))
 
-    it('return empty repo if host is not GitHub', () =>
-        expect(getParamsFromUriPath('git://unknownhost.com/sourcegraph/testrepo#http/req/main.go')).toEqual({
-            repo: null,
-            file: 'http/req/main.go',
+    it('returns null if URI is corrupted', () =>
+        expect(getParamsFromUriPath('git://thisisnotavaliduri')).toEqual({
+            repo: '',
+            file: null,
         }))
 
-    it('return empty file if document has no file format', () =>
-        expect(getParamsFromUriPath('git://github.com/sourcegraph/sourcegraph/testrepo#formatless')).toEqual({
-            repo: 'sourcegraph/sourcegraph',
+    it('returns empty file if document has no file format', () =>
+        expect(getParamsFromUriPath('git://github.com/sourcegraph/testrepo#formatless')).toEqual({
+            repo: '/sourcegraph/testrepo',
             file: null,
         }))
 })
 
 const paramsInput = [
     {
-        goal: 'returns a web project that matches the repo and file patterns',
+        goal: 'returns a web project that matches the repo and file patterns and an empty missingConfigs list',
         params: {
-            repo: 'sourcegraph/sourcegraph',
+            repo: '/sourcegraph/sourcegraph',
             file: 'web/src/storm/index.tsx',
         },
         expected: { project: projects[0], missingConfigs: [] },
     },
     {
-        goal: 'returns a dev project that matches the repo and file patterns',
+        goal: 'returns a dev project that matches the repo and file patterns and an empty missingConfigs list',
         params: {
-            repo: 'sourcegraph/dev-repo',
+            repo: '/sourcegraph/dev-repo',
             file: 'dev/backend/main.go',
         },
         expected: { project: projects[1], missingConfigs: [] },
     },
     {
-        goal: 'returns file false for not matching file patterns',
+        goal: 'returns null for not matching file patterns',
         params: {
-            repo: 'sourcegraph/dev-repo',
+            repo: '/sourcegraph/dev-repo',
             file: 'dev/test/start.rb',
         },
         expected: null,
     },
     {
-        goal: 'returns undefined for not matching repo and false for not matching file patterns',
+        goal: 'returns null for not matching repo and file patterns',
         params: {
-            repo: 'sourcegraph/test-repo',
+            repo: '/sourcegraph/test-repo',
             file: 'dev/test/start.rb',
         },
         expected: null,
     },
     {
-        goal: 'returns undefined for not matching repo and file patterns',
+        goal: 'returns project for matching repo despite not having a files config and an empty missingConfigs list',
         params: {
-            repo: 'sourcegraph/test-repo',
-            file: 'dev/test/start.rb',
-        },
-        expected: null,
-    },
-    {
-        goal: 'returns project for matching repo and undefined for not having file patterns',
-        params: {
-            repo: 'sourcegraph/docs',
+            repo: '/sourcegraph/docs',
             file: 'src/development/tutorial.tsx',
         },
         expected: { project: projects[2], missingConfigs: [] },
     },
     {
-        goal: 'returns project for matching file patterns',
+        goal:
+            'returns project for matching file patterns despite not having a repositories config and an empty missingConfigs list',
         params: {
-            repo: 'sourcegraph/website',
+            repo: '/sourcegraph/website',
             file: 'web/search/start.tsx',
         },
         expected: { project: projects[3], missingConfigs: [] },
@@ -166,11 +156,11 @@ const incompleteConfigs: { goal: string; settings: SentryProject; expected: stri
         settings: {
             name: 'sourcegraph',
             projectId: '1334031',
-            linePatterns: [/logger\.debug\(['"`]([^'"`]+)['"`]\);/].map(asString),
+            linePatterns: ['logger\\.debug\\([\'"`]([^\'"`]+)[\'"`]\\);'],
             filters: [
                 {
                     repositories: undefined,
-                    files: [/(web|shared|src).*\.java?/, /(dev|src).*\.java?/, /.java?/].map(asString),
+                    files: ['(?:web|shared|src)/.*\\.java?', '(?:dev|src)/.*\\.java?', '\\.java?'],
                 },
             ],
         },
@@ -181,11 +171,11 @@ const incompleteConfigs: { goal: string; settings: SentryProject; expected: stri
         settings: {
             name: 'sourcegraph',
             projectId: '',
-            linePatterns: [/logger\.debug\(['"`]([^'"`]+)['"`]\);/].map(asString),
+            linePatterns: ['logger\\.debug\\([\'"`]([^\'"`]+)[\'"`]\\);'],
             filters: [
                 {
                     repositories: undefined,
-                    files: [/(web|shared|src).*\.java?/, /(dev|src).*\.java?/, /.java?/].map(asString),
+                    files: ['(?:web|shared|src)/.*\\.java?', '(?:dev|src)/.*\\.java?', '\\.java?'],
                 },
             ],
         },

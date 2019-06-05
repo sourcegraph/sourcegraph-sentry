@@ -5,20 +5,12 @@ import { createDecoration, getParamsFromUriPath, matchSentryProject } from './ha
 import { resolveSettings, SentryProject, Settings } from './settings'
 
 /**
- * Params derived from the document's URI.
- */
-interface Params {
-    repo: string | null
-    file: string | null
-}
-
-/**
  * Common error log patterns to use in case no line matching regexes
  * are set in the sentry extension settings.
  */
 const COMMON_ERRORLOG_PATTERNS = [
     // typescript/javascript
-    /throw new Error+\(['"]([^'"]+)['"]\)/gi,
+    /throw new ([A-Z][a-z]+)+\(['"]([^'"]+)['"]\)/gi,
     /console\.(error|info|warn)\(['"`]([^'"`]+)['"`]\)/gi,
     // go
     /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/gi,
@@ -84,7 +76,7 @@ export function getDecorations(
     documentText: string,
     sentryProjects?: SentryProject[]
 ): sourcegraph.TextDocumentDecoration[] {
-    const params: Params = getParamsFromUriPath(documentUri)
+    const params = getParamsFromUriPath(documentUri)
     const matched = sentryProjects && matchSentryProject(params, sentryProjects)
 
     // Do not decorate lines if the document file format does not match the
@@ -189,7 +181,8 @@ function buildUrl(errorQuery: string, sentryProjectId?: string): URL {
 
     if (sentryProjectId) {
         url.searchParams.set('project', sentryProjectId)
-        url.searchParams.set('query', 'is:unresolved ' + errorQuery)
+        // Query must be wrapped in double quotes to be used as a search query in Sentry
+        url.searchParams.set('query', 'is:unresolved ' + '"' + errorQuery + '"')
         url.searchParams.set('statsPeriod', '14d')
     }
 

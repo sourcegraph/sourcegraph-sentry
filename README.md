@@ -37,16 +37,16 @@ Set the following configurations in your settings:
     "projectId": "[Sentry project ID, e.g. "1334031"]",
     "linePatterns": [
         // List of RegExp patterns that match error handling code, e.g. "throw new Error+\\(['\"]([^'\"]+)['\"]\\)",
-        // !! Make sure to capture the error message in a RegExp group !!
+        // !! Make sure to capture the error message in a RegExp group and escape special characters to ensure compatibility with JSON Schema!!
       ]
     "filters": {
         [
             "repositories": [
-                // List of RegExp repo names asociated with this Sentry project
+                // List of RegExp repo names asociated with this Sentry project.
             ],
             "files": [
                 // List of RegExp that matches file format, e.g. "\\.tsx?",
-                // or for more specific matching, folder matching, e.g. "(?:web|shared|src)\/.*\\.tsx?"
+                // or for more specific matching, folder matching, e.g. "(?:web|shared|src)/.*\\.tsx?"
         ],
     }
   }
@@ -59,7 +59,7 @@ File patterns can also be narrowed down to certain folders by specifying this in
 
 ```
 ...
-"files": ["(?:web|shared|src)\/.*\\.tsx?"]
+"files": ["(?:web|shared|src)/.*\\.tsx?"]
 ...
 ```
 
@@ -78,15 +78,15 @@ File patterns can also be narrowed down to certain folders by specifying this in
         "projectId": "1334031",
         "linePatterns": [
             "throw new Error+\\(['\"]([^'\"]+)['\"]\\)",
-            "console\\.(warn|debug|info|error)\\(['\"`]([^'\"`]+)['\"`]\\)"
+            "console\\.(?:warn|debug|info|error)\\(['\"`]([^'\"`]+)['\"`]\\)"
             ]
         "filters": [
             {
-                "repositories": "sourcegraph\/sourcegraph",
-                "files": ["web\/.*\\.ts?"],
+                "repositories": "sourcegraph/sourcegraph",
+                "files": ["web/.*\\.ts?"],
             },
             {
-                "files": ["sourcegraph-subfolder\/.*\\.tsx?"]
+                "files": ["sourcegraph-subfolder/.*\\.tsx?"]
             }
 
         ]
@@ -111,11 +111,11 @@ Configuration:
   "linePatterns": ["errors\\.New\\(['\"`](.*)['\"`]\\)"],
   "filters": [
       {
-          "repositories": ["sourcegraph\/sourcegraph", "sourcegraph\/dev-repo"],
-          "files": ["/auth\/.*.go?/"],
+          "repositories": ["sourcegraph/sourcegraph", "sourcegraph/dev-repo"],
+          "files": ["auth/.*\\.go?"],
       },
       {
-          "repositories": ["/dev-env/"]
+          "repositories": ["/dev-env"]
       }
   ],
 ]

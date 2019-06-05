@@ -16,21 +16,19 @@ describe('activation', () => {
     })
 })
 
-const asString = (re: RegExp): string => re.source
-
 const projects: SentryProject[] = [
     {
         name: 'Webapp typescript errors',
         projectId: '1334031',
         linePatterns: [
-            /throw new Error+\(['"]([^'"]+)['"]\)/,
-            /console\.(warn|debug|info|error|log)\(['"`]([^'"`]+)['"`]\)/,
-            /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/,
-        ].map(asString),
+            'throw new Error+\\([\'"]([^\'"]+)[\'"]\\)',
+            'console\\.(?:warn|debug|info|error|log)\\([\'"`]([^\'"`]+)[\'"`]\\)',
+            'log\\.(?:Printf|Print|Println)\\([\'"]([^\'"]+)[\'"]\\)',
+        ],
         filters: [
             {
-                repositories: [/sourcegraph\/sourcegraph/, /bucket/].map(asString),
-                files: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/].map(asString),
+                repositories: ['sourcegraph/sourcegraph', '/bucket'],
+                files: ['(?:web|shared|src)/.*\\.tsx?', '\\.ts?'],
             },
         ],
     },
@@ -38,11 +36,11 @@ const projects: SentryProject[] = [
     {
         name: 'Dev env errors',
         projectId: '213332',
-        linePatterns: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/].map(asString),
+        linePatterns: ['log\\.(Printf|Print|Println)\\([\'"]([^\'"]+)[\'"]\\)'],
         filters: [
             {
-                repositories: [/dev-repo/].map(asString),
-                files: [/(dev)\/.*\\.go?/].map(asString),
+                repositories: ['/dev-repo'],
+                files: ['dev/.*\\.go?'],
             },
         ],
     },
@@ -64,25 +62,25 @@ describe('resolveSettings()', () => {
                     projectId: '1334031',
                     name: 'Webapp typescript errors',
                     linePatterns: [
-                        /throw new Error+\(['"]([^'"]+)['"]\)/,
-                        /console\.(warn|debug|info|error|log)\(['"`]([^'"`]+)['"`]\)/,
-                        /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/,
-                    ].map(asString),
+                        'throw new Error+\\([\'"]([^\'"]+)[\'"]\\)',
+                        'console\\.(?:warn|debug|info|error|log)\\([\'"`]([^\'"`]+)[\'"`]\\)',
+                        'log\\.(?:Printf|Print|Println)\\([\'"]([^\'"]+)[\'"]\\)',
+                    ],
                     filters: [
                         {
-                            repositories: [/sourcegraph\/sourcegraph/, /bucket/].map(asString),
-                            files: [/(web|shared|src)\/.*\.tsx?/, /\/.*\\.ts?/].map(asString),
+                            repositories: ['sourcegraph/sourcegraph', '/bucket'],
+                            files: ['(?:web|shared|src)/.*\\.tsx?', '\\.ts?'],
                         },
                     ],
                 },
                 {
                     projectId: '213332',
                     name: 'Dev env errors',
-                    linePatterns: [/log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/].map(asString),
+                    linePatterns: ['log\\.(Printf|Print|Println)\\([\'"]([^\'"]+)[\'"]\\)'],
                     filters: [
                         {
-                            repositories: [/dev-repo/].map(asString),
-                            files: [/(dev)\/.*\\.go?/].map(asString),
+                            repositories: ['/dev-repo'],
+                            files: ['dev/.*\\.go?'],
                         },
                     ],
                 },
@@ -108,7 +106,7 @@ const decorateLineInput = [
                 contentText: ' View logs in Sentry » ',
                 hoverMessage: ' View logs in Sentry » ',
                 linkURL:
-                    'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+cannot+determine+file+path&statsPeriod=14d',
+                    'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+%22cannot+determine+file+path%22&statsPeriod=14d',
             },
         },
     },
@@ -127,7 +125,7 @@ const decorateLineInput = [
                 contentText: ' View logs in Sentry (❕)» ',
                 hoverMessage: ' Add this repository to your Sentry extension settings for project matching.',
                 linkURL:
-                    'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+cannot+determine+file+path&statsPeriod=14d',
+                    'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+%22cannot+determine+file+path%22&statsPeriod=14d',
             },
         },
     },
@@ -146,7 +144,7 @@ const decorateLineInput = [
                 contentText: ' View logs in Sentry (❕)» ',
                 hoverMessage: ' Add this repository to your Sentry extension settings for project matching.',
                 linkURL:
-                    'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+cannot+determine+file+path&statsPeriod=14d',
+                    'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+%22cannot+determine+file+path%22&statsPeriod=14d',
             },
         },
     },
@@ -226,7 +224,7 @@ const getDecorationsInput = [
                     contentText: ' View logs in Sentry » ',
                     hoverMessage: ' View logs in Sentry » ',
                     linkURL:
-                        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+cannot+determine+file+path&statsPeriod=14d',
+                        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+%22cannot+determine+file+path%22&statsPeriod=14d',
                 },
             },
             {
@@ -238,7 +236,7 @@ const getDecorationsInput = [
                     contentText: ' View logs in Sentry » ',
                     hoverMessage: ' View logs in Sentry » ',
                     linkURL:
-                        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+cannot+determine+delta+info&statsPeriod=14d',
+                        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+%22cannot+determine+delta+info%22&statsPeriod=14d',
                 },
             },
         ],
@@ -262,7 +260,7 @@ const getDecorationsInput = [
                     contentText: ' View logs in Sentry » ',
                     hoverMessage: ' View logs in Sentry » ',
                     linkURL:
-                        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+cannot+determine+file+path&statsPeriod=14d',
+                        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+%22cannot+determine+file+path%22&statsPeriod=14d',
                 },
             },
         ],
@@ -316,7 +314,7 @@ of(codeView).pipe(
                     contentText: ' View logs in Sentry » ',
                     hoverMessage: ' View logs in Sentry » ',
                     linkURL:
-                        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+cannot+determine+file+path&statsPeriod=14d',
+                        'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+%22cannot+determine+file+path%22&statsPeriod=14d',
                 },
             },
         ],
@@ -460,8 +458,8 @@ describe('buildDecorations()', () => {
     it('should not render anything due to missing code ', () => expect(buildDecorations([], '')).toEqual([]))
     // set linePatterns back to original state for the other tests
     projects[0].linePatterns = [
-        /throw new Error+\(['"]([^'"]+)['"]\)/,
-        /console\.(warn|debug|info|error|log)\(['"`]([^'"`]+)['"`]\)/,
-        /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/,
-    ].map(asString)
+        'throw new Error+\\([\'"]([^\'"]+)[\'"]\\)',
+        'console\\.(?:warn|debug|info|error|log)\\([\'"`]([^\'"`]+)[\'"`]\\)',
+        'log\\.(?:Printf|Print|Println)\\([\'"]([^\'"]+)[\'"]\\)',
+    ]
 })
