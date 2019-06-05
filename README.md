@@ -87,7 +87,7 @@ In this example, errors found in `repositoryA` will link to `project_a`, and err
 
 ## Mapping a single repository to multiple Sentry projects
 
-Some organizations will have different parts of their code base map to different Sentry projects. For example, all frontend code is sent to one Sentry project, and all backend code is sent to another. 
+Some organizations will have different parts of their code base map to different Sentry projects. For example, all frontend code is sent to one Sentry project, and all backend code is sent to another.
 
 You can add multiple Sentry projects and add file `filters` to match specific files or folders, like so:
 
