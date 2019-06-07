@@ -18,7 +18,6 @@ describe('activation', () => {
 
 const projects: SentryProject[] = [
     {
-        name: 'Webapp typescript errors',
         projectId: '1334031',
         linePatterns: [
             'throw new Error+\\([\'"]([^\'"]+)[\'"]\\)',
@@ -34,7 +33,6 @@ const projects: SentryProject[] = [
     },
 
     {
-        name: 'Dev env errors',
         projectId: '213332',
         linePatterns: ['log\\.(Printf|Print|Println)\\([\'"]([^\'"]+)[\'"]\\)'],
         filters: [
@@ -60,7 +58,6 @@ describe('resolveSettings()', () => {
             'sentry.projects': [
                 {
                     projectId: '1334031',
-                    name: 'Webapp typescript errors',
                     linePatterns: [
                         'throw new Error+\\([\'"]([^\'"]+)[\'"]\\)',
                         'console\\.(?:warn|debug|info|error|log)\\([\'"`]([^\'"`]+)[\'"`]\\)',
@@ -75,7 +72,6 @@ describe('resolveSettings()', () => {
                 },
                 {
                     projectId: '213332',
-                    name: 'Dev env errors',
                     linePatterns: ['log\\.(Printf|Print|Println)\\([\'"]([^\'"]+)[\'"]\\)'],
                     filters: [
                         {

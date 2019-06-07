@@ -11,18 +11,18 @@ import { resolveSettings, SentryProject, Settings } from './settings'
 // TODO: Add these to the Readme
 const COMMON_ERRORLOG_PATTERNS = [
     // typescript/javascript
-    /throw new ([A-Z][a-z]+)+\(['"]([^'"]+)['"]\)/gi,
-    /console\.(error|info|warn)\(['"`]([^'"`]+)['"`]\)/gi,
+    /throw new [A-Za-z0-9]+\(['"]([^'"]+)['"]\)/gi,
+    /console\.(?:error|info|warn)\(['"`]([^'"`]+)['"`]\)/gi,
     // go
-    /log\.(Printf|Print|Println)\(['"]([^'"]+)['"]\)/gi,
+    /log\.(?:Printf|Print|Println)\(['"]([^'"]+)['"]\)/gi,
     /fmt\.Errorf\(['"]([^'"]+)['"]\)/gi,
     /errors\.New\(['"]([^'"]+)['"]\)/gi,
     /err\.message\(['"`]([^'"`$]+)['"`]\)/gi,
     /panic\(['"]([^'"]+)['"]\)/gi,
     // python
-    /raise (TypeError|ValueError)\(['"`]([^'"`]+)['"`]\)/gi,
+    /raise (?:TypeError|ValueError)\(['"`]([^'"`]+)['"`]\)/gi,
     // java
-    /logger\.(debug|error)\(['"`]([^'"`]+)['"`]\);/gi,
+    /logger\.(?:debug|error)\(['"`]([^'"`]+)['"`]\);/gi,
 ]
 const DECORATION_TYPE = sourcegraph.app.createDecorationType()
 
@@ -78,6 +78,9 @@ export function getDecorations(
     sentryProjects?: SentryProject[]
 ): sourcegraph.TextDocumentDecoration[] {
     const params = getParamsFromUriPath(documentUri)
+    if (!params || !params.file || !params.repo) {
+        return []
+    }
     const matched = sentryProjects && matchSentryProject(params, sentryProjects)
     // Do not decorate lines if the document file format does not match the
     // file matching patterns listed in the Sentry extension configurations.
@@ -116,11 +119,12 @@ export function buildDecorations(
         for (const pattern of patterns) {
             do {
                 match = pattern.exec(line)
-                // Depending on the line matching pattern the query m is indexed in position 1 or 2.
-                // TODO: Specify which capture group should be used through configuration.
 
+                // Depending on the line matching pattern the query m is indexed in position 1 or 2.
                 if (match && match.length <= 2) {
                     decorations.push(decorateLine(index, match[1], missingConfigData, sentryProjectId))
+                    // Safeguard if a user forgets to use `?:` and uncapture part of the error message that doesn't need to be captured.
+                    // e.g.
                 } else if (match && match.length > 2) {
                     decorations.push(decorateLine(index, match[2], missingConfigData, sentryProjectId))
                 }

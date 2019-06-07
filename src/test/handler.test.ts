@@ -11,50 +11,46 @@ import { SentryProject } from '../settings'
 
 const projects: SentryProject[] = [
     {
-        name: 'Webapp typescript errors',
         projectId: '1334031',
+        filters: [
+            {
+                repositories: ['/sourcegraph/sourcegraph', '/bucket'],
+                files: ['(?:web|shared|src)/.*\\.tsx?', '\\.ts?'],
+            },
+        ],
         linePatterns: [
             'throw new Error+\\([\'"]([^\'"]+)[\'"]\\)',
             'console\\.(?:warn|debug|info|error|log)\\([\'"`]([^\'"`]+)[\'"`]\\)',
             'log\\.(Printf|Print|Println)\\([\'"]([^\'"]+)[\'"]\\)',
         ],
-        filters: [
-            {
-                repositories: ['sourcegraph/sourcegraph', '/bucket'],
-                files: ['(?:web|shared|src)/.*\\.tsx?', '\\.ts?'],
-            },
-        ],
     },
     {
-        name: 'Dev env errors',
         projectId: '213332',
-        linePatterns: ['log\\.(?:Printf|Print|Println)\\([\'"]([^\'"]+)[\'"]\\)'],
         filters: [
             {
                 repositories: ['/dev-repo'],
                 files: ['dev/.*\\.go?'],
             },
         ],
+        linePatterns: ['log\\.(?:Printf|Print|Println)\\([\'"]([^\'"]+)[\'"]\\)'],
     },
     {
-        name: 'docs pages errors',
         projectId: '544533',
-        linePatterns: ['throw new Error+\\([\'"]([^\'"]+)[\'"]\\)'],
         filters: [
             {
-                repositories: ['sourcegraph/docs'],
+                repositories: ['/sourcegraph/docs'],
             },
         ],
+        linePatterns: ['throw new Error+\\([\'"]([^\'"]+)[\'"]\\)'],
     },
     {
-        name: 'dot com errors',
         projectId: '242677',
-        linePatterns: ['throw new Error+\\([\'"]([^\'"]+)[\'"]\\)'],
         filters: [
             {
                 files: ['\\.tsx?'],
             },
         ],
+        linePatterns: ['throw new Error+\\([\'"]([^\'"]+)[\'"]\\)'],
     },
 ]
 
@@ -78,11 +74,7 @@ describe('getParamsFromUriPath', () => {
             file: 'web/src/e2e/index.e2e.test.tsx',
         }))
 
-    it('returns null if URI is corrupted', () =>
-        expect(getParamsFromUriPath('git://thisisnotavaliduri')).toEqual({
-            repo: '',
-            file: null,
-        }))
+    it('returns null if URI is corrupted', () => expect(getParamsFromUriPath('thisisnotavaliduri')).toEqual(null))
 
     it('returns empty file if document has no file format', () =>
         expect(getParamsFromUriPath('git://github.com/sourcegraph/testrepo#formatless')).toEqual({
@@ -99,6 +91,14 @@ const paramsInput = [
             file: 'web/src/storm/index.tsx',
         },
         expected: { project: projects[0], missingConfigs: [] },
+    },
+    {
+        goal: 'does not return a web project, as the params repo does not match the config repo, despite being similar',
+        params: {
+            repo: '/different-sourcegraph/docs',
+            file: 'web/src/storm/index.md',
+        },
+        expected: null,
     },
     {
         goal: 'returns a dev project that matches the repo and file patterns and an empty missingConfigs list',
@@ -154,12 +154,11 @@ const incompleteConfigs: { goal: string; settings: SentryProject; expected: stri
     {
         goal: 'returns one missing config',
         settings: {
-            name: 'sourcegraph',
             projectId: '1334031',
             linePatterns: ['logger\\.debug\\([\'"`]([^\'"`]+)[\'"`]\\);'],
             filters: [
                 {
-                    repositories: undefined,
+                    repositories: [],
                     files: ['(?:web|shared|src)/.*\\.java?', '(?:dev|src)/.*\\.java?', '\\.java?'],
                 },
             ],
@@ -167,19 +166,66 @@ const incompleteConfigs: { goal: string; settings: SentryProject; expected: stri
         expected: ['project[0].filters[0].repositories'],
     },
     {
-        goal: 'returns two missing configs',
+        goal: 'returns two missing configs with correct indexes',
         settings: {
-            name: 'sourcegraph',
             projectId: '',
             linePatterns: ['logger\\.debug\\([\'"`]([^\'"`]+)[\'"`]\\);'],
             filters: [
                 {
-                    repositories: undefined,
+                    repositories: [],
                     files: ['(?:web|shared|src)/.*\\.java?', '(?:dev|src)/.*\\.java?', '\\.java?'],
                 },
             ],
         },
         expected: ['project[1].projectId', 'project[1].filters[0].repositories'],
+    },
+    {
+        goal: 'returns two missing configs with correct indexes',
+        settings: {
+            projectId: '1334031',
+            linePatterns: ['logger\\.debug\\([\'"`]([^\'"`]+)[\'"`]\\);'],
+            filters: [
+                {
+                    repositories: [],
+                    files: [],
+                },
+            ],
+        },
+        expected: ['project[2].filters[0].repositories', 'project[2].filters[0].files'],
+    },
+    {
+        goal: 'returns three missing configs with correct indexes',
+        settings: {
+            projectId: '',
+            linePatterns: ['logger\\.debug\\([\'"`]([^\'"`]+)[\'"`]\\);'],
+            filters: [
+                {
+                    repositories: [],
+                    files: [],
+                },
+            ],
+        },
+        expected: ['project[3].projectId', 'project[3].filters[0].repositories', 'project[3].filters[0].files'],
+    },
+    {
+        goal: 'returns one missing config and does not expect a files filter',
+        settings: {
+            projectId: '425773',
+            linePatterns: ['logger\\.debug\\([\'"`]([^\'"`]+)[\'"`]\\);'],
+            filters: [
+                {
+                    repositories: [],
+                },
+            ],
+        },
+        expected: ['project[4].filters[0].repositories'],
+    },
+    {
+        goal: 'returns one missing config and does not expect a files filter',
+        settings: {
+            projectId: '425773',
+        },
+        expected: ['project[5].filters[0].repositories'],
     },
 ]
 
@@ -187,7 +233,6 @@ describe('findEmptyConfigs()', () => {
     for (const [index, config] of incompleteConfigs.entries()) {
         it(config.goal, () => expect(findEmptyConfigs(config.settings, 'project', index)).toEqual(config.expected))
     }
-    it('handles empty settings', () => expect(findEmptyConfigs()).toEqual(['settings']))
 })
 
 const createDecorationInputs = [

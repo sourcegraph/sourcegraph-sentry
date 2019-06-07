@@ -19,11 +19,15 @@ The Sentry extension renders `View logs in Sentry` next to error throwing statem
 
 The Sentry Sourcegraph extension uses common error handling and/or exception throwing patterns specific to each language to identfy Sentry relevant lines of code. The following languages are currently supported:
 
-- TypeScript
-- Go
-- JavaScript
-- Python
-- Java
+- TypeScript ( e.g. `throw new Error()`)
+- Go ( e.g. `err.message()`)
+- JavaScript ( e.g. `console.error()`)
+- Python ( e.g. `raise TypeError()`)
+- Java ( e.g. `logger.error()`)
+
+See the [default error patterns](https://sourcegraph.com/github.com/sourcegraph/sourcegraph-sentry@master/-/blob/src/extension.ts?diff=21f9b0716040dd96f917580ec4cacd59f3f1b5be&utm_source=chrome-extension#L11-25).
+
+If you need to match more specific patterns in your codebase, you can configure them through [line matches](#improving-error-pattern-recognition-for-your-organization).
 
 ## Basic Setup
 
@@ -39,6 +43,8 @@ In your Sourcegraph settings (user, organization, or global), add the following 
     }
 ]
 ```
+
+For organizations, we recommend to set this once by the site admin in the org or global settings, so that individual org users do not have to configure this individually.
 
 With this simple configuration, any error that matches the default patterns will link to the specified Sentry organization and project.
 
@@ -137,17 +143,13 @@ To do this, add a regex to your Sentry project config that captures the static e
         "projectId": "<project_a>",
         "linePatterns": [
             // Matches JS/TS throw statements:
-            "throw new (?:[A-Z][a-z]+)+\\(['\"]([^'\"]+)['\"]\\)"
+            "throw new [A-Za-z0-9]+\\(['\"]([^'\"]+)['\"]\\)"
         ]
     }
 ]
 ```
 
-In the above example, note how the first regex group is ignored with `?:`. It will match a variety of `throw new` error types, but doesn't need to be captured. The second regex group captures the error string, which will be used as the search when linked to Sentry.
-
-### Default error patterns
-
-See the [default error patterns](https://sourcegraph.com/github.com/sourcegraph/sourcegraph-sentry@master/-/blob/src/extension.ts?diff=21f9b0716040dd96f917580ec4cacd59f3f1b5be&utm_source=chrome-extension#L11-25).
+The error message should always be captured by the capture group \$INDEX=0. All other capture groups should be made optional with `?:`. For instance, in the above example, note how the first regex group is ignored with `?:`. It will match a variety of `throw new` error types, but doesn't need to be captured. The second regex group captures the error string, which will be used as the search when linked to Sentry.
 
 ## Language Specific Examples
 
@@ -159,24 +161,24 @@ See the [default error patterns](https://sourcegraph.com/github.com/sourcegraph/
   "sentry.decorations.inline": true,
   "sentry.organization": "sourcegraph",
   "sentry.projects": [
-    {
-        // Web errors
-        "projectId": "1334031",
-        "filters": [
-            {
-                "repositories": "sourcegraph/sourcegraph",
-                "files": ["web/.*\\.ts?"]
-            },
-            {
-                "files": ["sourcegraph-about/.*\\.tsx?"]
-            }
+      {
+          // Web errors
+          "projectId": "1334031",
+          "filters": [
+              {
+                  "repositories": "sourcegraph/sourcegraph",
+                  "files": ["web/.*\\.ts?"]
+              },
+              {
+                  "files": ["sourcegraph-about/.*\\.tsx?"]
+              }
 
-        ],
-        "linePatterns": [
-            "throw (?:[A-Z][a-z]+)+\\(['\"]([^'\"]+)['\"]\\)",
-            "console\\.(?:warn|debug|info|error)\\(['\"`]([^'\"`]+)['\"`]\\)"
-        ]
-    }
+          ],
+          "linePatterns": [
+              "throw new [A-Za-z0-9]+\\(['\"]([^'\"]+)['\"]\\)",
+              "console\\.(?:warn|debug|info|error)\\(['\"`]([^'\"`]+)['\"`]\\)"
+          ]
+      }
   ]
   ```
 

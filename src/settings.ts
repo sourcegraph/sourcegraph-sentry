@@ -11,7 +11,6 @@ export interface Settings {
 }
 
 export interface SentryProject {
-    name: string
     projectId: string
     // RexExp patterns to match log handeling code, e.g. /log\.(Printf|Print)\(['"]([^'"]+)['"]\)/
     linePatterns?: string[]
