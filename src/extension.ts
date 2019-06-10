@@ -17,12 +17,12 @@ const COMMON_ERRORLOG_PATTERNS = [
     /log\.(?:Printf|Print|Println)\(['"]([^'"]+)['"]\)/gi,
     /fmt\.Errorf\(['"]([^'"]+)['"]\)/gi,
     /errors\.New\(['"]([^'"]+)['"]\)/gi,
-    /err\.message\(['"`]([^'"`$]+)['"`]\)/gi,
     /panic\(['"]([^'"]+)['"]\)/gi,
     // python
-    /raise (?:TypeError|ValueError)\(['"`]([^'"`]+)['"`]\)/gi,
+    /logger.[A-Za-z0-9]+\(['"`]([^'"`]+)['"`]\)$/gi,
+    /raise [A-Za-z0-9]+\(['"`]([^'"`]+)['"`]\)/gi,
     // java
-    /logger\.(?:debug|error)\(['"`]([^'"`]+)['"`]\);/gi,
+    /logger\.[A-Za-z0-9]+\(['"`]([^'"`]+)['"`]\);/gi,
 ]
 const DECORATION_TYPE = sourcegraph.app.createDecorationType()
 

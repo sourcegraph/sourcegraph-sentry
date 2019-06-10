@@ -20,9 +20,9 @@ The Sentry extension renders `View logs in Sentry` next to error throwing statem
 The Sentry Sourcegraph extension uses common error handling and/or exception throwing patterns specific to each language to identfy Sentry relevant lines of code. The following languages are currently supported:
 
 - TypeScript, JavaScript ( e.g. `throw new Error()`, `console.error()`)
-- Go ( e.g. `err.message()`)
+- Go ( e.g. `errors.New()`)
 - JavaScript ( e.g. `console.error()`)
-- Python ( e.g. `raise TypeError()`)
+- Python ( e.g. `raise ValueError()`)
 - Java ( e.g. `logger.error()`)
 
 See the [default error patterns](https://sourcegraph.com/github.com/sourcegraph/sourcegraph-sentry@master/-/blob/src/extension.ts?diff=21f9b0716040dd96f917580ec4cacd59f3f1b5be&utm_source=chrome-extension#L11-25).
