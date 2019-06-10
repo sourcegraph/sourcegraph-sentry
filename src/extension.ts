@@ -19,7 +19,7 @@ const COMMON_ERRORLOG_PATTERNS = [
     /errors\.New\(['"]([^'"]+)['"]\)/gi,
     /panic\(['"]([^'"]+)['"]\)/gi,
     // python
-    /logger.[A-Za-z0-9]+\(['"`]([^'"`]+)['"`]\)/gi,
+    /logger.[A-Za-z0-9]+\(['"`]([^'"`]+)['"`]\)$/gi,
     /raise [A-Za-z0-9]+\(['"`]([^'"`]+)['"`]\)/gi,
     // java
     /logger\.[A-Za-z0-9]+\(['"`]([^'"`]+)['"`]\);/gi,
