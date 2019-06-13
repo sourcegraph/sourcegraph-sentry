@@ -32,8 +32,10 @@
         "title": "${config.sentry.decorations.inline && \"Hide\" || \"Show\"} inline Sentry links on file",
         "category": "Sentry",
         "actionItem": {
-          "label": "Sentry",
-          "description": "${config.sentry.decorations.inline && \"Hide\" || \"Show\"} inline Sentry links"
+          "description": "${config.sentry.decorations.inline && \"Hide\" || \"Show\"} inline Sentry links",
+          "iconDescription": "${config.sentry.decorations.inline && \"Hide\" || \"Show\"} inline Sentry links on file",
+          "iconURL": "https://raw.githubusercontent.com/sourcegraph/sourcegraph-sentry/master/assets/img/sentry-glyph-${config.sentry.decorations.inline&&\"red\"||\"grey\"}.svg?sanitize=true",
+          "pressed": "config.sentry.decorations.inline"
         }
       }
     ],
