@@ -34,7 +34,8 @@
         "actionItem": {
           "description": "${config.sentry.decorations.inline && \"Hide\" || \"Show\"} inline Sentry links",
           "iconDescription": "${config.sentry.decorations.inline && \"Hide\" || \"Show\"} inline Sentry links on file",
-          "iconURL": "https://raw.githubusercontent.com/sourcegraph/sourcegraph-sentry/vo/add-sentry-icon/assets/img/sentry-glyph-${config.sentry.decorations.inline&&\"red\"||\"grey\"}.svg?sanitize=true"
+          "iconURL": "https://raw.githubusercontent.com/sourcegraph/sourcegraph-sentry/assets/img/sentry-glyph-${config.sentry.decorations.inline&&\"red\"||\"grey\"}.svg?sanitize=true",
+          "pressed": "config.sentry.decorations.inline"
         }
       }
     ],
