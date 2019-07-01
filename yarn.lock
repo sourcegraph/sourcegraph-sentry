@@ -837,13 +837,13 @@
   dependencies:
     "@sourcegraph/extension-api-types" "^2.0.0"
 
-"@sourcegraph/extension-api-stubs@^0.2.1":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@sourcegraph/extension-api-stubs/-/extension-api-stubs-0.2.1.tgz#4489eb627b3f465d2f8b2a2a96c21c4f8c6bfccc"
-  integrity sha512-xuTVB/cuoHTpUF1QfdpovWd46pp4y77e7BWp5gN99E7UkurCgHGBIxtq6hupDRD1FGF1K8kITdta0TbVTuDHig==
+"@sourcegraph/extension-api-stubs@^0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@sourcegraph/extension-api-stubs/-/extension-api-stubs-0.2.2.tgz#9f6a175fbe2504e3d54840470210ae6d6241d2ae"
+  integrity sha512-3jVSf5EKWwQOS9RDPZ2Kkb1tOlPflrrbch32WO28HSBPGNtIdYqYkJ4SLa8PNHXyE3lxuEnLJI7x3QuG6rr17g==
   dependencies:
     "@sourcegraph/extension-api-classes" "^1.0.2"
-    "@types/sinon" "7.0.12"
+    "@types/sinon" "7.0.13"
     rxjs "^6.5.1"
     sinon "^7.3.2"
     sourcegraph "^23.0.1"
@@ -909,11 +909,6 @@
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/@types/q/-/q-1.5.1.tgz#48fd98c1561fe718b61733daed46ff115b496e18"
   integrity sha512-eqz8c/0kwNi/OEHQfvIuJVLTst3in0e7uTKeuY+WL/zfKn0xVujOTp42bS/vUUokhK5P2BppLd9JXMOMHcgbjA==
-
-"@types/sinon@7.0.12":
-  version "7.0.12"
-  resolved "https://registry.yarnpkg.com/@types/sinon/-/sinon-7.0.12.tgz#18412939ae45b225bd38715a25c1040cbad80f42"
-  integrity sha512-fo0MWpVPSUrnZZhp9wyu+hhI3VJ9+Jhs+PWrokBTg3d2ryNPDOAWF1csIhQuYWBTn7KdZzXpRgpX2o6cwOlPWg==
 
 "@types/sinon@7.0.13":
   version "7.0.13"
