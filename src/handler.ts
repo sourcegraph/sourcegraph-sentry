@@ -1,8 +1,8 @@
 import { SentryProject } from './settings'
 
 interface Params {
-    repo: string | null
-    file: string | null
+    repo: string | undefined
+    file: string | undefined
 }
 
 export interface LineDecorationText {
