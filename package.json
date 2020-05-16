@@ -176,7 +176,7 @@
     "last 1 Safari versions"
   ],
   "devDependencies": {
-    "@sourcegraph/extension-api-stubs": "^1.0.1",
+    "@sourcegraph/extension-api-stubs": "^1.1.0",
     "@sourcegraph/prettierrc": "^2.2.0",
     "@sourcegraph/tsconfig": "^4.0.1",
     "@sourcegraph/tslint-config": "^13.4.0",
