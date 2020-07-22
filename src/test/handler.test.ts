@@ -79,7 +79,7 @@ describe('getParamsFromUriPath', () => {
     it('returns empty file if document has no file format', () =>
         expect(getParamsFromUriPath('git://github.com/sourcegraph/testrepo#formatless')).toEqual({
             repo: '/sourcegraph/testrepo',
-            file: null,
+            file: undefined,
         }))
 })
 

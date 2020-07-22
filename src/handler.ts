@@ -1,8 +1,8 @@
 import { SentryProject } from './settings'
 
 interface Params {
-    repo: string | null
-    file: string | null
+    repo: string | undefined
+    file: string | undefined
 }
 
 export interface LineDecorationText {
@@ -24,7 +24,7 @@ export function getParamsFromUriPath(textDocumentURI: string): Params | null {
         const fileMatch = filePattern.exec(textDocumentURI)
         return {
             repo: paramsRepo,
-            file: fileMatch && fileMatch[1],
+            file: fileMatch?.[1],
         }
     } catch (err) {
         console.error(err)
