@@ -186,7 +186,7 @@
     "@types/mock-require": "2.0.0",
     "@types/node": "11.13.3",
     "@types/sinon": "7.0.13",
-    "expect": "24.1.0",
+    "expect": "24.9.0",
     "lnfs-cli": "^2.1.0",
     "lodash": "^4.17.11",
     "mkdirp": "^0.5.1",
