@@ -924,10 +924,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@11.13.3":
-  version "11.13.3"
-  resolved "https://registry.npmjs.org/@types/node/-/node-11.13.3.tgz"
-  integrity sha512-OgizLUF0unveHVSI74hyX1J5vQeteANZX+Gqc5qr6fR7JVFYBmzJmcxAncBl8H9Cwz2Zks2dx4uQc7g77iUcWQ==
+"@types/node@*", "@types/node@11.15.47":
+  version "11.15.47"
+  resolved "https://registry.npmjs.org/@types/node/-/node-11.15.47.tgz"
+  integrity sha512-S4vrkrslntCM+1cw9Q27M/doWQrZklb9lOyo4b+K27SOo5jZYEKY5epdixySx7OI+A67DMJ8W/XBiLMBiI452A==
 
 "@types/q@^1.5.1":
   version "1.5.2"
