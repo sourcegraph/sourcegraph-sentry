@@ -185,7 +185,7 @@
     "@types/mocha": "5.2.7",
     "@types/mock-require": "2.0.0",
     "@types/node": "11.15.48",
-    "@types/sinon": "7.0.13",
+    "@types/sinon": "9.0.11",
     "expect": "24.1.0",
     "lnfs-cli": "^2.1.0",
     "lodash": "^4.17.11",
