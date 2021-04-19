@@ -5865,10 +5865,10 @@ source-map@^0.5.0, source-map@^0.5.3, source-map@^0.5.6:
   resolved "https://registry.npmjs.org/source-map/-/source-map-0.5.7.tgz"
   integrity sha1-igOdLRAh0i0eoUyA2OpGi6LvP8w=
 
-sourcegraph@^25.0.0, sourcegraph@^25.1.0:
-  version "25.1.0"
-  resolved "https://registry.npmjs.org/sourcegraph/-/sourcegraph-25.1.0.tgz"
-  integrity sha512-B0+ntOilJFopB3FQuRz+SXZLMKeo8y6Aob6yjqtVuC6JRMsKyQ6XwoE842dh65ePOwFvED/kOFLBEcLBJ18jnA==
+sourcegraph@^25.0.0, sourcegraph@^25.2.0:
+  version "25.2.0"
+  resolved "https://registry.npmjs.org/sourcegraph/-/sourcegraph-25.2.0.tgz"
+  integrity sha512-2yYJN8DMFrGesDfZvaYfXie86fHl3HtPRZ4XImQ6H4d7HuHHYEkVYxlbrOD4BUgMBsit5oVUPZ9Kspu0676QAA==
 
 spawn-wrap@^1.4.2:
   version "1.4.2"
