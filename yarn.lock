@@ -860,13 +860,13 @@
   dependencies:
     "@sourcegraph/extension-api-types" "^2.1.0"
 
-"@sourcegraph/extension-api-stubs@^1.5.2":
-  version "1.5.2"
-  resolved "https://registry.npmjs.org/@sourcegraph/extension-api-stubs/-/extension-api-stubs-1.5.2.tgz"
-  integrity sha512-YtVaca1n52FQuhLD6t8tr/PswUlIVM+npn1dQ4pl1I+2o6DXmWVrKKZDfOr1mUOybgszQ0I3vXOkEAEdXznfTg==
+"@sourcegraph/extension-api-stubs@^1.5.3":
+  version "1.5.3"
+  resolved "https://registry.npmjs.org/@sourcegraph/extension-api-stubs/-/extension-api-stubs-1.5.3.tgz"
+  integrity sha512-1QeiDLK9KcUOPkeoOe19ieHZN4Uz5GsY9qEwtM/n2e9Ew4kNJMvfid+8MFAo8MVcoLMtbMxJbs03LqwJTB1shg==
   dependencies:
     "@sourcegraph/extension-api-classes" "^1.1.0"
-    "@types/sinon" "10.0.1"
+    "@types/sinon" "10.0.2"
     rxjs "^6.5.1"
     sinon "^10.0.0"
     sourcegraph "^25.3.0"
@@ -937,6 +937,13 @@
   version "10.0.1"
   resolved "https://registry.npmjs.org/@types/sinon/-/sinon-10.0.1.tgz"
   integrity sha512-tZulsvuJwif5ddTBtscflI7gJcd+RpENcNZ7QCp0jKEl0bZY3Pu6PbJs4GR3SfQkGgsUa+FrlKsKQ0XyGNvDuA==
+  dependencies:
+    "@sinonjs/fake-timers" "^7.1.0"
+
+"@types/sinon@10.0.2":
+  version "10.0.2"
+  resolved "https://registry.npmjs.org/@types/sinon/-/sinon-10.0.2.tgz"
+  integrity sha512-BHn8Bpkapj8Wdfxvh2jWIUoaYB/9/XhsL0oOvBfRagJtKlSl9NWPcFOz2lRukI9szwGxFtYZCTejJSqsGDbdmw==
   dependencies:
     "@sinonjs/fake-timers" "^7.1.0"
 
