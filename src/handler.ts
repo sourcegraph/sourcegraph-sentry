@@ -125,25 +125,25 @@ export function createDecoration(
 ): LineDecorationText {
     if (missingConfigData.includes('settings') || !sentryOrg) {
         return {
-            content: ' Configure the Sentry extension to view logs (❕)» ',
+            content: ' Configure the Sentry extension to view issues (❕)» ',
             hover: ' Please fill out the configurations in your Sentry extension settings.',
         }
     }
     if (missingConfigData.includes('repositories')) {
         return {
-            content: ' View logs in Sentry (❕)» ',
+            content: ' View issues in Sentry (❕)» ',
             hover: ' Add this repository to your Sentry extension settings for project matching.',
         }
     }
     if (!sentryProjectId) {
         return {
-            content: ' View logs in Sentry (❕)» ',
+            content: ' View issues in Sentry (❕)» ',
             hover: ' Add Sentry projects to your Sentry extension settings for project matching.',
         }
     }
     if (missingConfigData.length > 0 && missingConfigData[0] !== 'settings') {
         return {
-            content: ' View logs in Sentry (❕)» ',
+            content: ' View issues in Sentry (❕)» ',
             hover:
                 ' Please fill out these configurations for better Sentry project matching: ' +
                 missingConfigData.join(', '),
@@ -151,7 +151,7 @@ export function createDecoration(
     }
 
     return {
-        content: ' View logs in Sentry » ',
-        hover: ' View logs in Sentry » ',
+        content: ' View issues in Sentry » ',
+        hover: ' View issues in Sentry » ',
     }
 }

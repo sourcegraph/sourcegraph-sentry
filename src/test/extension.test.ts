@@ -99,8 +99,8 @@ const decorateLineInput = [
             after: {
                 backgroundColor: '#e03e2f',
                 color: 'rgba(255, 255, 255, 0.8)',
-                contentText: ' View logs in Sentry » ',
-                hoverMessage: ' View logs in Sentry » ',
+                contentText: ' View issues in Sentry » ',
+                hoverMessage: ' View issues in Sentry » ',
                 linkURL:
                     'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+%22cannot+determine+file+path%22&statsPeriod=14d',
             },
@@ -118,7 +118,7 @@ const decorateLineInput = [
             after: {
                 backgroundColor: '#f2736d',
                 color: 'rgba(255, 255, 255, 0.8)',
-                contentText: ' View logs in Sentry (❕)» ',
+                contentText: ' View issues in Sentry (❕)» ',
                 hoverMessage: ' Add this repository to your Sentry extension settings for project matching.',
                 linkURL:
                     'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+%22cannot+determine+file+path%22&statsPeriod=14d',
@@ -137,7 +137,7 @@ const decorateLineInput = [
             after: {
                 backgroundColor: '#f2736d',
                 color: 'rgba(255, 255, 255, 0.8)',
-                contentText: ' View logs in Sentry (❕)» ',
+                contentText: ' View issues in Sentry (❕)» ',
                 hoverMessage: ' Add this repository to your Sentry extension settings for project matching.',
                 linkURL:
                     'https://sentry.io/organizations/sourcegraph/issues/?project=134412&query=is%3Aunresolved+%22cannot+determine+file+path%22&statsPeriod=14d',
@@ -156,7 +156,7 @@ const decorateLineInput = [
             after: {
                 backgroundColor: '#f2736d',
                 color: 'rgba(255, 255, 255, 0.8)',
-                contentText: ' View logs in Sentry (❕)» ',
+                contentText: ' View issues in Sentry (❕)» ',
                 hoverMessage: ' Add Sentry projects to your Sentry extension settings for project matching.',
                 linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
             },
@@ -175,7 +175,7 @@ const decorateLineInput = [
             after: {
                 backgroundColor: '#f2736d',
                 color: 'rgba(255, 255, 255, 0.8)',
-                contentText: ' View logs in Sentry (❕)» ',
+                contentText: ' View issues in Sentry (❕)» ',
                 hoverMessage: ' Add Sentry projects to your Sentry extension settings for project matching.',
                 linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
             },
@@ -217,8 +217,8 @@ const getDecorationsInput = [
                 after: {
                     backgroundColor: '#e03e2f',
                     color: 'rgba(255, 255, 255, 0.8)',
-                    contentText: ' View logs in Sentry » ',
-                    hoverMessage: ' View logs in Sentry » ',
+                    contentText: ' View issues in Sentry » ',
+                    hoverMessage: ' View issues in Sentry » ',
                     linkURL:
                         'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+%22cannot+determine+file+path%22&statsPeriod=14d',
                 },
@@ -229,8 +229,8 @@ const getDecorationsInput = [
                 after: {
                     backgroundColor: '#e03e2f',
                     color: 'rgba(255, 255, 255, 0.8)',
-                    contentText: ' View logs in Sentry » ',
-                    hoverMessage: ' View logs in Sentry » ',
+                    contentText: ' View issues in Sentry » ',
+                    hoverMessage: ' View issues in Sentry » ',
                     linkURL:
                         'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+%22cannot+determine+delta+info%22&statsPeriod=14d',
                 },
@@ -253,8 +253,8 @@ const getDecorationsInput = [
                 after: {
                     backgroundColor: '#e03e2f',
                     color: 'rgba(255, 255, 255, 0.8)',
-                    contentText: ' View logs in Sentry » ',
-                    hoverMessage: ' View logs in Sentry » ',
+                    contentText: ' View issues in Sentry » ',
+                    hoverMessage: ' View issues in Sentry » ',
                     linkURL:
                         'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+%22cannot+determine+file+path%22&statsPeriod=14d',
                 },
@@ -307,8 +307,8 @@ of(codeView).pipe(
                 after: {
                     backgroundColor: '#e03e2f',
                     color: 'rgba(255, 255, 255, 0.8)',
-                    contentText: ' View logs in Sentry » ',
-                    hoverMessage: ' View logs in Sentry » ',
+                    contentText: ' View issues in Sentry » ',
+                    hoverMessage: ' View issues in Sentry » ',
                     linkURL:
                         'https://sentry.io/organizations/sourcegraph/issues/?project=1334031&query=is%3Aunresolved+%22cannot+determine+file+path%22&statsPeriod=14d',
                 },
@@ -347,7 +347,7 @@ const supportedLanguageCode = [
             after: {
                 backgroundColor: '#f2736d',
                 color: 'rgba(255, 255, 255, 0.8)',
-                contentText: ' View logs in Sentry (❕)» ',
+                contentText: ' View issues in Sentry (❕)» ',
                 hoverMessage: ' Add Sentry projects to your Sentry extension settings for project matching.',
                 linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
             },
@@ -365,7 +365,7 @@ const supportedLanguageCode = [
             after: {
                 backgroundColor: '#f2736d',
                 color: 'rgba(255, 255, 255, 0.8)',
-                contentText: ' View logs in Sentry (❕)» ',
+                contentText: ' View issues in Sentry (❕)» ',
                 hoverMessage: ' Add Sentry projects to your Sentry extension settings for project matching.',
                 linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
             },
@@ -382,7 +382,7 @@ const supportedLanguageCode = [
             after: {
                 backgroundColor: '#f2736d',
                 color: 'rgba(255, 255, 255, 0.8)',
-                contentText: ' View logs in Sentry (❕)» ',
+                contentText: ' View issues in Sentry (❕)» ',
                 hoverMessage: ' Add Sentry projects to your Sentry extension settings for project matching.',
                 linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
             },
@@ -400,7 +400,7 @@ const supportedLanguageCode = [
             after: {
                 backgroundColor: '#f2736d',
                 color: 'rgba(255, 255, 255, 0.8)',
-                contentText: ' View logs in Sentry (❕)» ',
+                contentText: ' View issues in Sentry (❕)» ',
                 hoverMessage: ' Add Sentry projects to your Sentry extension settings for project matching.',
                 linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
             },
@@ -419,7 +419,7 @@ const supportedLanguageCode = [
             after: {
                 backgroundColor: '#f2736d',
                 color: 'rgba(255, 255, 255, 0.8)',
-                contentText: ' Configure the Sentry extension to view logs (❕)» ',
+                contentText: ' Configure the Sentry extension to view issues (❕)» ',
                 hoverMessage: ' Please fill out the configurations in your Sentry extension settings.',
                 linkURL: 'https://sentry.io/organizations/sourcegraph/issues/',
             },

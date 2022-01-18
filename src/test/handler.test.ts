@@ -240,7 +240,7 @@ const createDecorationInputs = [
         goal: 'handles an empty organization setting',
         params: { missingConfigData: [] },
         expected: {
-            content: ' Configure the Sentry extension to view logs (❕)» ',
+            content: ' Configure the Sentry extension to view issues (❕)» ',
             hover: ' Please fill out the configurations in your Sentry extension settings.',
         },
     },
@@ -248,7 +248,7 @@ const createDecorationInputs = [
         goal: 'informs user to fill out settings.',
         params: { missingConfigData: ['settings'] },
         expected: {
-            content: ' Configure the Sentry extension to view logs (❕)» ',
+            content: ' Configure the Sentry extension to view issues (❕)» ',
             hover: ' Please fill out the configurations in your Sentry extension settings.',
         },
     },
@@ -256,7 +256,7 @@ const createDecorationInputs = [
         goal: 'informs user to add the repository to their Sentry settings.',
         params: { missingConfigData: ['repositories'], sentryOrg: 'sourcegraph' },
         expected: {
-            content: ' View logs in Sentry (❕)» ',
+            content: ' View issues in Sentry (❕)» ',
             hover: ' Add this repository to your Sentry extension settings for project matching.',
         },
     },
@@ -264,7 +264,7 @@ const createDecorationInputs = [
         goal: 'informs user to add to add missing configs to their Sentry settings.',
         params: { missingConfigData: ['linePatterns', 'files'], sentryProjectId: '1334031', sentryOrg: 'sourcegraph' },
         expected: {
-            content: ' View logs in Sentry (❕)» ',
+            content: ' View issues in Sentry (❕)» ',
             hover: ' Please fill out these configurations for better Sentry project matching: linePatterns, files',
         },
     },
