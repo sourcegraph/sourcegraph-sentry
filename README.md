@@ -3,6 +3,15 @@
 [![build](https://travis-ci.org/sourcegraph/sourcegraph-sentry.svg?branch=master)](https://travis-ci.org/sourcegraph/sentry)
 [![codecov](https://codecov.io/gh/sourcegraph/sourcegraph-sentry/branch/master/graph/badge.svg)](https://codecov.io/gh/sourcegraph/sourcegraph-sentry)
 
+## ⚠️ Deprecation notice
+
+**Sourcegraph extensions have been deprecated with the September 2022 Sourcegraph
+release. [Learn more](https://docs.sourcegraph.com/extensions/deprecation).**
+
+The repo and the docs below are kept to support older Sourcegraph versions.
+
+## Description
+
 Sentry facilitates the debugging process by helping developers track, organize, and break down errors more efficiently. At Sourcegraph, we want to make it more convenient for developers to access Sentry's error tracking tools directly from the code that is doing the error handling. For example: `throw new Error(QUERY)`, `console.log(QUERY)`, and `console.error(QUERY)`.
 
 The Sentry extension renders `View issues in Sentry` next to error throwing statements, and links directly to the corresponding Sentry issues stream page. Links are rendered when viewing files on [Sourcegraph](https://sourcegraph.com), GitHub, and GitLab.
