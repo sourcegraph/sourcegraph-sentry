@@ -183,7 +183,7 @@
     "@types/expect": "1.20.4",
     "@types/lodash": "4.14.179",
     "@types/mocha": "8.2.2",
-    "@types/mock-require": "2.0.0",
+    "@types/mock-require": "2.0.3",
     "@types/node": "14.17.3",
     "@types/sinon": "10.0.2",
     "expect": "24.1.0",
