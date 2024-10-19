@@ -181,7 +181,7 @@
     "@sourcegraph/tsconfig": "^4.0.1",
     "@sourcegraph/tslint-config": "^13.4.0",
     "@types/expect": "1.20.4",
-    "@types/lodash": "4.14.179",
+    "@types/lodash": "4.17.12",
     "@types/mocha": "8.2.2",
     "@types/mock-require": "2.0.0",
     "@types/node": "14.17.3",
