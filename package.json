@@ -180,7 +180,7 @@
     "@sourcegraph/prettierrc": "^3.0.3",
     "@sourcegraph/tsconfig": "^4.0.1",
     "@sourcegraph/tslint-config": "^13.4.0",
-    "@types/expect": "1.20.4",
+    "@types/expect": "24.3.2",
     "@types/lodash": "4.14.179",
     "@types/mocha": "8.2.2",
     "@types/mock-require": "2.0.0",
